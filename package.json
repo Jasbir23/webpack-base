@@ -1,0 +1,32 @@
+{
+  "name": "skiiman2",
+  "version": "1.0.0",
+  "description": "skiiman2 client web game",
+  "main": "index.js",
+  "scripts": {
+    "build": "NODE_ENV=production webpack",
+    "dev": "NODE_ENV=development webpack-dev-server --content-base dist --hot"
+  },
+  "author": "Jasbir",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.7.7",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/preset-env": "^7.7.7",
+    "babel-loader": "^8.0.6",
+    "babel-preset-env": "^1.7.0",
+    "css-loader": "^3.4.0",
+    "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "file-loader": "^5.0.2",
+    "gltf-webpack-loader": "^1.0.6",
+    "html-webpack-plugin": "^3.2.0",
+    "style-loader": "^1.1.1",
+    "webpack": "^4.41.4",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.10.1"
+  },
+  "dependencies": {
+    "matter-js": "^0.14.2",
+    "socket.io": "^2.3.0"
+  }
+}
