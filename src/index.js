@@ -1,5 +1,6 @@
 import "./index.css";
 import Matter from "matter-js";
+import "./assets/basketBall.png";
 const { innerHeight: h, innerWidth: w } = window;
 // module aliases
 var Engine = Matter.Engine,
@@ -7,6 +8,7 @@ var Engine = Matter.Engine,
   Render = Matter.Render,
   World = Matter.World,
   Bodies = Matter.Bodies,
+  Vertices = Matter.Vertices,
   Mouse = Matter.Mouse,
   Events = Matter.Events,
   Runner = Matter.Runner,
@@ -18,9 +20,17 @@ var initialVx = 0;
 var initialVy = 0;
 var shouldStart = false;
 var infiniteMassRadius = w / 84;
-var ballRadius = w / 12;
+var ballRadius = w / 10;
+var BALL_POSITION_CHECK_THRES = 80;
+var ROTATION_FAC = 10;
 var engine = Engine.create();
 engine.world.gravity.y = GRAVITY;
+
+var defaultCategory = 0x0001,
+  redCategory = 0x0002,
+  greenCategory = 0x0004,
+  blueCategory = 0x0008;
+
 function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -56,7 +66,8 @@ var render = Render.create({
   options: {
     width: w,
     height: h,
-    wireframes: true
+    wireframes: false,
+    showConvexHulls: true
   }
 });
 
@@ -65,23 +76,40 @@ var basketOptions = {
   friction: 0.05,
   frictionAir: 0.006,
   restitution: 0.9,
+  collisionFilter: {
+    category: redCategory
+  },
   render: {
     fillStyle: "darkorange",
     strokeStyle: "black",
     sprite: {
+      texture: "./assets/basketBall.png",
       xScale: 0.75,
       yScale: 0.75
     }
   }
 };
 
-var boxA = Bodies.circle(300, 600, infiniteMassRadius, { isStatic: true });
-var boxB = Bodies.circle(550, 600, infiniteMassRadius, { isStatic: true });
-var ball = Bodies.circle(w / 2, 0.7 * h, ballRadius, basketOptions);
-var ground = Bodies.rectangle(w / 2, 0.98 * h, w, 0.08 * h, { isStatic: true });
+var boxA = Bodies.circle(0.3 * w, (2 / 7) * h, infiniteMassRadius, {
+  isStatic: true,
+  collisionFilter: {
+    mask: redCategory
+  }
+});
+var boxB = Bodies.circle(0.55 * w, (2 / 7) * h, infiniteMassRadius, {
+  isStatic: true,
+  collisionFilter: {
+    mask: redCategory
+  }
+});
+var ball = Bodies.circle(w / 2, 0.92 * h, ballRadius, basketOptions);
+var ground = Bodies.rectangle(w / 2, 0.98 * h, w, 0.08 * h, {
+  isStatic: true,
+  collisionFilter: { mask: defaultCategory }
+});
 
 // add all of the bodies to the world
-World.add(engine.world, [boxA, boxB, ball, ground]);
+World.add(engine.world, [boxA, boxB, ground, ball]);
 var mouse = Mouse.create(render.canvas),
   mouseConstraint = MouseConstraint.create(engine, {
     mouse: mouse,
@@ -108,6 +136,7 @@ Events.on(mouseConstraint, "mouseup", function(event) {
   initialVy = -7 * swipeLength;
   shouldStart = true;
   Body.set(ball, { isSensor: true, isStatic: false });
+  Body.setAngularVelocity(ball, 0.2 * angle * ROTATION_FAC);
   Body.setVelocity(ball, { x: initialVx, y: initialVy });
 });
 
@@ -123,7 +152,6 @@ Events.on(mouseConstraint, "mousedown", function(event) {
   this.startY = mousePosition.y;
   this.startX = mousePosition.x;
 });
-Body.setPosition(ball, { x: 400, y: 1400 });
 console.log("ball: ", ball);
 
 setInterval(function() {
@@ -133,12 +161,15 @@ setInterval(function() {
   ) {
     Body.set(ball, { isSensor: false, isStatic: false });
   }
+  console.log("here: ball.timeScale", ball.timeScale);
+  // if (shouldStart && ball.position.y > boxA.position.y)
+  //   Body.scale(ball, 0.99, 0.99);
   if (
-    ball.position.x < 0 - ballRadius ||
-    ball.position.x > w + ballRadius ||
-    ball.position.y > h + ballRadius
+    ball.position.x < 0 - ballRadius - BALL_POSITION_CHECK_THRES ||
+    ball.position.x > w + ballRadius + BALL_POSITION_CHECK_THRES ||
+    ball.position.y > h + ballRadius + 10 * BALL_POSITION_CHECK_THRES
   ) {
-    Body.setPosition(ball, { x: 400, y: 1400 });
+    Body.setPosition(ball, { x: w / 2, y: 0.92 * h });
     Body.setStatic(ball, true);
   }
   Engine.update(engine, 1000 / 60);
