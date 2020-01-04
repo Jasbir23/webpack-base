@@ -27,12 +27,12 @@ var ballAboveBasket = false;
 var isCollided = false;
 var score = 0;
 var infiniteMassRadius = w / 84;
-var ballRadius = w / 9;
+var ballRadius = w / 12;
 var BALL_POSITION_CHECK_THRES = 80;
 var ROTATION_FAC = 14;
-var scale = 1;
+var scale = 1.4;
 var isMoving = false;
-var scaleThreshold = 0.008;
+var scaleThreshold = 0.01;
 var engine = Engine.create();
 engine.world.gravity.y = GRAVITY;
 var defaultCategory = 0x0001,
@@ -86,7 +86,7 @@ var basketOptions = {
   isStatic: true,
   friction: 0.05,
   frictionAir: 0.006,
-  restitution: 0.3,
+  restitution: 0.6,
   collisionFilter: {
     category: redCategory
   },
@@ -104,7 +104,7 @@ var boxA = Bodies.circle(0.35 * w, (2 / 7) * h, infiniteMassRadius, {
     fillStyle: "transparent"
   }
 });
-var boxB = Bodies.circle(0.6 * w, (2 / 7) * h, infiniteMassRadius, {
+var boxB = Bodies.circle(0.55 * w, (2 / 7) * h, infiniteMassRadius, {
   isStatic: true,
   collisionFilter: {
     mask: redCategory
@@ -156,7 +156,7 @@ Events.on(mouseConstraint, "mouseup", function(event) {
   );
   swipeLength = swipeLength > 400 ? 4 : (swipeLength * 4) / 400;
   initialVx = 0.02 * (mousePosition.x - this.startX);
-  initialVy = -8.4 * swipeLength;
+  initialVy = -8.4 * swipeLength > -10 ? -10 : -8.4 * swipeLength;
   shouldStart = true;
   Body.set(ball, { isSensor: true, isStatic: false });
   Body.setVelocity(ball, { x: initialVx, y: initialVy });
@@ -184,8 +184,6 @@ console.log("ball: ", ball);
 
 Events.on(engine, "collisionStart", function(event) {
   isCollided = true;
-
-  console.log("here: ballR: ", ballRadius * scale, "rend: ", ball.circleRadius);
 });
 const scoreView = document.querySelector(".score");
 
@@ -216,17 +214,12 @@ rightPoint.style.left = boxB.position.x - infiniteMassRadius;
 rightPoint.style.top = boxB.position.y - infiniteMassRadius;
 
 setInterval(function() {
-  const bodies = Composite.allBodies(engine.world);
   scoreView.textContent = `score ${score}`;
-  bodies.forEach(body => {
-    if (body.name === "basketBall") {
-      ballView.style.left = body.position.x - ball.circleRadius;
-      ballView.style.top = body.position.y - ball.circleRadius;
-      ballView.style.transform = `rotate(${rotation}deg) scale(${scale})`;
-      Body.set(ball, { circleRadius: ballRadius * scale });
-      rotation = rotation + body.velocity.x;
-    }
-  });
+  Body.set(ball, { circleRadius: ballRadius * scale });
+  ballView.style.transform = `rotate(${rotation}deg) scale(${scale})`;
+  rotation = rotation + ball.velocity.x;
+  ballView.style.left = ball.position.x - ballRadius;
+  ballView.style.top = ball.position.y - ballRadius;
 
   if (
     ball.position.y + ball.circleRadius <
@@ -237,7 +230,12 @@ setInterval(function() {
     ballAboveBasket = true;
     Body.set(ball, { isSensor: false, isStatic: false });
   }
-  if (shouldStart && scale > 0.85 && isMoving) {
+  if (
+    ball.velocity.y > 0 &&
+    ball.position.y - ball.circleRadius > boxA.position.y + infiniteMassRadius
+  )
+    ballView.style.zIndex = -2;
+  if (shouldStart && scale > 1 && isMoving) {
     scale = scale - scaleThreshold;
   }
   //check if ball is outside viewport
@@ -250,9 +248,9 @@ setInterval(function() {
     isMoving = false;
 
     ballView.style.zIndex = -1;
-    scale = 1;
+    scale = 1.5;
     Body.setPosition(ball, {
-      x: random(0 + ballRadius, w - ballRadius),
+      x: random(0 + ballRadius * scale, w - ballRadius * scale),
       y: 0.92 * h
     });
     Body.setStatic(ball, true);
