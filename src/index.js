@@ -27,10 +27,10 @@ var ballAboveBasket = false;
 var isCollided = false;
 var score = 0;
 var infiniteMassRadius = w / 84;
-var ballRadius = w / 10;
+var ballRadius = w / 9;
 var BALL_POSITION_CHECK_THRES = 80;
 var ROTATION_FAC = 14;
-var scale = 1.2;
+var scale = 1;
 var isMoving = false;
 var scaleThreshold = 0.008;
 var engine = Engine.create();
@@ -41,34 +41,34 @@ var defaultCategory = 0x0001,
 function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-var group = Body.nextGroup(true),
-  particleOptions = {
-    friction: 0.00001,
-    collisionFilter: { group: group },
-    render: {
-      visible: false
-    }
-  },
-  constraintOptions = { stiffness: 0.6 },
-  cloth = Composites.softBody(
-    0.35 * w - infiniteMassRadius,
-    (2 / 7) * h - infiniteMassRadius,
-    10,
-    5,
-    12,
-    10,
-    false,
-    8,
-    particleOptions,
-    constraintOptions
-  );
-for (var i = 0; i < 20; i++) {
-  if (i !== 0 && i !== 8) {
-    cloth.bodies[i].isSensor = true;
-  }
-  cloth.bodies[0].isStatic = true;
-  cloth.bodies[9].isStatic = true;
-}
+// var group = Body.nextGroup(true),
+//   particleOptions = {
+//     friction: 0.00001,
+//     collisionFilter: { group: group },
+//     render: {
+//       visible: false
+//     }
+//   },
+//   constraintOptions = { stiffness: 0.6 },
+//   cloth = Composites.softBody(
+//     0.35 * w - infiniteMassRadius,
+//     (2 / 7) * h - infiniteMassRadius,
+//     10,
+//     5,
+//     12,
+//     10,
+//     false,
+//     8,
+//     particleOptions,
+//     constraintOptions
+//   );
+// for (var i = 0; i < 20; i++) {
+//   if (i !== 0 && i !== 8) {
+//     cloth.bodies[i].isSensor = true;
+//   }
+//   cloth.bodies[0].isStatic = true;
+//   cloth.bodies[9].isStatic = true;
+// }
 
 // create a renderer
 var render = Render.create({
@@ -86,7 +86,7 @@ var basketOptions = {
   isStatic: true,
   friction: 0.05,
   frictionAir: 0.006,
-  restitution: 0.8,
+  restitution: 0.3,
   collisionFilter: {
     category: redCategory
   },
@@ -184,6 +184,8 @@ console.log("ball: ", ball);
 
 Events.on(engine, "collisionStart", function(event) {
   isCollided = true;
+
+  console.log("here: ballR: ", ballRadius * scale, "rend: ", ball.circleRadius);
 });
 const scoreView = document.querySelector(".score");
 
@@ -195,9 +197,9 @@ rim.style.top = boxA.position.y - infiniteMassRadius;
 rim.style.borderRadius = `${infiniteMassRadius}px`;
 
 const ballView = document.querySelector(".ball");
-ballView.style.height = 2 * ballRadius;
-ballView.style.width = 2 * ballRadius;
-ballView.style.borderRadius = `${ballRadius}px`;
+ballView.style.height = 2 * ball.circleRadius;
+ballView.style.width = 2 * ball.circleRadius;
+ballView.style.borderRadius = `${ball.circleRadius}px`;
 
 const leftPoint = document.querySelector(".leftPoint");
 leftPoint.style.height = 2 * infiniteMassRadius;
@@ -218,20 +220,20 @@ setInterval(function() {
   scoreView.textContent = `score ${score}`;
   bodies.forEach(body => {
     if (body.name === "basketBall") {
-      ballView.style.left = body.position.x - ballRadius;
-      ballView.style.top = body.position.y - ballRadius;
+      ballView.style.left = body.position.x - ball.circleRadius;
+      ballView.style.top = body.position.y - ball.circleRadius;
       ballView.style.transform = `rotate(${rotation}deg) scale(${scale})`;
+      Body.set(ball, { circleRadius: ballRadius * scale });
       rotation = rotation + body.velocity.x;
     }
   });
 
-  if (ball.position.y + ballRadius * scale < 0.9 * h)
-    ballView.style.zIndex = -2;
-  // check if ball is falling
   if (
-    ball.position.y < boxA.position.y - 100 &&
+    ball.position.y + ball.circleRadius <
+      boxA.position.y - infiniteMassRadius &&
     Math.round(ball.velocity.y) === 0
   ) {
+    ballView.style.zIndex = -2;
     ballAboveBasket = true;
     Body.set(ball, { isSensor: false, isStatic: false });
   }
@@ -248,7 +250,7 @@ setInterval(function() {
     isMoving = false;
 
     ballView.style.zIndex = -1;
-    scale = 1.2;
+    scale = 1;
     Body.setPosition(ball, {
       x: random(0 + ballRadius, w - ballRadius),
       y: 0.92 * h
