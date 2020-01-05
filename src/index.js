@@ -1,7 +1,5 @@
 import "./index.css";
 import Matter from "matter-js";
-import { platform } from "os";
-import { createContext } from "vm";
 const { innerHeight: h, innerWidth: w } = window;
 // module aliases
 
@@ -18,7 +16,7 @@ var Engine = Matter.Engine,
   Composite = Matter.Composite,
   MouseConstraint = Matter.MouseConstraint;
 
-var GRAVITY = 0.9;
+const GRAVITY = 0.9;
 var rotation = 0;
 var initialVx = 0;
 var initialVy = 0;
@@ -26,13 +24,14 @@ var shouldStart = false;
 var ballAboveBasket = false;
 var isCollided = false;
 var score = 0;
-var infiniteMassRadius = w / 84;
+const infiniteMassRadius = w / 84;
 var ballRadius = w / 12;
-var BALL_POSITION_CHECK_THRES = 80;
-var ROTATION_FAC = 14;
+const BALL_POSITION_CHECK_THRES = 80;
+const ROTATION_FAC = 14;
 var scale = 1.4;
 var isMoving = false;
-var scaleThreshold = 0.01;
+const RANDOM_VX_FAC = 1.2;
+const scaleThreshold = 0.01;
 var engine = Engine.create();
 engine.world.gravity.y = GRAVITY;
 var defaultCategory = 0x0001,
@@ -41,34 +40,35 @@ var defaultCategory = 0x0001,
 function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-// var group = Body.nextGroup(true),
-//   particleOptions = {
-//     friction: 0.00001,
-//     collisionFilter: { group: group },
-//     render: {
-//       visible: false
-//     }
-//   },
-//   constraintOptions = { stiffness: 0.6 },
-//   cloth = Composites.softBody(
-//     0.35 * w - infiniteMassRadius,
-//     (2 / 7) * h - infiniteMassRadius,
-//     10,
-//     5,
-//     12,
-//     10,
-//     false,
-//     8,
-//     particleOptions,
-//     constraintOptions
-//   );
-// for (var i = 0; i < 20; i++) {
-//   if (i !== 0 && i !== 8) {
-//     cloth.bodies[i].isSensor = true;
-//   }
-//   cloth.bodies[0].isStatic = true;
-//   cloth.bodies[9].isStatic = true;
-// }
+
+var group = Body.nextGroup(true),
+  particleOptions = {
+    friction: 0.00001,
+    collisionFilter: { group: group },
+    render: {
+      visible: false
+    }
+  },
+  constraintOptions = { stiffness: 0.6 },
+  cloth = Composites.softBody(
+    0.34 * w - infiniteMassRadius,
+    (1.78 / 7) * h - infiniteMassRadius,
+    5,
+    5,
+    6,
+    2,
+    false,
+    8,
+    particleOptions,
+    constraintOptions
+  );
+for (var i = 0; i < 20; i++) {
+  if (i !== 0 && i !== 9) {
+    cloth.bodies[i].isSensor = true;
+  }
+  cloth.bodies[5].isStatic = true;
+  cloth.bodies[9].isStatic = true;
+}
 
 // create a renderer
 var render = Render.create({
@@ -86,7 +86,7 @@ var basketOptions = {
   isStatic: true,
   friction: 0.05,
   frictionAir: 0.006,
-  restitution: 0.6,
+  restitution: 0.7,
   collisionFilter: {
     category: redCategory
   },
@@ -134,7 +134,6 @@ var mouse = Mouse.create(render.canvas),
       }
     }
   });
-
 Events.on(mouseConstraint, "mouseup", function(event) {
   var mousePosition = event.mouse.position;
   const { x, y } = ball.position;
@@ -154,13 +153,19 @@ Events.on(mouseConstraint, "mouseup", function(event) {
     { x: this.startX, y: this.startY },
     mousePosition
   );
-  swipeLength = swipeLength > 400 ? 4 : (swipeLength * 4) / 400;
-  initialVx = 0.02 * (mousePosition.x - this.startX);
-  initialVy = -8.4 * swipeLength > -10 ? -10 : -8.4 * swipeLength;
+  swipeLength = swipeLength > 200 ? 2.4 : (swipeLength * 2.4) / 200;
+  initialVx =
+    0.02 * (mousePosition.x - this.startX) +
+    RANDOM_VX_FAC * (random(0, 1) > 0.5 ? 0.1 : -0.1);
+  initialVy = -8 * swipeLength > -10 ? -10 : -8.4 * swipeLength;
+
+  //fixing bug
+  if (initialVy < -16.5 && initialVy > -19.5) initialVy = -19.8;
   shouldStart = true;
   Body.set(ball, { isSensor: true, isStatic: false });
   Body.setVelocity(ball, { x: initialVx, y: initialVy });
-  rotation = 0.2 * angle * ROTATION_FAC;
+  console.log("initialvy: ", initialVy);
+  rotation = -0.7 * angle * ROTATION_FAC;
   isMoving = true;
 });
 
@@ -184,6 +189,7 @@ console.log("ball: ", ball);
 
 Events.on(engine, "collisionStart", function(event) {
   isCollided = true;
+  // console.log("collided");
 });
 const scoreView = document.querySelector(".score");
 
@@ -221,10 +227,13 @@ setInterval(function() {
   ballView.style.left = ball.position.x - ballRadius;
   ballView.style.top = ball.position.y - ballRadius;
 
+  // if (Math.round(ball.velocity.y) === 0 && Math.round(ball.velocity.x) === 0) {
+  //   Body.setVelocity(ball, { x: random(0, 1) > 0.5 ? 1 : -1 });
+  // }
   if (
     ball.position.y + ball.circleRadius <
       boxA.position.y - infiniteMassRadius &&
-    Math.round(ball.velocity.y) === 0
+    ball.velocity.y >= 0
   ) {
     ballView.style.zIndex = -2;
     ballAboveBasket = true;
@@ -235,6 +244,7 @@ setInterval(function() {
     ball.position.y - ball.circleRadius > boxA.position.y + infiniteMassRadius
   )
     ballView.style.zIndex = -2;
+  // if (ball.velocity.y >= 0 && ball.position.y < boxA.position.y) debugger;
   if (shouldStart && scale > 1 && isMoving) {
     scale = scale - scaleThreshold;
   }
@@ -244,7 +254,6 @@ setInterval(function() {
     ball.position.x > w + ballRadius + BALL_POSITION_CHECK_THRES ||
     ball.position.y > h + ballRadius + 10 * BALL_POSITION_CHECK_THRES
   ) {
-    console.log("outside");
     isMoving = false;
 
     ballView.style.zIndex = -1;
@@ -264,10 +273,11 @@ setInterval(function() {
   //check if basket is succesfull
   if (
     ballAboveBasket &&
-    ball.position.x > boxA.position.x &&
-    ball.position.x < boxB.position.x &&
-    ball.position.y > boxA.position.y + ball.circleRadius
+    ball.position.x > boxA.position.x + infiniteMassRadius + 30 &&
+    ball.position.x < boxB.position.x - infiniteMassRadius - 30 &&
+    ball.position.y - ball.circleRadius > boxA.position.y + infiniteMassRadius
   ) {
+    console.log("ball pos: ", ball.position);
     ballAboveBasket = false;
     score = isCollided ? score + 1 : score + 2;
   }
