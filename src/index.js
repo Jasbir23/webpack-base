@@ -1,73 +1,49 @@
 import "./index.css";
 import Matter from "matter-js";
+import lottie from "lottie-web";
 const { innerHeight: h, innerWidth: w } = window;
-// module aliases
 
 var Engine = Matter.Engine,
   Body = Matter.Body,
   Render = Matter.Render,
   World = Matter.World,
   Bodies = Matter.Bodies,
-  Vertices = Matter.Vertices,
   Mouse = Matter.Mouse,
   Events = Matter.Events,
   Runner = Matter.Runner,
-  Composites = Matter.Composites,
-  Composite = Matter.Composite,
   MouseConstraint = Matter.MouseConstraint;
 
-const GRAVITY = 0.9;
 var rotation = 0;
 var initialVx = 0;
 var initialVy = 0;
-var shouldStart = false;
 var ballAboveBasket = false;
 var isCollided = false;
 var score = 0;
-const infiniteMassRadius = w / 84;
 var ballRadius = w / 12;
-const BALL_POSITION_CHECK_THRES = 80;
-const ROTATION_FAC = 14;
-var scale = 1.4;
+var scale = 1.5;
 var isMoving = false;
+var startX = 0;
+var startY = 0;
+var startTime = null;
+var endTime = null;
+var dragTime = null;
+
+const GRAVITY = 0.9;
+const INFINITE_MASS_RADIUS = w / 84;
+const BALL_POSITION_CHECK_THRES = 80;
+const ROTATION_FAC = 4;
+const RIM_HEIGHT = 0.14 * h;
 const RANDOM_VX_FAC = 1.2;
-const scaleThreshold = 0.01;
+const SCALE_THRESHOLD = 0.015;
+
 var engine = Engine.create();
 engine.world.gravity.y = GRAVITY;
+
 var defaultCategory = 0x0001,
   redCategory = 0x0002;
 
 function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-var group = Body.nextGroup(true),
-  particleOptions = {
-    friction: 0.00001,
-    collisionFilter: { group: group },
-    render: {
-      visible: false
-    }
-  },
-  constraintOptions = { stiffness: 0.6 },
-  cloth = Composites.softBody(
-    0.34 * w - infiniteMassRadius,
-    (1.78 / 7) * h - infiniteMassRadius,
-    5,
-    5,
-    6,
-    2,
-    false,
-    8,
-    particleOptions,
-    constraintOptions
-  );
-for (var i = 0; i < 20; i++) {
-  if (i !== 0 && i !== 9) {
-    cloth.bodies[i].isSensor = true;
-  }
-  cloth.bodies[5].isStatic = true;
-  cloth.bodies[9].isStatic = true;
 }
 
 // create a renderer
@@ -95,7 +71,7 @@ var basketOptions = {
   }
 };
 
-var boxA = Bodies.circle(0.35 * w, (2 / 7) * h, infiniteMassRadius, {
+var left_point = Bodies.circle(0.4 * w, (2 / 7) * h, INFINITE_MASS_RADIUS, {
   isStatic: true,
   collisionFilter: {
     mask: redCategory
@@ -104,7 +80,8 @@ var boxA = Bodies.circle(0.35 * w, (2 / 7) * h, infiniteMassRadius, {
     fillStyle: "transparent"
   }
 });
-var boxB = Bodies.circle(0.55 * w, (2 / 7) * h, infiniteMassRadius, {
+
+var right_point = Bodies.circle(0.6 * w, (2 / 7) * h, INFINITE_MASS_RADIUS, {
   isStatic: true,
   collisionFilter: {
     mask: redCategory
@@ -113,7 +90,9 @@ var boxB = Bodies.circle(0.55 * w, (2 / 7) * h, infiniteMassRadius, {
     fillStyle: "transparent"
   }
 });
-var ball = Bodies.circle(w / 2, 0.92 * h, ballRadius, basketOptions);
+
+var ball = Bodies.circle(w / 2, 0.9 * h, ballRadius, basketOptions);
+
 var ground = Bodies.rectangle(w / 2, 0.98 * h, w, 0.08 * h, {
   isStatic: true,
   collisionFilter: { mask: defaultCategory },
@@ -123,7 +102,7 @@ var ground = Bodies.rectangle(w / 2, 0.98 * h, w, 0.08 * h, {
 });
 
 // add all of the bodies to the world
-World.add(engine.world, [boxA, boxB, ground, ball]);
+World.add(engine.world, [left_point, right_point, ground, ball]);
 var mouse = Mouse.create(render.canvas),
   mouseConstraint = MouseConstraint.create(engine, {
     mouse: mouse,
@@ -134,40 +113,6 @@ var mouse = Mouse.create(render.canvas),
       }
     }
   });
-Events.on(mouseConstraint, "mouseup", function(event) {
-  var mousePosition = event.mouse.position;
-  const { x, y } = ball.position;
-  if (
-    this.startX < x - ballRadius ||
-    this.startX > x + ballRadius ||
-    this.startY > y + ballRadius ||
-    this.startY < y - ballRadius ||
-    this.startY + 20 < mousePosition.y
-  )
-    return;
-  const angle =
-    (Math.atan2(mousePosition.y - this.startY, mousePosition.x - this.startX) *
-      180) /
-    Math.PI;
-  let swipeLength = getDistance(
-    { x: this.startX, y: this.startY },
-    mousePosition
-  );
-  swipeLength = swipeLength > 200 ? 2.4 : (swipeLength * 2.4) / 200;
-  initialVx =
-    0.02 * (mousePosition.x - this.startX) +
-    RANDOM_VX_FAC * (random(0, 1) > 0.5 ? 0.1 : -0.1);
-  initialVy = -8 * swipeLength > -10 ? -10 : -8.4 * swipeLength;
-
-  //fixing bug
-  if (initialVy < -16.5 && initialVy > -19.5) initialVy = -19.8;
-  shouldStart = true;
-  Body.set(ball, { isSensor: true, isStatic: false });
-  Body.setVelocity(ball, { x: initialVx, y: initialVy });
-  console.log("initialvy: ", initialVy);
-  rotation = -0.7 * angle * ROTATION_FAC;
-  isMoving = true;
-});
 
 function getDistance(center1, center2) {
   return Math.sqrt(
@@ -175,30 +120,87 @@ function getDistance(center1, center2) {
       (center1.y - center2.y) * (center1.y - center2.y)
   );
 }
-Body.set(ball, { name: "basketBall" });
-Body.set(boxA, { name: "leftNetPoint" });
-Body.set(boxB, { name: "rightNetPoint" });
-Body.set(ground, { name: "ground" });
+
+function setFinalValue(event) {
+  if (isMoving) return;
+  var mousePosition = event.mouse.position;
+  const { x, y } = ball.position;
+  if (
+    startX < x - ballRadius ||
+    startX > x + ballRadius ||
+    startY > y + ballRadius ||
+    startY < y - ballRadius ||
+    startY + 20 < mousePosition.y
+  )
+    return;
+  let swipeLength = startY - mousePosition.y;
+  swipeLength = swipeLength >= 200 ? 2.4 : (swipeLength * 2.4) / 200;
+
+  initialVx =
+    0.02 * (mousePosition.x - startX) +
+    RANDOM_VX_FAC * (random(0, 1) > 0.5 ? 0.1 : -0.1);
+
+  initialVy = swipeLength === 2.4 ? -20 : -8.3 * swipeLength;
+  //fixing bug
+  if (initialVy < -16.5 && initialVy > -19.8) initialVy = -20;
+  if (initialVy > -5) initialVy = -5;
+
+  Body.set(ball, { isSensor: true, isStatic: false });
+  Body.setVelocity(ball, { x: initialVx, y: initialVy });
+  rotation = initialVx * ROTATION_FAC;
+  isMoving = true;
+}
 
 Events.on(mouseConstraint, "mousedown", function(event) {
   var mousePosition = event.mouse.position;
-  this.startY = mousePosition.y;
-  this.startX = mousePosition.x;
+  startY = mousePosition.y;
+  startX = mousePosition.x;
+  startTime = new Date().getTime();
+  endTime = null;
 });
-console.log("ball: ", ball);
+
+Events.on(mouseConstraint, "mousemove", function(event) {
+  dragTime = new Date().getTime();
+  if (!endTime && dragTime - startTime > 400) setFinalValue(event);
+});
+
+Events.on(mouseConstraint, "mouseup", function(event) {
+  endTime = new Date().getTime();
+  setFinalValue(event);
+});
 
 Events.on(engine, "collisionStart", function(event) {
-  isCollided = true;
-  // console.log("collided");
+  if (ball.velocity.y >= 0) {
+    rimLottie.playSegments([30, 45], true);
+    isCollided = true;
+    rimLottie.setSpeed(1.5);
+  }
 });
+
 const scoreView = document.querySelector(".score");
 
 const rim = document.querySelector(".rim");
-rim.style.height = 2 * infiniteMassRadius;
-rim.style.width = boxB.position.x - boxA.position.x + 2 * infiniteMassRadius;
-rim.style.left = boxA.position.x - infiniteMassRadius;
-rim.style.top = boxA.position.y - infiniteMassRadius;
-rim.style.borderRadius = `${infiniteMassRadius}px`;
+var rimLottie = lottie.loadAnimation({
+  container: rim,
+  renderer: "svg",
+  autoplay: false,
+  loop: false,
+  animationData: require("./assets/net.json")
+});
+rimLottie.goToAndStop(0, true);
+
+rim.style.height = RIM_HEIGHT;
+rim.style.width =
+  right_point.position.x - left_point.position.x + 2 * INFINITE_MASS_RADIUS;
+rim.style.left = left_point.position.x - INFINITE_MASS_RADIUS;
+rim.style.top = left_point.position.y - 2 * INFINITE_MASS_RADIUS;
+rim.style.borderRadius = `${INFINITE_MASS_RADIUS}px`;
+
+const board = document.querySelector(".board");
+board.style.height = h * 0.15;
+board.style.width = w * 0.38;
+board.style.left = left_point.position.x - INFINITE_MASS_RADIUS - 0.068 * w;
+board.style.top = left_point.position.y - INFINITE_MASS_RADIUS - 0.13 * h;
 
 const ballView = document.querySelector(".ball");
 ballView.style.height = 2 * ball.circleRadius;
@@ -206,48 +208,51 @@ ballView.style.width = 2 * ball.circleRadius;
 ballView.style.borderRadius = `${ball.circleRadius}px`;
 
 const leftPoint = document.querySelector(".leftPoint");
-leftPoint.style.height = 2 * infiniteMassRadius;
-leftPoint.style.width = 2 * infiniteMassRadius;
-leftPoint.style.borderRadius = `${infiniteMassRadius}px`;
-leftPoint.style.left = boxA.position.x - infiniteMassRadius;
-leftPoint.style.top = boxA.position.y - infiniteMassRadius;
+leftPoint.style.height = 2 * INFINITE_MASS_RADIUS;
+leftPoint.style.width = 2 * INFINITE_MASS_RADIUS;
+leftPoint.style.borderRadius = `${INFINITE_MASS_RADIUS}px`;
+leftPoint.style.left = left_point.position.x - INFINITE_MASS_RADIUS;
+leftPoint.style.top = left_point.position.y - INFINITE_MASS_RADIUS;
 
 const rightPoint = document.querySelector(".rightPoint");
-rightPoint.style.height = 2 * infiniteMassRadius;
-rightPoint.style.width = 2 * infiniteMassRadius;
-rightPoint.style.borderRadius = `${infiniteMassRadius}px`;
-rightPoint.style.left = boxB.position.x - infiniteMassRadius;
-rightPoint.style.top = boxB.position.y - infiniteMassRadius;
+rightPoint.style.height = 2 * INFINITE_MASS_RADIUS;
+rightPoint.style.width = 2 * INFINITE_MASS_RADIUS;
+rightPoint.style.borderRadius = `${INFINITE_MASS_RADIUS}px`;
+rightPoint.style.left = right_point.position.x - INFINITE_MASS_RADIUS;
+rightPoint.style.top = right_point.position.y - INFINITE_MASS_RADIUS;
 
 setInterval(function() {
   scoreView.textContent = `score ${score}`;
   Body.set(ball, { circleRadius: ballRadius * scale });
   ballView.style.transform = `rotate(${rotation}deg) scale(${scale})`;
   rotation = rotation + ball.velocity.x;
-  ballView.style.left = ball.position.x - ballRadius;
-  ballView.style.top = ball.position.y - ballRadius;
+  ballView.style.left = ball.position.x - ball.circleRadius;
+  ballView.style.top = ball.position.y - ball.circleRadius;
 
-  // if (Math.round(ball.velocity.y) === 0 && Math.round(ball.velocity.x) === 0) {
-  //   Body.setVelocity(ball, { x: random(0, 1) > 0.5 ? 1 : -1 });
-  // }
+  //check if ball is completely above basket
   if (
     ball.position.y + ball.circleRadius <
-      boxA.position.y - infiniteMassRadius &&
+      left_point.position.y - INFINITE_MASS_RADIUS &&
     ball.velocity.y >= 0
   ) {
-    ballView.style.zIndex = -2;
-    ballAboveBasket = true;
     Body.set(ball, { isSensor: false, isStatic: false });
+    ballView.style.zIndex = -2;
+    isCollided = false;
+    ballAboveBasket = true;
   }
+
   if (
-    ball.velocity.y > 0 &&
-    ball.position.y - ball.circleRadius > boxA.position.y + infiniteMassRadius
+    isMoving &&
+    ball.velocity.y >= 0 &&
+    ball.position.y - ballRadius >
+      left_point.position.y + INFINITE_MASS_RADIUS + RIM_HEIGHT
   )
     ballView.style.zIndex = -2;
-  // if (ball.velocity.y >= 0 && ball.position.y < boxA.position.y) debugger;
-  if (shouldStart && scale > 1 && isMoving) {
-    scale = scale - scaleThreshold;
+
+  if (scale > 1 && isMoving) {
+    scale = scale - SCALE_THRESHOLD < 1 ? 1 : scale - SCALE_THRESHOLD;
   }
+
   //check if ball is outside viewport
   if (
     ball.position.x < 0 - ballRadius - BALL_POSITION_CHECK_THRES ||
@@ -255,30 +260,30 @@ setInterval(function() {
     ball.position.y > h + ballRadius + 10 * BALL_POSITION_CHECK_THRES
   ) {
     isMoving = false;
-
-    ballView.style.zIndex = -1;
     scale = 1.5;
+    isCollided = false;
+    rotation = 0;
+    ballAboveBasket = false;
+    ballView.style.zIndex = -1;
     Body.setPosition(ball, {
-      x: random(0 + ballRadius * scale, w - ballRadius * scale),
+      x: random(0 + ballRadius * 1.6, w - ballRadius * 1.6),
       y: 0.92 * h
     });
     Body.setStatic(ball, true);
-    isCollided = false;
-    rotation = 0;
     Body.setVelocity(ball, { x: 0, y: 0 });
-
-    ballAboveBasket = false;
   }
 
   //check if basket is succesfull
   if (
     ballAboveBasket &&
-    ball.position.x > boxA.position.x + infiniteMassRadius + 30 &&
-    ball.position.x < boxB.position.x - infiniteMassRadius - 30 &&
-    ball.position.y - ball.circleRadius > boxA.position.y + infiniteMassRadius
+    ball.position.x > left_point.position.x + INFINITE_MASS_RADIUS &&
+    ball.position.x < right_point.position.x - INFINITE_MASS_RADIUS &&
+    ball.position.y - ball.circleRadius >
+      left_point.position.y + INFINITE_MASS_RADIUS
   ) {
-    console.log("ball pos: ", ball.position);
     ballAboveBasket = false;
+    rimLottie.setSpeed(3);
+    rimLottie.playSegments([0, 30], true);
     score = isCollided ? score + 1 : score + 2;
   }
   if (ball) Engine.update(engine, 1000 / 60);
