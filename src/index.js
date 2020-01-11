@@ -22,25 +22,29 @@ var score = 0;
 var ballRadius = w / 12;
 var scale = 1.5;
 var isMoving = false;
+var ballOnPlatform = false;
 var startX = 0;
 var startY = 0;
 var startTime = null;
 var endTime = null;
 var dragTime = null;
+var scaleThreshold = 0.015;
 
 const GRAVITY = 0.9;
+const URL = "http://www.basketball.com/game?battleId=1&playerId=2&test=true";
 const INFINITE_MASS_RADIUS = w / 84;
 const BALL_POSITION_CHECK_THRES = 80;
 const ROTATION_FAC = 4;
 const RIM_HEIGHT = 0.14 * h;
 const RANDOM_VX_FAC = 1.2;
-const SCALE_THRESHOLD = 0.015;
+const RIM_WIDTH = 0.2 * w + 2 * INFINITE_MASS_RADIUS;
+const RIM_LEFT = 0.4 * w;
+const RIM_TOP = 0.28 * h;
+const BOARD_WIDTH = w * 0.5;
+const BOARD_HEIGHT = h * 0.2;
 
 var engine = Engine.create();
 engine.world.gravity.y = GRAVITY;
-
-var defaultCategory = 0x0001,
-  redCategory = 0x0002;
 
 function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -62,47 +66,43 @@ var basketOptions = {
   isStatic: true,
   friction: 0.05,
   frictionAir: 0.006,
+  frictionStatic: 0,
   restitution: 0.7,
-  collisionFilter: {
-    category: redCategory
-  },
   render: {
     fillStyle: "transparent"
   }
 };
 
-var left_point = Bodies.circle(0.4 * w, (2 / 7) * h, INFINITE_MASS_RADIUS, {
+var left_point = Bodies.circle(RIM_LEFT, RIM_TOP, INFINITE_MASS_RADIUS, {
   isStatic: true,
-  collisionFilter: {
-    mask: redCategory
-  },
   render: {
     fillStyle: "transparent"
   }
 });
 
-var right_point = Bodies.circle(0.6 * w, (2 / 7) * h, INFINITE_MASS_RADIUS, {
-  isStatic: true,
-  collisionFilter: {
-    mask: redCategory
-  },
-  render: {
-    fillStyle: "transparent"
+var right_point = Bodies.circle(
+  RIM_LEFT + RIM_WIDTH - 2 * INFINITE_MASS_RADIUS,
+  RIM_TOP,
+  INFINITE_MASS_RADIUS,
+  {
+    isStatic: true,
+    render: {
+      fillStyle: "transparent"
+    }
   }
-});
+);
 
-var ball = Bodies.circle(w / 2, 0.9 * h, ballRadius, basketOptions);
+var ball = Bodies.circle(w / 2, 0.92 * h, ballRadius, basketOptions);
 
-var ground = Bodies.rectangle(w / 2, 0.98 * h, w, 0.08 * h, {
+var ground = Bodies.rectangle(w / 2, 0.75 * h, w, 0.05 * h, {
   isStatic: true,
-  collisionFilter: { mask: defaultCategory },
   render: {
     fillStyle: "transparent"
   }
 });
 
 // add all of the bodies to the world
-World.add(engine.world, [left_point, right_point, ground, ball]);
+World.add(engine.world, [ground, left_point, right_point, ball]);
 var mouse = Mouse.create(render.canvas),
   mouseConstraint = MouseConstraint.create(engine, {
     mouse: mouse,
@@ -114,12 +114,14 @@ var mouse = Mouse.create(render.canvas),
     }
   });
 
-function getDistance(center1, center2) {
-  return Math.sqrt(
-    (center1.x - center2.x) * (center1.x - center2.x) +
-      (center1.y - center2.y) * (center1.y - center2.y)
-  );
-}
+// function httpGet(theUrl) {
+//   var xmlHttp = new XMLHttpRequest();
+//   xmlHttp.open("GET", theUrl, true); // false for synchronous request
+//   console.log("here:", xmlHttp);
+//   xmlHttp.send(null);
+//   return xmlHttp.responseText;
+// }
+// httpGet(URL);
 
 function setFinalValue(event) {
   if (isMoving) return;
@@ -134,17 +136,16 @@ function setFinalValue(event) {
   )
     return;
   let swipeLength = startY - mousePosition.y;
-  swipeLength = swipeLength >= 200 ? 2.4 : (swipeLength * 2.4) / 200;
+  swipeLength = swipeLength >= 300 ? 2.4 : (swipeLength * 2.4) / 300;
 
   initialVx =
     0.02 * (mousePosition.x - startX) +
     RANDOM_VX_FAC * (random(0, 1) > 0.5 ? 0.1 : -0.1);
 
-  initialVy = swipeLength === 2.4 ? -20 : -8.3 * swipeLength;
+  initialVy = swipeLength === 2.4 ? -0.03 * h : -8.3 * swipeLength;
   //fixing bug
-  if (initialVy < -16.5 && initialVy > -19.8) initialVy = -20;
-  if (initialVy > -5) initialVy = -5;
-
+  if (initialVy > -0.02 * h) initialVy = -0.023 * h;
+  else initialVy = -0.03 * h;
   Body.set(ball, { isSensor: true, isStatic: false });
   Body.setVelocity(ball, { x: initialVx, y: initialVy });
   rotation = initialVx * ROTATION_FAC;
@@ -170,14 +171,23 @@ Events.on(mouseConstraint, "mouseup", function(event) {
 });
 
 Events.on(engine, "collisionStart", function(event) {
-  if (ball.velocity.y >= 0) {
+  if (ball.velocity.y >= 0 && ball.position.y < RIM_TOP + 2 * ballRadius) {
     rimLottie.playSegments([30, 45], true);
     isCollided = true;
     rimLottie.setSpeed(1.5);
+  } else if (ball.velocity.y >= 0 && ball.position.y + ballRadius >= 0.6 * h) {
+    ballOnPlatform = true;
   }
 });
 
 const scoreView = document.querySelector(".score");
+
+const board = document.querySelector(".board");
+board.style.height = BOARD_HEIGHT;
+board.style.width = BOARD_WIDTH;
+board.style.left =
+  RIM_LEFT - INFINITE_MASS_RADIUS - (BOARD_WIDTH - RIM_WIDTH) / 2;
+board.style.top = RIM_TOP + 2 * INFINITE_MASS_RADIUS - BOARD_HEIGHT;
 
 const rim = document.querySelector(".rim");
 var rimLottie = lottie.loadAnimation({
@@ -190,22 +200,16 @@ var rimLottie = lottie.loadAnimation({
 rimLottie.goToAndStop(0, true);
 
 rim.style.height = RIM_HEIGHT;
-rim.style.width =
-  right_point.position.x - left_point.position.x + 2 * INFINITE_MASS_RADIUS;
+rim.style.width = RIM_WIDTH;
 rim.style.left = left_point.position.x - INFINITE_MASS_RADIUS;
 rim.style.top = left_point.position.y - 2 * INFINITE_MASS_RADIUS;
 rim.style.borderRadius = `${INFINITE_MASS_RADIUS}px`;
-
-const board = document.querySelector(".board");
-board.style.height = h * 0.15;
-board.style.width = w * 0.38;
-board.style.left = left_point.position.x - INFINITE_MASS_RADIUS - 0.068 * w;
-board.style.top = left_point.position.y - INFINITE_MASS_RADIUS - 0.13 * h;
 
 const ballView = document.querySelector(".ball");
 ballView.style.height = 2 * ball.circleRadius;
 ballView.style.width = 2 * ball.circleRadius;
 ballView.style.borderRadius = `${ball.circleRadius}px`;
+ballView.style.opacity = 1;
 
 const leftPoint = document.querySelector(".leftPoint");
 leftPoint.style.height = 2 * INFINITE_MASS_RADIUS;
@@ -229,6 +233,33 @@ setInterval(function() {
   ballView.style.left = ball.position.x - ball.circleRadius;
   ballView.style.top = ball.position.y - ball.circleRadius;
 
+  if (isMoving) {
+    ballView.style.boxShadow = "0px 15px 10px -15px #111";
+  } else {
+    ballView.style.boxShadow = "0px 15px 10px -10px #111";
+  }
+  if (ballOnPlatform && ballView.style.opacity >= 0.1) {
+    ballView.style.opacity = ballView.style.opacity - 0.02;
+  } else if (ballOnPlatform && ballView.style.opacity <= 0.1) {
+    ballOnPlatform = false;
+
+    isMoving = false;
+    scale = 1.5;
+    isCollided = false;
+    rotation = 0;
+    ballAboveBasket = false;
+    ballView.style.zIndex = -1;
+    Body.setStatic(ball, true);
+    Body.setVelocity(ball, { x: 0, y: 0 });
+    setTimeout(() => {
+      ballView.style.opacity = 1;
+    }, 100);
+    scaleThreshold = 0.015;
+    Body.setPosition(ball, {
+      x: random(0 + ballRadius * 1.6, w - ballRadius * 1.6),
+      y: 0.92 * h
+    });
+  }
   //check if ball is completely above basket
   if (
     ball.position.y + ball.circleRadius <
@@ -241,16 +272,22 @@ setInterval(function() {
     ballAboveBasket = true;
   }
 
+  if (ball.velocity.y > 0) {
+    Body.set(ball, { isSensor: false });
+  }
   if (
     isMoving &&
     ball.velocity.y >= 0 &&
     ball.position.y - ballRadius >
       left_point.position.y + INFINITE_MASS_RADIUS + RIM_HEIGHT
-  )
+  ) {
     ballView.style.zIndex = -2;
+  }
 
   if (scale > 1 && isMoving) {
-    scale = scale - SCALE_THRESHOLD < 1 ? 1 : scale - SCALE_THRESHOLD;
+    if (initialVy === 0.02 * h) scaleThreshold = 0.03;
+    else scaleThreshold = 0.015;
+    scale = scale - scaleThreshold < 1 ? 1 : scale - scaleThreshold;
   }
 
   //check if ball is outside viewport
@@ -259,14 +296,17 @@ setInterval(function() {
     ball.position.x > w + ballRadius + BALL_POSITION_CHECK_THRES ||
     ball.position.y > h + ballRadius + 10 * BALL_POSITION_CHECK_THRES
   ) {
+    ballOnPlatform = false;
+    ballView.style.opacity = 1;
     isMoving = false;
     scale = 1.5;
     isCollided = false;
     rotation = 0;
+    scaleThreshold = 0.015;
     ballAboveBasket = false;
     ballView.style.zIndex = -1;
     Body.setPosition(ball, {
-      x: random(0 + ballRadius * 1.6, w - ballRadius * 1.6),
+      x: random(0 + ballRadius * 2, w - ballRadius * 2),
       y: 0.92 * h
     });
     Body.setStatic(ball, true);

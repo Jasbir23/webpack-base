@@ -7,16 +7,24 @@ body {
   background: white;
 }
 
-.ground {
+.container {
   position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   bottom: 0;
-  height: 10%;
-  width: 100%;
-  background-color: #e3e0e0;
-  z-index: -2;
+  background-position: center;
+  background-image: url("./assets/background.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  z-index: -4;
 }
 
 .leftPoint {
+  position: absolute;
+}
+
+.rightPoint {
   position: absolute;
 }
 
@@ -28,7 +36,7 @@ body {
 
 .board {
   position: absolute;
-  background-image: url("./assets/board.png");
+  background-image: url("./assets/board2.png");
   background-size: contain;
   background-repeat: no-repeat;
   z-index: -3;
@@ -40,19 +48,17 @@ body {
   right: 10px;
   height: 20px;
   width: 60px;
-  color: #918f8f;
+  color: white;
   text-align: center;
   font-size: 24px;
   font-weight: 600;
 }
 
-.rightPoint {
-  position: absolute;
-}
 
 .ball {
   position: absolute;
   z-index: -1;
+  box-shadow: 0px 15px 10px -10px #111;
   background-image: url("./assets/basketBall.png");
   background-size: cover;
 }
