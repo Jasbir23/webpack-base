@@ -13,6 +13,11 @@ var Engine = Matter.Engine,
   Runner = Matter.Runner,
   MouseConstraint = Matter.MouseConstraint;
 
+var velSet = false;
+var gameStarted = false;
+var timeStopped = true;
+var time = 45;
+var count = 0;
 var rotation = 0;
 var initialVx = 0;
 var initialVy = 0;
@@ -30,16 +35,17 @@ var endTime = null;
 var dragTime = null;
 var scaleThreshold = 0.015;
 
-const GRAVITY = 0.9;
-const URL = "http://www.basketball.com/game?battleId=1&playerId=2&test=true";
+const GRAVITY = 0.0013 * h;
+const URL =
+  "http://192.168.0.116:9000/api/marketjs/user/1cfb2101-b204-4744-a977-592be73c8b10";
 const INFINITE_MASS_RADIUS = w / 84;
 const BALL_POSITION_CHECK_THRES = 80;
 const ROTATION_FAC = 4;
 const RIM_HEIGHT = 0.14 * h;
 const RANDOM_VX_FAC = 1.2;
-const RIM_WIDTH = 0.2 * w + 2 * INFINITE_MASS_RADIUS;
+const RIM_WIDTH = 0.22 * w + 2 * INFINITE_MASS_RADIUS;
 const RIM_LEFT = 0.4 * w;
-const RIM_TOP = 0.28 * h;
+const RIM_TOP = 0.32 * h;
 const BOARD_WIDTH = w * 0.5;
 const BOARD_HEIGHT = h * 0.2;
 
@@ -50,6 +56,25 @@ function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// function getParameterByName(name, url) {
+//   if (!url) url = window.location.href;
+//   console.log("here url: ", url);
+//   var queryObj = {};
+//   if (url.split("?").length > 0) {
+//     var queryString = url.split("?")[1];
+//   }
+//   queryObj = JSON.parse(
+//     '{"' +
+//       queryString
+//         .replace(/"/g, '\\"')
+//         .replace(/&/g, '","')
+//         .replace(/=/g, '":"') +
+//       '"}'
+//   );
+//   return queryObj;
+// }
+// const temp = getParameterByName("xyz");
+// console.log("here: ", temp);
 // create a renderer
 var render = Render.create({
   element: document.body,
@@ -117,11 +142,18 @@ var mouse = Mouse.create(render.canvas),
 // function httpGet(theUrl) {
 //   var xmlHttp = new XMLHttpRequest();
 //   xmlHttp.open("GET", theUrl, true); // false for synchronous request
-//   console.log("here:", xmlHttp);
-//   xmlHttp.send(null);
-//   return xmlHttp.responseText;
+//   console.log("here: json response", JSON.parse(xmlHttp.responseText));
+//   // xmlHttp.send(null);
+//   return JSON.parse(xmlHttp.responseText);
 // }
-// httpGet(URL);
+
+// fetch(URL)
+//   .then(res => {
+//     return res.json();
+//   })
+//   .then(json => {
+//     console.log("here: json: ", json);
+//   });
 
 function setFinalValue(event) {
   if (isMoving) return;
@@ -136,7 +168,7 @@ function setFinalValue(event) {
   )
     return;
   let swipeLength = startY - mousePosition.y;
-  swipeLength = swipeLength >= 300 ? 2.4 : (swipeLength * 2.4) / 300;
+  swipeLength = swipeLength >= 250 ? 2.4 : (swipeLength * 2.4) / 250;
 
   initialVx =
     0.02 * (mousePosition.x - startX) +
@@ -153,6 +185,8 @@ function setFinalValue(event) {
 }
 
 Events.on(mouseConstraint, "mousedown", function(event) {
+  if (!gameStarted && timeStopped) return;
+
   var mousePosition = event.mouse.position;
   startY = mousePosition.y;
   startX = mousePosition.x;
@@ -161,17 +195,25 @@ Events.on(mouseConstraint, "mousedown", function(event) {
 });
 
 Events.on(mouseConstraint, "mousemove", function(event) {
+  if (!gameStarted && timeStopped) return;
   dragTime = new Date().getTime();
+  slideLottie.stop();
   if (!endTime && dragTime - startTime > 400) setFinalValue(event);
 });
 
 Events.on(mouseConstraint, "mouseup", function(event) {
+  if (!gameStarted && timeStopped) return;
+
   endTime = new Date().getTime();
   setFinalValue(event);
 });
 
 Events.on(engine, "collisionStart", function(event) {
-  if (ball.velocity.y >= 0 && ball.position.y < RIM_TOP + 2 * ballRadius) {
+  if (
+    isMoving &&
+    ball.velocity.y >= 0 &&
+    ball.position.y < RIM_TOP + 2 * ballRadius
+  ) {
     rimLottie.playSegments([30, 45], true);
     isCollided = true;
     rimLottie.setSpeed(1.5);
@@ -180,7 +222,12 @@ Events.on(engine, "collisionStart", function(event) {
   }
 });
 
-const scoreView = document.querySelector(".score");
+// var bounceEl = document.getElementById("bounce");
+// var bouncSrc = document.getElementById("bounceSrc");
+// bounceSrc.src = "bounce.mp3";
+// console.log("bounceEl: ", bouncSrc);
+const scoreView = document.querySelector(".scoreVal");
+const timerView = document.querySelector(".timerVal");
 
 const board = document.querySelector(".board");
 board.style.height = BOARD_HEIGHT;
@@ -188,6 +235,38 @@ board.style.width = BOARD_WIDTH;
 board.style.left =
   RIM_LEFT - INFINITE_MASS_RADIUS - (BOARD_WIDTH - RIM_WIDTH) / 2;
 board.style.top = RIM_TOP + 2 * INFINITE_MASS_RADIUS - BOARD_HEIGHT;
+
+const finalScore = document.querySelector(".finalScore");
+const name = document.querySelector(".name");
+console.log("wid: ", name.width);
+finalScore.style.display = "none";
+name.style.display = "none";
+
+const plusTwo = document.querySelector(".plusTwo");
+plusTwo.style.display = "none";
+
+const gameOver = document.querySelector(".gameOver");
+gameOver.style.display = "none";
+const beginning = document.querySelector(".beginning");
+var beginLottie = lottie.loadAnimation({
+  container: beginning,
+  renderer: "svg",
+  autoplay: false,
+  loop: false,
+  animationData: require("./assets/beginning.json")
+});
+beginLottie.goToAndStop(0, true);
+const slide = document.querySelector(".slide");
+var slideLottie = lottie.loadAnimation({
+  container: slide,
+  renderer: "svg",
+  autoplay: false,
+  loop: true,
+  animationData: require("./assets/slide.json")
+});
+slideLottie.goToAndStop(0, true);
+
+var begin = 0;
 
 const rim = document.querySelector(".rim");
 var rimLottie = lottie.loadAnimation({
@@ -226,7 +305,39 @@ rightPoint.style.left = right_point.position.x - INFINITE_MASS_RADIUS;
 rightPoint.style.top = right_point.position.y - INFINITE_MASS_RADIUS;
 
 setInterval(function() {
-  scoreView.textContent = `score ${score}`;
+  count += 1;
+  var scoreText = ("0" + score).slice(-2);
+  scoreView.textContent = `${scoreText}`;
+  if (count === 60) {
+    count = 0;
+    if (begin <= 15) {
+      begin += 5;
+      beginLottie.goToAndStop(begin, true);
+    }
+    if (begin === 20) {
+      begin += 5;
+      beginLottie.goToAndStop(15, true);
+      slideLottie.setSpeed(0.2);
+      slideLottie.playSegments([0, 10], true);
+      gameStarted = true;
+      timeStopped = false;
+    }
+    time !== 0 && gameStarted && time--;
+    if (time === 0) {
+      timeStopped = true;
+      isMoving = false;
+    }
+
+    if (gameStarted && timeStopped) {
+      slideLottie.stop();
+      ballView.style.display = "none";
+      gameOver.style.display = "initial";
+      name.style.display = "initial";
+      finalScore.style.display = "initial";
+      finalScore.textContent = `SCORE ${score}`;
+    }
+  }
+  timerView.textContent = `${time}`;
   Body.set(ball, { circleRadius: ballRadius * scale });
   ballView.style.transform = `rotate(${rotation}deg) scale(${scale})`;
   rotation = rotation + ball.velocity.x;
@@ -255,6 +366,8 @@ setInterval(function() {
       ballView.style.opacity = 1;
     }, 100);
     scaleThreshold = 0.015;
+    plusTwo.style.display = "none";
+    velSet = false;
     Body.setPosition(ball, {
       x: random(0 + ballRadius * 1.6, w - ballRadius * 1.6),
       y: 0.92 * h
@@ -262,6 +375,7 @@ setInterval(function() {
   }
   //check if ball is completely above basket
   if (
+    isMoving &&
     ball.position.y + ball.circleRadius <
       left_point.position.y - INFINITE_MASS_RADIUS &&
     ball.velocity.y >= 0
@@ -284,6 +398,17 @@ setInterval(function() {
     ballView.style.zIndex = -2;
   }
 
+  if (
+    isMoving &&
+    ball.position.y > RIM_TOP &&
+    ball.velocity.y > 0 &&
+    ball.position.x > RIM_LEFT &&
+    ball.position.x < RIM_LEFT + RIM_WIDTH &&
+    !velSet
+  ) {
+    Body.setVelocity(ball, { x: 0, y: ball.velocity.y });
+    velSet = true;
+  }
   if (scale > 1 && isMoving) {
     if (initialVy === 0.02 * h) scaleThreshold = 0.03;
     else scaleThreshold = 0.015;
@@ -305,16 +430,19 @@ setInterval(function() {
     scaleThreshold = 0.015;
     ballAboveBasket = false;
     ballView.style.zIndex = -1;
+    velSet = false;
     Body.setPosition(ball, {
       x: random(0 + ballRadius * 2, w - ballRadius * 2),
       y: 0.92 * h
     });
+    plusTwo.style.display = "none";
     Body.setStatic(ball, true);
     Body.setVelocity(ball, { x: 0, y: 0 });
   }
 
   //check if basket is succesfull
   if (
+    isMoving &&
     ballAboveBasket &&
     ball.position.x > left_point.position.x + INFINITE_MASS_RADIUS &&
     ball.position.x < right_point.position.x - INFINITE_MASS_RADIUS &&
@@ -324,6 +452,7 @@ setInterval(function() {
     ballAboveBasket = false;
     rimLottie.setSpeed(3);
     rimLottie.playSegments([0, 30], true);
+    if (!isCollided) plusTwo.style.display = "initial";
     score = isCollided ? score + 1 : score + 2;
   }
   if (ball) Engine.update(engine, 1000 / 60);
