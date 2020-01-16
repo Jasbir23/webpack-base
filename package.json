@@ -28,6 +28,7 @@
     "webpack-dev-server": "^3.10.1"
   },
   "dependencies": {
+    "egoroof-blowfish": "^2.2.1",
     "lodash.debounce": "^4.0.8",
     "lottie-web": "^5.6.0",
     "matter-js": "^0.14.2",

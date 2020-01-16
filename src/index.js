@@ -1,8 +1,10 @@
 import "./index.css";
 import Matter from "matter-js";
 import lottie from "lottie-web";
+const Blowfish = require("egoroof-blowfish");
 const { innerHeight: h, innerWidth: w } = window;
 
+// const blowfish = require("./blowfish");
 var Engine = Matter.Engine,
   Body = Matter.Body,
   Render = Matter.Render,
@@ -15,8 +17,10 @@ var Engine = Matter.Engine,
 
 var velSet = false;
 var gameStarted = false;
+var resultSend = false;
+var initialTime = 0;
 var timeStopped = true;
-var time = 45;
+var time = 60;
 var count = 0;
 var rotation = 0;
 var initialVx = 0;
@@ -34,10 +38,17 @@ var startTime = null;
 var endTime = null;
 var dragTime = null;
 var scaleThreshold = 0.015;
+const timerFrames = [20, 40, 41];
+const frameArr = [
+  [0, 20],
+  [21, 40],
+  [41, 60]
+];
 
 const GRAVITY = 0.0013 * h;
-const URL =
-  "http://192.168.0.116:9000/api/marketjs/user/1cfb2101-b204-4744-a977-592be73c8b10";
+const getUserURL =
+  "http://192.168.0.116:9000/api/gamePind/user/1cfb2101-b204-4744-a977-592be73c8b10";
+const postResURL = "http://192.168.17.236:9000/api/gamePind/result";
 const INFINITE_MASS_RADIUS = w / 84;
 const BALL_POSITION_CHECK_THRES = 80;
 const ROTATION_FAC = 4;
@@ -51,7 +62,6 @@ const BOARD_HEIGHT = h * 0.2;
 
 var engine = Engine.create();
 engine.world.gravity.y = GRAVITY;
-
 function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -139,21 +149,16 @@ var mouse = Mouse.create(render.canvas),
     }
   });
 
-// function httpGet(theUrl) {
-//   var xmlHttp = new XMLHttpRequest();
-//   xmlHttp.open("GET", theUrl, true); // false for synchronous request
-//   console.log("here: json response", JSON.parse(xmlHttp.responseText));
-//   // xmlHttp.send(null);
-//   return JSON.parse(xmlHttp.responseText);
-// }
+const bf = new Blowfish("gamePind@12", Blowfish.MODE.ECB); // only key isn't optional
 
-// fetch(URL)
-//   .then(res => {
-//     return res.json();
-//   })
-//   .then(json => {
-//     console.log("here: json: ", json);
-//   });
+function sendResult(obj) {
+  const encoded = bf.encode(JSON.stringify(obj));
+  resultSend = true;
+  fetch(postResURL, {
+    method: "post",
+    body: encoded.toString()
+  });
+}
 
 function setFinalValue(event) {
   if (isMoving) return;
@@ -178,15 +183,14 @@ function setFinalValue(event) {
   //fixing bug
   if (initialVy > -0.02 * h) initialVy = -0.023 * h;
   else initialVy = -0.03 * h;
+  console.log("initial vy: ", initialVy);
   Body.set(ball, { isSensor: true, isStatic: false });
   Body.setVelocity(ball, { x: initialVx, y: initialVy });
   rotation = initialVx * ROTATION_FAC;
   isMoving = true;
 }
-
 Events.on(mouseConstraint, "mousedown", function(event) {
   if (!gameStarted && timeStopped) return;
-
   var mousePosition = event.mouse.position;
   startY = mousePosition.y;
   startX = mousePosition.x;
@@ -214,11 +218,17 @@ Events.on(engine, "collisionStart", function(event) {
     ball.velocity.y >= 0 &&
     ball.position.y < RIM_TOP + 2 * ballRadius
   ) {
+    rimSound.playbackRate = 3;
+    rimSound.volume = 0.4;
+    rimSound.play();
     rimLottie.playSegments([30, 45], true);
     isCollided = true;
     rimLottie.setSpeed(1.5);
   } else if (ball.velocity.y >= 0 && ball.position.y + ballRadius >= 0.6 * h) {
     ballOnPlatform = true;
+    bounceSound.playbackRate = 4;
+    bounceSound.volume = 0.2;
+    bounceSound.play();
   }
 });
 
@@ -234,11 +244,10 @@ board.style.height = BOARD_HEIGHT;
 board.style.width = BOARD_WIDTH;
 board.style.left =
   RIM_LEFT - INFINITE_MASS_RADIUS - (BOARD_WIDTH - RIM_WIDTH) / 2;
-board.style.top = RIM_TOP + 2 * INFINITE_MASS_RADIUS - BOARD_HEIGHT;
+board.style.top = RIM_TOP + 4 * INFINITE_MASS_RADIUS - BOARD_HEIGHT;
 
 const finalScore = document.querySelector(".finalScore");
 const name = document.querySelector(".name");
-console.log("wid: ", name.width);
 finalScore.style.display = "none";
 name.style.display = "none";
 
@@ -248,25 +257,32 @@ plusTwo.style.display = "none";
 const gameOver = document.querySelector(".gameOver");
 gameOver.style.display = "none";
 const beginning = document.querySelector(".beginning");
+beginning.style.left =
+  RIM_LEFT - INFINITE_MASS_RADIUS - (BOARD_WIDTH - RIM_WIDTH) / 2 + 0.06 * w;
+beginning.style.top =
+  RIM_TOP + 4 * INFINITE_MASS_RADIUS - BOARD_HEIGHT + 0.024 * h;
 var beginLottie = lottie.loadAnimation({
   container: beginning,
   renderer: "svg",
   autoplay: false,
   loop: false,
-  animationData: require("./assets/beginning.json")
+  animationData: require("./assets/timer.json")
 });
-beginLottie.goToAndStop(0, true);
-const slide = document.querySelector(".slide");
-var slideLottie = lottie.loadAnimation({
-  container: slide,
-  renderer: "svg",
-  autoplay: false,
-  loop: true,
-  animationData: require("./assets/slide.json")
-});
-slideLottie.goToAndStop(0, true);
+beginLottie.setSpeed(0.78);
+beginLottie.goToAndStop(timerFrames[0], true);
 
 var begin = 0;
+
+const rimSound = document.querySelector(".rimSound");
+const swishSound = document.querySelector(".swishSound");
+const bounceSound = document.querySelector(".bounceSound");
+
+// const timerGif = document.querySelector(".timerGif");
+
+// timerGif.style.width = RIM_WIDTH + 4 * INFINITE_MASS_RADIUS;
+// timerGif.style.height = RIM_WIDTH - 2 * INFINITE_MASS_RADIUS;
+// timerGif.style.top = left_point.position.y - RIM_WIDTH - INFINITE_MASS_RADIUS;
+// timerGif.style.left = left_point.position.x - 3 * INFINITE_MASS_RADIUS;
 
 const rim = document.querySelector(".rim");
 var rimLottie = lottie.loadAnimation({
@@ -290,6 +306,19 @@ ballView.style.width = 2 * ball.circleRadius;
 ballView.style.borderRadius = `${ball.circleRadius}px`;
 ballView.style.opacity = 1;
 
+const slide = document.querySelector(".slide");
+slide.style.left = ball.position.x - 0.1 * w;
+slide.style.top = ball.position.y - 0.25 * h;
+
+var slideLottie = lottie.loadAnimation({
+  container: slide,
+  renderer: "svg",
+  autoplay: false,
+  loop: true,
+  animationData: require("./assets/slide.json")
+});
+slideLottie.goToAndStop(0, true);
+
 const leftPoint = document.querySelector(".leftPoint");
 leftPoint.style.height = 2 * INFINITE_MASS_RADIUS;
 leftPoint.style.width = 2 * INFINITE_MASS_RADIUS;
@@ -309,19 +338,20 @@ setInterval(function() {
   var scoreText = ("0" + score).slice(-2);
   scoreView.textContent = `${scoreText}`;
   if (count === 60) {
+    beginLottie.goToAndStop(begin + 20, true);
     count = 0;
-    if (begin <= 15) {
-      begin += 5;
-      beginLottie.goToAndStop(begin, true);
-    }
-    if (begin === 20) {
-      begin += 5;
-      beginLottie.goToAndStop(15, true);
+    initialTime++;
+    if (initialTime === 1) beginLottie.playSegments(frameArr[0], true);
+    else if (initialTime === 2) beginLottie.playSegments(frameArr[1], true);
+    else if (initialTime === 3) beginLottie.playSegments(frameArr[2], true);
+    else if (initialTime === 4) {
+      beginLottie.goToAndStop(60, true);
       slideLottie.setSpeed(0.2);
       slideLottie.playSegments([0, 10], true);
       gameStarted = true;
       timeStopped = false;
     }
+
     time !== 0 && gameStarted && time--;
     if (time === 0) {
       timeStopped = true;
@@ -335,6 +365,8 @@ setInterval(function() {
       name.style.display = "initial";
       finalScore.style.display = "initial";
       finalScore.textContent = `SCORE ${score}`;
+      let res = { battleId: 123, result: { id: "abc", score } };
+      // !resultSend && sendResult(res);
     }
   }
   timerView.textContent = `${time}`;
@@ -404,7 +436,8 @@ setInterval(function() {
     ball.velocity.y > 0 &&
     ball.position.x > RIM_LEFT &&
     ball.position.x < RIM_LEFT + RIM_WIDTH &&
-    !velSet
+    !velSet &&
+    initialVy === -0.03 * h
   ) {
     Body.setVelocity(ball, { x: 0, y: ball.velocity.y });
     velSet = true;
@@ -452,6 +485,10 @@ setInterval(function() {
     ballAboveBasket = false;
     rimLottie.setSpeed(3);
     rimLottie.playSegments([0, 30], true);
+
+    swishSound.play();
+    swishSound.playbackRate = 2;
+    swishSound.volume = 0.6;
     if (!isCollided) plusTwo.style.display = "initial";
     score = isCollided ? score + 1 : score + 2;
   }

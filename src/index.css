@@ -67,15 +67,13 @@ body {
 
 .beginning {
   position: absolute;
-  top: 50vh;
-  left: 10vw;
-  width: 80vw;
-  height: 12vh;
+  width: 38vw;
+  height: 13vh;
 }
 
 .name {
   position: absolute;
-  top: 70vh;
+  top: 72vh;
   width: 100%;
   text-align: center;
   font-size: 30px;
@@ -85,7 +83,7 @@ body {
 
 .finalScore {
   position: absolute;
-  top: 76vh;
+  top: 78vh;
   left: 25vw;
   width: 50vw;
   text-align: center;
@@ -101,11 +99,9 @@ body {
 
 .slide {
   position: absolute;
-  top: 50vh;
   opacity: 0.6;
-  left: 36vw;
-  width: 20vw;
-  height: 40vh;
+  width: 10vw;
+  height: 24vh;
 }
 
 .score {
@@ -122,13 +118,16 @@ body {
 
 .gameOver {
   position: absolute;
-  background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079521/gameOver.png");
-  background-size: contain;
-  background-repeat: no-repeat;
   top: 50vh;
   left: 18vw;
   width: 64vw;
   height: 12vh;
+}
+
+.timerGif {
+  display: none;
+  position: absolute;
+  border-radius: 4px;
 }
 
 .timer {
