@@ -1,3 +1,8 @@
+@font-face {
+  font-family: 'digital-clock-font';
+  src: url('https://res.cloudinary.com/princeofpersia/raw/upload/v1579287016/digital.ttf') format('truetype');
+}
+
 body {
   position: fixed;
   margin: 0;
@@ -5,6 +10,42 @@ body {
   height: 100%;
   width: 100%;
   background: white;
+}
+
+.loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  background-position: center;
+  background-image: url('./assets/loaderBackground.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.loadingBall {
+  position: absolute;
+  top: 20%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.gameEndContainer {
+  position: absolute;
+  display: none;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  background-color: black;
 }
 
 .container {
@@ -36,39 +77,30 @@ body {
 
 .plusTwo {
   position: absolute;
-  font-size: 32px;
+  font-size: 40px;
   font-style: italic;
   font-weight: 600;
   left: 64vw;
-  top: 32vh;
-  color: rgb(255, 230, 0);
+  top: 34vh;
+  color: rgb(250, 173, 6);
   animation: start 1s forwards;
 }
 
 @keyframes start {
   from {
     opacity: 0;
-    top: 35vh;
+    top: 37vh;
   }
 
   to {
     opacity: 1;
-    top: 32vh;
+    top: 34vh;
   }
 }
 
 .board {
   position: absolute;
-  background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079521/board2.png");
-  background-size: contain;
-  background-repeat: no-repeat;
   z-index: -3;
-}
-
-.beginning {
-  position: absolute;
-  width: 38vw;
-  height: 13vh;
 }
 
 .name {
@@ -83,13 +115,14 @@ body {
 
 .finalScore {
   position: absolute;
-  top: 78vh;
+  top: 71vh;
   left: 25vw;
   width: 50vw;
   text-align: center;
   line-height: 8vh;
   height: 8vh;
   border: #fff 1px solid;
+  font-family: 'digital-clock-font';
   border-radius: 4px;
   background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079521/yellowBack.png");
   background-size: cover;
@@ -105,6 +138,7 @@ body {
 }
 
 .score {
+  display: none;
   position: absolute;
   top: 5px;
   right: 10px;
@@ -118,10 +152,9 @@ body {
 
 .gameOver {
   position: absolute;
-  top: 50vh;
-  left: 18vw;
-  width: 64vw;
-  height: 12vh;
+  bottom: 0;
+  height: 70%;
+  width: 100%;
 }
 
 .timerGif {
@@ -131,6 +164,7 @@ body {
 }
 
 .timer {
+  display: none;
   position: absolute;
   top: 5px;
   left: 10px;
@@ -146,9 +180,10 @@ body {
   position: absolute;
   top: 30px;
   left: 10px;
-  text-align: center;
   height: 28px;
-  width: 60px;
+  line-height: 28px;
+  width: 80px;
+  font-family: 'digital-clock-font';
   border: #fff 1px solid;
   border-radius: 4px;
   background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079521/yellowBack.png");
@@ -165,8 +200,10 @@ body {
   right: 10px;
   text-align: center;
   height: 28px;
-  width: 60px;
+  line-height: 28px;
+  width: 110px;
   border: #fff 1px solid;
+  font-family: 'digital-clock-font';
   border-radius: 4px;
   background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079521/yellowBack.png");
   background-size: cover;

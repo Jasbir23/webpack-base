@@ -4,7 +4,6 @@ import lottie from "lottie-web";
 const Blowfish = require("egoroof-blowfish");
 const { innerHeight: h, innerWidth: w } = window;
 
-// const blowfish = require("./blowfish");
 var Engine = Matter.Engine,
   Body = Matter.Body,
   Render = Matter.Render,
@@ -18,9 +17,9 @@ var Engine = Matter.Engine,
 var velSet = false;
 var gameStarted = false;
 var resultSend = false;
-var initialTime = 0;
+var isLoading = true;
 var timeStopped = true;
-var time = 60;
+var time = 40;
 var count = 0;
 var rotation = 0;
 var initialVx = 0;
@@ -38,11 +37,11 @@ var startTime = null;
 var endTime = null;
 var dragTime = null;
 var scaleThreshold = 0.015;
-const timerFrames = [20, 40, 41];
-const frameArr = [
-  [0, 20],
-  [21, 40],
-  [41, 60]
+const loadingArr = [
+  [0, 35],
+  [35, 65],
+  [65, 100],
+  [100, 115]
 ];
 
 const GRAVITY = 0.0013 * h;
@@ -66,26 +65,6 @@ function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// function getParameterByName(name, url) {
-//   if (!url) url = window.location.href;
-//   console.log("here url: ", url);
-//   var queryObj = {};
-//   if (url.split("?").length > 0) {
-//     var queryString = url.split("?")[1];
-//   }
-//   queryObj = JSON.parse(
-//     '{"' +
-//       queryString
-//         .replace(/"/g, '\\"')
-//         .replace(/&/g, '","')
-//         .replace(/=/g, '":"') +
-//       '"}'
-//   );
-//   return queryObj;
-// }
-// const temp = getParameterByName("xyz");
-// console.log("here: ", temp);
-// create a renderer
 var render = Render.create({
   element: document.body,
   engine: engine,
@@ -183,7 +162,7 @@ function setFinalValue(event) {
   //fixing bug
   if (initialVy > -0.02 * h) initialVy = -0.023 * h;
   else initialVy = -0.03 * h;
-  console.log("initial vy: ", initialVy);
+  // console.log("initial vy: ", initialVy);
   Body.set(ball, { isSensor: true, isStatic: false });
   Body.setVelocity(ball, { x: initialVx, y: initialVy });
   rotation = initialVx * ROTATION_FAC;
@@ -218,11 +197,9 @@ Events.on(engine, "collisionStart", function(event) {
     ball.velocity.y >= 0 &&
     ball.position.y < RIM_TOP + 2 * ballRadius
   ) {
-    rimSound.playbackRate = 3;
-    rimSound.volume = 0.4;
-    rimSound.play();
     rimLottie.playSegments([30, 45], true);
     isCollided = true;
+    window.navigator.vibrate(100);
     rimLottie.setSpeed(1.5);
   } else if (ball.velocity.y >= 0 && ball.position.y + ballRadius >= 0.6 * h) {
     ballOnPlatform = true;
@@ -232,14 +209,13 @@ Events.on(engine, "collisionStart", function(event) {
   }
 });
 
-// var bounceEl = document.getElementById("bounce");
-// var bouncSrc = document.getElementById("bounceSrc");
-// bounceSrc.src = "bounce.mp3";
-// console.log("bounceEl: ", bouncSrc);
 const scoreView = document.querySelector(".scoreVal");
 const timerView = document.querySelector(".timerVal");
-
+const scoreText = document.querySelector(".score");
+scoreText.textContent = "Score";
 const board = document.querySelector(".board");
+board.src =
+  "https://res.cloudinary.com/princeofpersia/image/upload/v1579348123/board.png";
 board.style.height = BOARD_HEIGHT;
 board.style.width = BOARD_WIDTH;
 board.style.left =
@@ -248,35 +224,45 @@ board.style.top = RIM_TOP + 4 * INFINITE_MASS_RADIUS - BOARD_HEIGHT;
 
 const finalScore = document.querySelector(".finalScore");
 const name = document.querySelector(".name");
+// name.textContent = "Parth";
 finalScore.style.display = "none";
 name.style.display = "none";
 
 const plusTwo = document.querySelector(".plusTwo");
 plusTwo.style.display = "none";
 
+const timer = document.querySelector(".timer");
+timer.textContent = "Time";
 const gameOver = document.querySelector(".gameOver");
+// gameOver.src =
+//   "https://res.cloudinary.com/princeofpersia/image/upload/v1579079521/gameOver.png";
 gameOver.style.display = "none";
-const beginning = document.querySelector(".beginning");
-beginning.style.left =
-  RIM_LEFT - INFINITE_MASS_RADIUS - (BOARD_WIDTH - RIM_WIDTH) / 2 + 0.06 * w;
-beginning.style.top =
-  RIM_TOP + 4 * INFINITE_MASS_RADIUS - BOARD_HEIGHT + 0.024 * h;
-var beginLottie = lottie.loadAnimation({
-  container: beginning,
+
+var gameEndLottie = lottie.loadAnimation({
+  container: gameOver,
   renderer: "svg",
-  autoplay: false,
-  loop: false,
-  animationData: require("./assets/timer.json")
+  autoplay: true,
+  loop: true,
+  animationData: require("./assets/bouncyBall.json")
 });
-beginLottie.setSpeed(0.78);
-beginLottie.goToAndStop(timerFrames[0], true);
+// gameEndLottie.play();
 
-var begin = 0;
-
-const rimSound = document.querySelector(".rimSound");
 const swishSound = document.querySelector(".swishSound");
 const bounceSound = document.querySelector(".bounceSound");
 
+const loading = document.querySelector(".loading");
+const loadingBall = document.querySelector(".loadingBall");
+var loadingLottie = lottie.loadAnimation({
+  container: loadingBall,
+  renderer: "svg",
+  autoplay: false,
+  loop: false,
+  animationData: require("./assets/loading.json")
+});
+loadingLottie.playSegments(loadingArr[0], true);
+loadingLottie.playSegments(loadingArr[1], false);
+loadingLottie.playSegments(loadingArr[2], false);
+loadingLottie.loop = true;
 // const timerGif = document.querySelector(".timerGif");
 
 // timerGif.style.width = RIM_WIDTH + 4 * INFINITE_MASS_RADIUS;
@@ -334,24 +320,14 @@ rightPoint.style.left = right_point.position.x - INFINITE_MASS_RADIUS;
 rightPoint.style.top = right_point.position.y - INFINITE_MASS_RADIUS;
 
 setInterval(function() {
+  if (isLoading) return;
   count += 1;
   var scoreText = ("0" + score).slice(-2);
-  scoreView.textContent = `${scoreText}`;
+  scoreView.textContent = `SCORE: ${scoreText}`;
   if (count === 60) {
-    beginLottie.goToAndStop(begin + 20, true);
     count = 0;
-    initialTime++;
-    if (initialTime === 1) beginLottie.playSegments(frameArr[0], true);
-    else if (initialTime === 2) beginLottie.playSegments(frameArr[1], true);
-    else if (initialTime === 3) beginLottie.playSegments(frameArr[2], true);
-    else if (initialTime === 4) {
-      beginLottie.goToAndStop(60, true);
-      slideLottie.setSpeed(0.2);
-      slideLottie.playSegments([0, 10], true);
-      gameStarted = true;
-      timeStopped = false;
-    }
-
+    gameStarted = true;
+    timeStopped = false;
     time !== 0 && gameStarted && time--;
     if (time === 0) {
       timeStopped = true;
@@ -362,19 +338,24 @@ setInterval(function() {
       slideLottie.stop();
       ballView.style.display = "none";
       gameOver.style.display = "initial";
+      var gameEndContainer = document.querySelector(".gameEndContainer");
+      gameEndContainer.style.opacity = 0.6;
+      gameEndContainer.style.display = "initial";
       name.style.display = "initial";
       finalScore.style.display = "initial";
-      finalScore.textContent = `SCORE ${score}`;
+      finalScore.textContent = `SCORE: ${score}`;
       let res = { battleId: 123, result: { id: "abc", score } };
       // !resultSend && sendResult(res);
     }
   }
-  timerView.textContent = `${time}`;
+
+  timerView.textContent = `TIME: ${time}`;
   Body.set(ball, { circleRadius: ballRadius * scale });
   ballView.style.transform = `rotate(${rotation}deg) scale(${scale})`;
   rotation = rotation + ball.velocity.x;
   ballView.style.left = ball.position.x - ball.circleRadius;
   ballView.style.top = ball.position.y - ball.circleRadius;
+  // console.log("pos: ", ballView.style.left === "150px");
 
   if (isMoving) {
     ballView.style.boxShadow = "0px 15px 10px -15px #111";
@@ -473,6 +454,17 @@ setInterval(function() {
     Body.setVelocity(ball, { x: 0, y: 0 });
   }
 
+  if (
+    isMoving &&
+    ballAboveBasket &&
+    ball.position.x > left_point.position.x + INFINITE_MASS_RADIUS &&
+    ball.position.x < right_point.position.x - INFINITE_MASS_RADIUS &&
+    ball.position.y > left_point.position.y - INFINITE_MASS_RADIUS
+  ) {
+    swishSound.play();
+    swishSound.playbackRate = 1;
+    swishSound.volume = 0.7;
+  }
   //check if basket is succesfull
   if (
     isMoving &&
@@ -485,15 +477,27 @@ setInterval(function() {
     ballAboveBasket = false;
     rimLottie.setSpeed(3);
     rimLottie.playSegments([0, 30], true);
-
-    swishSound.play();
-    swishSound.playbackRate = 2;
-    swishSound.volume = 0.6;
-    if (!isCollided) plusTwo.style.display = "initial";
+    plusTwo.textContent = isCollided ? "+1" : "+2";
+    plusTwo.style.display = "initial";
     score = isCollided ? score + 1 : score + 2;
   }
   if (ball) Engine.update(engine, 1000 / 60);
 }, 1000 / 60);
+
+setTimeout(function() {
+  loadingLottie.playSegments(loadingArr[3], false);
+  loadingLottie.loop = false;
+  loadingLottie.stop();
+  loading.style.display = "none";
+  loadingBall.style.display = "none";
+  ballView.style.display = "none";
+  setTimeout(function() {
+    isLoading = false;
+    ballView.style.display = "initial";
+    slideLottie.setSpeed(0.2);
+    slideLottie.playSegments([0, 10], true);
+  }, 500);
+}, 5000);
 
 var runner = Runner.create();
 Runner.run(runner, engine);

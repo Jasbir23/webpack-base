@@ -26,7 +26,10 @@ module.exports = {
   optimization: {
     minimizer: [
       new UglifyJSPlugin({
+        cache: true,
+        parallel: true,
         uglifyOptions: {
+          warnings: false,
           compress: {
             drop_console: false,
             reduce_vars: false
