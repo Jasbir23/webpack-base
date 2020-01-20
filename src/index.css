@@ -157,11 +157,6 @@ body {
   width: 100%;
 }
 
-.timerGif {
-  display: none;
-  position: absolute;
-  border-radius: 4px;
-}
 
 .timer {
   display: none;
@@ -181,7 +176,7 @@ body {
   top: 30px;
   left: 10px;
   height: 28px;
-  line-height: 28px;
+  line-height: 27px;
   width: 80px;
   font-family: 'digital-clock-font';
   border: #fff 1px solid;
@@ -200,7 +195,7 @@ body {
   right: 10px;
   text-align: center;
   height: 28px;
-  line-height: 28px;
+  line-height: 27px;
   width: 110px;
   border: #fff 1px solid;
   font-family: 'digital-clock-font';

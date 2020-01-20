@@ -263,12 +263,6 @@ loadingLottie.playSegments(loadingArr[0], true);
 loadingLottie.playSegments(loadingArr[1], false);
 loadingLottie.playSegments(loadingArr[2], false);
 loadingLottie.loop = true;
-// const timerGif = document.querySelector(".timerGif");
-
-// timerGif.style.width = RIM_WIDTH + 4 * INFINITE_MASS_RADIUS;
-// timerGif.style.height = RIM_WIDTH - 2 * INFINITE_MASS_RADIUS;
-// timerGif.style.top = left_point.position.y - RIM_WIDTH - INFINITE_MASS_RADIUS;
-// timerGif.style.left = left_point.position.x - 3 * INFINITE_MASS_RADIUS;
 
 const rim = document.querySelector(".rim");
 var rimLottie = lottie.loadAnimation({
