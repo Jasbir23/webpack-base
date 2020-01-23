@@ -177,7 +177,7 @@ body {
   left: 10px;
   height: 28px;
   line-height: 27px;
-  width: 80px;
+  width: 100px;
   font-family: 'digital-clock-font';
   border: #fff 1px solid;
   border-radius: 4px;
@@ -196,7 +196,7 @@ body {
   text-align: center;
   height: 28px;
   line-height: 27px;
-  width: 110px;
+  width: 130px;
   border: #fff 1px solid;
   font-family: 'digital-clock-font';
   border-radius: 4px;

@@ -36,6 +36,8 @@ var startY = 0;
 var startTime = null;
 var endTime = null;
 var dragTime = null;
+var battleId = null;
+var playerId = null;
 var scaleThreshold = 0.015;
 const loadingArr = [
   [0, 35],
@@ -45,9 +47,8 @@ const loadingArr = [
 ];
 
 const GRAVITY = 0.0013 * h;
-const getUserURL =
-  "http://192.168.0.116:9000/api/gamePind/user/1cfb2101-b204-4744-a977-592be73c8b10";
-const postResURL = "http://192.168.17.236:9000/api/gamePind/result";
+const getUserURL = "https://drq3q01uui2o6.cloudfront.net/api/marketjs";
+const postResURL = "https://drq3q01uui2o6.cloudfront.net/api/marketjs/result";
 const INFINITE_MASS_RADIUS = w / 84;
 const BALL_POSITION_CHECK_THRES = 80;
 const ROTATION_FAC = 4;
@@ -130,6 +131,27 @@ var mouse = Mouse.create(render.canvas),
 
 const bf = new Blowfish("gamePind@12", Blowfish.MODE.ECB); // only key isn't optional
 
+function getParameterByName() {
+  let params = new URL(document.location).searchParams;
+  battleId = params.get("battleId");
+  playerId = parseInt(params.get("playerId"));
+  var getUrl = `${getUserURL}/user/:${playerId}`;
+  fetch(getUrl, {
+    method: "get",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+    .then(res => {
+      return res.json();
+    })
+    .then(data => {
+      console.log("here: data", data.result.data);
+    });
+}
+
+getParameterByName();
+
 function sendResult(obj) {
   const encoded = bf.encode(JSON.stringify(obj));
   resultSend = true;
@@ -162,7 +184,6 @@ function setFinalValue(event) {
   //fixing bug
   if (initialVy > -0.02 * h) initialVy = -0.023 * h;
   else initialVy = -0.03 * h;
-  // console.log("initial vy: ", initialVy);
   Body.set(ball, { isSensor: true, isStatic: false });
   Body.setVelocity(ball, { x: initialVx, y: initialVy });
   rotation = initialVx * ROTATION_FAC;
@@ -234,8 +255,6 @@ plusTwo.style.display = "none";
 const timer = document.querySelector(".timer");
 timer.textContent = "Time";
 const gameOver = document.querySelector(".gameOver");
-// gameOver.src =
-//   "https://res.cloudinary.com/princeofpersia/image/upload/v1579079521/gameOver.png";
 gameOver.style.display = "none";
 
 var gameEndLottie = lottie.loadAnimation({
@@ -338,8 +357,8 @@ setInterval(function() {
       name.style.display = "initial";
       finalScore.style.display = "initial";
       finalScore.textContent = `SCORE: ${score}`;
-      let res = { battleId: 123, result: { id: "abc", score } };
-      // !resultSend && sendResult(res);
+      let res = { battleId: battleId, result: { id: playerId, score } };
+      !resultSend && playerId && battleId && sendResult(res);
     }
   }
 
