@@ -19,7 +19,7 @@ var gameStarted = false;
 var resultSend = false;
 var isLoading = true;
 var timeStopped = true;
-var time = 40;
+var time = 60;
 var count = 0;
 var rotation = 0;
 var initialVx = 0;
@@ -47,8 +47,8 @@ const loadingArr = [
 ];
 
 const GRAVITY = 0.0013 * h;
-const getUserURL = "https://drq3q01uui2o6.cloudfront.net/api/marketjs";
-const postResURL = "https://drq3q01uui2o6.cloudfront.net/api/marketjs/result";
+const getUserURL = "https://d1wrkhocqf21ah.cloudfront.net/api/gamePind";
+const postResURL = "https://d1wrkhocqf21ah.cloudfront.net/api/gamePind/result";
 const INFINITE_MASS_RADIUS = w / 84;
 const BALL_POSITION_CHECK_THRES = 80;
 const ROTATION_FAC = 4;
@@ -134,7 +134,7 @@ const bf = new Blowfish("gamePind@12", Blowfish.MODE.ECB); // only key isn't opt
 function getParameterByName() {
   let params = new URL(document.location).searchParams;
   battleId = params.get("battleId");
-  playerId = parseInt(params.get("playerId"));
+  playerId = params.get("playerId");
   var getUrl = `${getUserURL}/user/:${playerId}`;
   fetch(getUrl, {
     method: "get",
@@ -146,7 +146,7 @@ function getParameterByName() {
       return res.json();
     })
     .then(data => {
-      console.log("here: data", data.result.data);
+      console.log("data: ", data);
     });
 }
 
