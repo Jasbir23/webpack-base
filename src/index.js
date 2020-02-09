@@ -3,6 +3,8 @@ import Matter from "matter-js";
 import lottie from "lottie-web";
 const Blowfish = require("egoroof-blowfish");
 const { innerHeight: h, innerWidth: w } = window;
+import { GRAVITY, getUserURL, postResURL, INFINITE_MASS_RADIUS, BALL_POSITION_CHECK_THRES, ROTATION_FAC, RIM_HEIGHT, RANDOM_VX_FAC, RIM_WIDTH, RIM_LEFT, RIM_TOP, BOARD_WIDTH, BOARD_HEIGHT  } from './constants'
+import { random, getParameterByName, sendResult } from './utils'
 
 var Engine = Matter.Engine,
   Body = Matter.Body,
@@ -33,6 +35,8 @@ var isMoving = false;
 var ballOnPlatform = false;
 var startX = 0;
 var startY = 0;
+var timerStart = 0;
+var timerCurr = 0;
 var startTime = null;
 var endTime = null;
 var dragTime = null;
@@ -46,25 +50,9 @@ const loadingArr = [
   [100, 115]
 ];
 
-const GRAVITY = 0.0013 * h;
-const getUserURL = "https://d1wrkhocqf21ah.cloudfront.net/api/gamePind";
-const postResURL = "https://d1wrkhocqf21ah.cloudfront.net/api/gamePind/result";
-const INFINITE_MASS_RADIUS = w / 84;
-const BALL_POSITION_CHECK_THRES = 80;
-const ROTATION_FAC = 4;
-const RIM_HEIGHT = 0.14 * h;
-const RANDOM_VX_FAC = 1.2;
-const RIM_WIDTH = 0.22 * w + 2 * INFINITE_MASS_RADIUS;
-const RIM_LEFT = 0.4 * w;
-const RIM_TOP = 0.32 * h;
-const BOARD_WIDTH = w * 0.5;
-const BOARD_HEIGHT = h * 0.2;
-
 var engine = Engine.create();
+
 engine.world.gravity.y = GRAVITY;
-function random(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
 
 var render = Render.create({
   element: document.body,
@@ -131,35 +119,10 @@ var mouse = Mouse.create(render.canvas),
 
 const bf = new Blowfish("gamePind@12", Blowfish.MODE.ECB); // only key isn't optional
 
-function getParameterByName() {
-  let params = new URL(document.location).searchParams;
-  battleId = params.get("battleId");
-  playerId = params.get("playerId");
-  var getUrl = `${getUserURL}/user/:${playerId}`;
-  fetch(getUrl, {
-    method: "get",
-    headers: {
-      "Content-Type": "application/json"
-    }
-  })
-    .then(res => {
-      return res.json();
-    })
-    .then(data => {
-      console.log("data: ", data);
-    });
-}
-
-getParameterByName();
-
-function sendResult(obj) {
-  const encoded = bf.encode(JSON.stringify(obj));
-  resultSend = true;
-  fetch(postResURL, {
-    method: "post",
-    body: encoded.toString()
-  });
-}
+let params = new URL(document.location).searchParams;
+battleId = params.get("battleId");
+playerId = params.get("playerId");
+getParameterByName(getUserURL, battleId, playerId);
 
 function setFinalValue(event) {
   if (isMoving) return;
@@ -245,7 +208,6 @@ board.style.top = RIM_TOP + 4 * INFINITE_MASS_RADIUS - BOARD_HEIGHT;
 
 const finalScore = document.querySelector(".finalScore");
 const name = document.querySelector(".name");
-// name.textContent = "Parth";
 finalScore.style.display = "none";
 name.style.display = "none";
 
@@ -260,11 +222,10 @@ gameOver.style.display = "none";
 var gameEndLottie = lottie.loadAnimation({
   container: gameOver,
   renderer: "svg",
-  autoplay: true,
+  autoplay: false,
   loop: true,
   animationData: require("./assets/bouncyBall.json")
 });
-// gameEndLottie.play();
 
 const swishSound = document.querySelector(".swishSound");
 const bounceSound = document.querySelector(".bounceSound");
@@ -304,6 +265,10 @@ ballView.style.height = 2 * ball.circleRadius;
 ballView.style.width = 2 * ball.circleRadius;
 ballView.style.borderRadius = `${ball.circleRadius}px`;
 ballView.style.opacity = 1;
+Body.set(ball, { circleRadius: ballRadius * scale });
+ballView.style.transform = `rotate(${rotation}deg) scale(${scale})`;
+ballView.style.left = ball.position.x - ball.circleRadius;
+ballView.style.top = ball.position.y - ball.circleRadius;
 
 const slide = document.querySelector(".slide");
 slide.style.left = ball.position.x - 0.1 * w;
@@ -332,19 +297,38 @@ rightPoint.style.borderRadius = `${INFINITE_MASS_RADIUS}px`;
 rightPoint.style.left = right_point.position.x - INFINITE_MASS_RADIUS;
 rightPoint.style.top = right_point.position.y - INFINITE_MASS_RADIUS;
 
-setInterval(function() {
+setTimeout(function() {
+  loadingLottie.playSegments(loadingArr[3], false);
+  loadingLottie.loop = false;
+  loadingLottie.stop();
+  loading.style.display = "none";
+  loadingBall.style.display = "none";
+  ballView.style.display = "none";
+  setTimeout(function() {
+    loadingLottie.destroy();
+    isLoading = false;
+    ballView.style.display = "initial";
+    slideLottie.setSpeed(0.2);
+    slideLottie.playSegments([0, 10], true);
+    timerStart = new Date().getTime() / 1000;
+    window.requestAnimationFrame(run);
+  }, 500);
+}, 4000);
+
+function run() {
   if (isLoading) return;
-  count += 1;
-  var scoreText = ("0" + score).slice(-2);
+  timerCurr = new Date().getTime() / 1000;
+  var scoreText = ("0" + score).slice(-3);
   scoreView.textContent = `SCORE: ${scoreText}`;
-  if (count === 60) {
-    count = 0;
+  if (timerCurr - timerStart >= 1) {
+    timerStart = timerCurr;
     gameStarted = true;
     timeStopped = false;
     time !== 0 && gameStarted && time--;
     if (time === 0) {
       timeStopped = true;
       isMoving = false;
+      gameEndLottie.play()
     }
 
     if (gameStarted && timeStopped) {
@@ -358,7 +342,7 @@ setInterval(function() {
       finalScore.style.display = "initial";
       finalScore.textContent = `SCORE: ${score}`;
       let res = { battleId: battleId, result: { id: playerId, score } };
-      !resultSend && playerId && battleId && sendResult(res);
+      !resultSend && playerId && battleId && sendResult(res, postResURL, bf);
     }
   }
 
@@ -368,7 +352,6 @@ setInterval(function() {
   rotation = rotation + ball.velocity.x;
   ballView.style.left = ball.position.x - ball.circleRadius;
   ballView.style.top = ball.position.y - ball.circleRadius;
-  // console.log("pos: ", ballView.style.left === "150px");
 
   if (isMoving) {
     ballView.style.boxShadow = "0px 15px 10px -15px #111";
@@ -495,25 +478,9 @@ setInterval(function() {
     score = isCollided ? score + 1 : score + 2;
   }
   if (ball) Engine.update(engine, 1000 / 60);
-}, 1000 / 60);
-
-setTimeout(function() {
-  loadingLottie.playSegments(loadingArr[3], false);
-  loadingLottie.loop = false;
-  loadingLottie.stop();
-  loading.style.display = "none";
-  loadingBall.style.display = "none";
-  ballView.style.display = "none";
-  setTimeout(function() {
-    isLoading = false;
-    ballView.style.display = "initial";
-    slideLottie.setSpeed(0.2);
-    slideLottie.playSegments([0, 10], true);
-  }, 500);
-}, 5000);
-
-var runner = Runner.create();
-Runner.run(runner, engine);
+  window.requestAnimationFrame(run);
+  Engine.update(engine, 1000 / 60);
+}
 
 render.mouse = mouse;
 
