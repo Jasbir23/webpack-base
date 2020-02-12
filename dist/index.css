@@ -1,9 +1,218 @@
+@font-face {
+  font-family: 'digital-clock-font';
+  src: url('https://res.cloudinary.com/princeofpersia/raw/upload/v1579287016/digital.ttf') format('truetype');
+}
+
 body {
+  position: fixed;
   margin: 0;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  background: white;
+}
+
+.loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  background-position: center;
+  background-image: url(assets/449169960203278a0ce45072a4f8ab22.png);
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.loadingBall {
+  position: absolute;
+  top: 20%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.gameEndContainer {
+  position: absolute;
+  display: none;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  background-color: black;
+}
+
+.container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-position: center;
+  background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079523/background.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  z-index: -4;
+}
+
+.leftPoint {
+  position: absolute;
+}
+
+.rightPoint {
+  position: absolute;
+}
+
+.rim {
+  position: absolute;
+  z-index: -2;
   overflow: hidden;
 }
 
-canvas {
+.plusTwo {
+  position: absolute;
+  font-size: 40px;
+  font-style: italic;
+  font-weight: 600;
+  left: 64vw;
+  top: 34vh;
+  color: rgb(250, 173, 6);
+  animation: start 1s forwards;
+}
+
+@keyframes start {
+  from {
+    opacity: 0;
+    top: 37vh;
+  }
+
+  to {
+    opacity: 1;
+    top: 34vh;
+  }
+}
+
+.board {
+  position: absolute;
+  z-index: -3;
+}
+
+.name {
+  position: absolute;
+  top: 72vh;
   width: 100%;
-  height: 100%;
+  text-align: center;
+  font-size: 30px;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.finalScore {
+  position: absolute;
+  top: 71vh;
+  left: 25vw;
+  width: 50vw;
+  text-align: center;
+  line-height: 8vh;
+  height: 8vh;
+  border: #fff 1px solid;
+  font-family: 'digital-clock-font';
+  border-radius: 4px;
+  background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079521/yellowBack.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  font-size: 32px;
+}
+
+.slide {
+  position: absolute;
+  opacity: 0.6;
+  width: 10vw;
+  height: 24vh;
+}
+
+.score {
+  display: none;
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  height: 20px;
+  width: 60px;
+  color: white;
+  font-style: italic;
+  text-align: center;
+  font-size: 18px;
+}
+
+.gameOver {
+  position: absolute;
+  bottom: 0;
+  height: 70%;
+  width: 100%;
+}
+
+
+.timer {
+  display: none;
+  position: absolute;
+  top: 5px;
+  left: 10px;
+  height: 20px;
+  width: 60px;
+  font-style: italic;
+  color: white;
+  text-align: center;
+  font-size: 18px;
+}
+
+.timerVal {
+  position: absolute;
+  top: 30px;
+  left: 10px;
+  height: 28px;
+  line-height: 27px;
+  width: 100px;
+  font-family: 'digital-clock-font';
+  border: #fff 1px solid;
+  border-radius: 4px;
+  background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079521/yellowBack.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  color: black;
+  text-align: center;
+  font-size: 24px;
+}
+
+.scoreVal {
+  position: absolute;
+  top: 30px;
+  right: 10px;
+  text-align: center;
+  height: 28px;
+  line-height: 27px;
+  width: 130px;
+  border: #fff 1px solid;
+  font-family: 'digital-clock-font';
+  border-radius: 4px;
+  background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079521/yellowBack.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  color: black;
+  text-align: center;
+  font-size: 24px;
+}
+
+
+#ball>span {
+  position: absolute;
+  z-index: -1;
+  box-shadow: 0px 15px 10px -10px #111;
+  background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079522/basketball.png");
+  background-size: cover;
 }
