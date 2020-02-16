@@ -88,6 +88,7 @@ function handleVisibilityChange() {
 		ballCont &&
 			ballCont.remove();
 		fireLottie.goToAndStop(30, true)
+		slideLottie.stop();
 		gameOver.style.display = "initial";
 		var gameEndContainer = document.querySelector(".gameEndContainer");
 		gameEndContainer.style.opacity = 0.6;
@@ -527,6 +528,7 @@ function run() {
 	if (gameStarted && timeStopped) {
 		slideLottie.stop();
 		gameEndLottie.play();
+		slideLottie.stop();
 		ballCont &&
 			ballCont.remove();
 		fireLottie.goToAndStop(30, true)
