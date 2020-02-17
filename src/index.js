@@ -43,7 +43,7 @@ var animationFrame;
 var gameStarted = false;
 var resultSend = false;
 var timeStopped = true;
-var mainTimer = 6;
+var mainTimer = 60;
 var initialVx = 0;
 var initialVy = 0;
 var score = 0;
