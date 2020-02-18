@@ -1,8 +1,41 @@
 body {
+  position: fixed;
   margin: 0;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  user-select: none;
+  background: black;
 }
 
 canvas {
   width: 100%;
   height: 100%;
+}
+
+.car {
+  position: absolute;
+  background-color: aquamarine;
+}
+
+.steering {
+  position: fixed;
+  width: 160px;
+  height: 160px;
+  border-radius: 80px;
+  background-image: linear-gradient(to right, rgb(3, 3, 192), red, yellow);
+  opacity: 0.6;
+}
+
+.accelerator {
+  position: fixed;
+  width: 60px;
+  height: 80px;
+  opacity: 0.8;
+}
+.deaccelerator {
+  position: fixed;
+  width: 60px;
+  height: 80px;
+  opacity: 0.5;
 }
