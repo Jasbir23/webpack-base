@@ -4,14 +4,17 @@ import { addWalls } from "./utils";
 
 const { innerHeight: h, innerWidth: w } = window;
 
-const STEERING_RADIUS = 80,
+const STEERING_RADIUS = 0.08 * w,
   SENSITIVITY = 1,
-  FORCE_CONST = 0.0002,
-  CAR_WIDTH = 20,
-  CAR_HEIGHT = 30;
+  FORCE_CONST = 0.0000001 * w,
+  STEERING_DIFF_THRESHOLD = 40,
+  CAR_WIDTH = 0.02 * w,
+  CAR_HEIGHT = 0.05 * h;
 
 var accelerate = false,
   deaccelerate = false,
+  lockSteeringWheel = false,
+  prevVal = 0,
   carAngle = 0,
   steeringStartX,
   steeringStartY;
@@ -42,19 +45,19 @@ var car = Bodies.rectangle(w / 5, 0.6 * h, CAR_WIDTH, CAR_HEIGHT, {
   }
 });
 
-var boxA = Bodies.rectangle(w / 3.2, 0.3 * h, 160, 160, {
+var boxA = Bodies.rectangle(w / 3.2, 0.3 * h, 0.14 * w, 0.14 * w, {
   isStatic: true,
   render: {
     fillStyle: "lightyellow"
   }
 });
-var boxB = Bodies.rectangle((2.8 * w) / 4, 0.3 * h, 160, 160, {
+var boxB = Bodies.rectangle((2.8 * w) / 4, 0.3 * h, 0.14 * w, 0.14 * w, {
   isStatic: true,
   render: {
     fillStyle: "lightyellow"
   }
 });
-var boxC = Bodies.rectangle(w / 2, 0.7 * h, 160, 160, {
+var boxC = Bodies.rectangle(w / 2, 0.7 * h, 0.14 * w, 0.14 * w, {
   isStatic: true,
   render: {
     fillStyle: "lightyellow"
@@ -138,17 +141,23 @@ function ontouchstart(event) {
 function ontouchmove(event) {
   let { x, y } = getTouchPoints(event);
   y /= SENSITIVITY;
-  let diff = STEERING_RADIUS - (y > steeringStartY ? y - steeringStartY : 0);
-  if (diff <= 0) diff = 0;
-  const angle =
-    Math.acos(diff / STEERING_RADIUS) * (x >= steeringStartX ? 1 : -1);
+  let diff = y - steeringStartY;
+  if (diff < STEERING_DIFF_THRESHOLD) lockSteeringWheel = false;
+  if (diff > 2 * STEERING_RADIUS) diff = 2 * STEERING_RADIUS;
+  else if (diff < 0) diff = 0;
+
+  if (!lockSteeringWheel) {
+    prevVal = x >= steeringStartX ? 1 : -1;
+    lockSteeringWheel = true;
+  }
+  const angle = (diff / STEERING_RADIUS) * prevVal;
   carAngle = angle;
   steering.style.transform = `rotate(${angle}rad)`;
 }
 
 function ontouchend(event) {
   steering.style.transform = `rotate(0deg)`;
-  carAngle = 0;
+  // carAngle = 0;
 }
 
 var deaccelerator = document.querySelector(".deaccelerator");
