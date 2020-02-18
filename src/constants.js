@@ -4,8 +4,8 @@ const {
 } = window;
 export const GRAVITY = 0.006 * h,
     SLOW_VEL_FAC = 0.04,
-    getUserURL = "https://apistaging.ewar.in/api/gamePind",
-    postResURL = "https://apistaging.ewar.in/api/gamePind/result",
+    getUserURL = "https://api.ewar.in/api/gamePind",
+    postResURL = "https://api.ewar.in/api/gamePind/result",
     INFINITE_MASS_RADIUS = w / 84,
     BALL_POSITION_CHECK_THRES = 80,
     ROTATION_FAC = 4,

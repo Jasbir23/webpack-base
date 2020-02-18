@@ -25,7 +25,6 @@ import {
 import {
   random,
   getParameterByName,
-  sendResult
 } from "./utils";
 
 var Engine = Matter.Engine,
@@ -72,6 +71,8 @@ var engine = Engine.create();
 const ballCont = document.getElementById("ball");
 engine.world.gravity.y = GRAVITY;
 
+const bf = new Blowfish("gamePind@12", Blowfish.MODE.ECB); // only key isn't optional
+
 var hidden, visibilityChange;
 if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
   hidden = "hidden";
@@ -89,6 +90,12 @@ function handleVisibilityChange() {
     stopGame()
   }
 }
+
+let params = new URL(document.location).searchParams;
+battleId = params.get("battleId");
+playerId = params.get("playerId");
+getParameterByName(getUserURL, battleId, playerId);
+
 function stopGame() {
   ballCont &&
     ballCont.remove();
@@ -110,10 +117,19 @@ function stopGame() {
   };
   gameEndLottie.play();
   clearInterval(timerInterval)
-  window.cancelAnimationFrame(animationFrame)
+  window.cancelAnimationFrame(animationFrame);
   !resultSend && playerId && battleId && sendResult(res, postResURL, bf);
 }
 
+
+function sendResult(obj, postResURL, bf) {
+  const encoded = bf.encode(JSON.stringify(obj));
+  resultSend = true;
+  fetch(postResURL, {
+    method: "post",
+    body: encoded.toString()
+  });
+}
 if (typeof document.addEventListener === "undefined" || hidden === undefined) {
   console.log("This demo requires a browser, such as Google Chrome or Firefox, that supports the Page Visibility API.");
 } else {
@@ -122,8 +138,14 @@ if (typeof document.addEventListener === "undefined" || hidden === undefined) {
 }
 
 Matter.Bounds.create({
-  min: { x: -Infinity, y: -Infinity },
-  max: { x: Infinity, y: Infinity }
+  min: {
+    x: -Infinity,
+    y: -Infinity
+  },
+  max: {
+    x: Infinity,
+    y: Infinity
+  }
 })
 var render = Render.create({
   element: document.body,
@@ -164,14 +186,14 @@ var right_point = Bodies.circle(
   RIM_LEFT + RIM_WIDTH - 2 * INFINITE_MASS_RADIUS,
   RIM_TOP,
   INFINITE_MASS_RADIUS, {
-  isStatic: true,
-  collisionFilter: {
-    mask: defaultCategory
-  },
-  render: {
-    fillStyle: "transparent"
+    isStatic: true,
+    collisionFilter: {
+      mask: defaultCategory
+    },
+    render: {
+      fillStyle: "transparent"
+    }
   }
-}
 );
 
 var ground = Bodies.rectangle(w / 2, 0.75 * h, 3 * w, 0.06 * h, {
@@ -184,7 +206,7 @@ var ground = Bodies.rectangle(w / 2, 0.75 * h, 3 * w, 0.06 * h, {
   }
 });
 // add all of the bodies to the world
-World.add(engine.world, [ground, left_point, right_point,]);
+World.add(engine.world, [ground, left_point, right_point, ]);
 
 var mouse = Mouse.create(render.canvas),
   mouseConstraint = MouseConstraint.create(engine, {
@@ -196,13 +218,6 @@ var mouse = Mouse.create(render.canvas),
       }
     }
   });
-
-const bf = new Blowfish("gamePind@12", Blowfish.MODE.ECB); // only key isn't optional
-
-let params = new URL(document.location).searchParams;
-battleId = params.get("battleId");
-playerId = params.get("playerId");
-getParameterByName(getUserURL, battleId, playerId);
 
 function setFinalValue(event) {
   if (!ballArray[ballArray.length - 1] || ballArray[ballArray.length - 1].isMoving) return;
@@ -336,6 +351,7 @@ var interval = null;
 
 const slide = document.querySelector(".slide");
 var slideLottie = null;
+
 function startGame() {
   loadingLottie.playSegments(loadingArr[3], false);
   loadingLottie.loop = false;
@@ -449,7 +465,7 @@ function removeBall(index) {
     ballCont.childNodes[index]
   )
     ballCont
-      .removeChild(ballCont.childNodes[index]);
+    .removeChild(ballCont.childNodes[index]);
 
 }
 
@@ -475,6 +491,7 @@ function showPoints(text) {
     plusTwo.style.display = "none";
   }, 1000);
 }
+
 function runOnBasketSuccess(ball) {
   if (
     ball.isMoving &&
@@ -492,14 +509,12 @@ function runOnBasketSuccess(ball) {
       score += 5
       showPoints("+5")
       perfectShot.play();
-    }
-    else if (rimOnFire && ball.isCollided) {
+    } else if (rimOnFire && ball.isCollided) {
       score += 3
       showPoints("+3")
       rimOnFire = false
       fireLottie.goToAndStop(30, true)
-    }
-    else if (!rimOnFire && !ball.isCollided) {
+    } else if (!rimOnFire && !ball.isCollided) {
       score += 2
       rimOnFire = true
       fireLottie.playSegments([0, 29])
