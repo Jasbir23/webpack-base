@@ -9,7 +9,9 @@ import {
 
 import {
     addWalls,
-    addCar
+    addCar,
+    addBlock,
+    addGrass
 } from './utils'
 
 const {
@@ -21,6 +23,7 @@ const Engine = Matter.Engine,
     Render = Matter.Render,
     World = Matter.World,
     Bodies = Matter.Bodies,
+    Events = Matter.Events,
     Body = Matter.Body;
 
 export default class WorldUtil {
@@ -44,11 +47,30 @@ export default class WorldUtil {
         this.accelerate = false;
         this.deaccelerate = false;
         this.addControls();
+
         this.car = addCar({
             x: 0.1 * w,
             y: 0.8 * h
         }, this.engine, World, Bodies);
+
+        addBlock({
+            x: 0.3 * w,
+            y: 0.4 * h
+        }, this.engine, World, Bodies);
+
+        addBlock({
+            x: 0.7 * w,
+            y: 0.4 * h
+        }, this.engine, World, Bodies);
+
+        this.grass = addGrass({
+            x: 0.5 * w,
+            y: 0.4 * h
+        }, this.engine, World, Bodies)
+
         addWalls(this.engine, World, Bodies);
+        Events.on(this.engine, "collisionActive", this.collisionActive)
+        Events.on(this.engine, 'collisionEnd', this.collisionEnd)
         Render.run(render)
     }
 
@@ -109,4 +131,21 @@ export default class WorldUtil {
                 break;
         }
     };
+    collisionActive = (e) => {
+        var i, pair,
+            length = e.pairs.length;
+        for (i = 0; i < length; i++) {
+            pair = e.pairs[i];
+            if (pair.bodyA.label === 'car' && pair.bodyB.label === 'grass') {
+                Body.set(this.car, {
+                    frictionAir: 0.1
+                })
+            }
+        }
+    }
+    collisionEnd = (e) => {
+        Body.set(this.car, {
+            frictionAir: 0
+        })
+    }
 }
