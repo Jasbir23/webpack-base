@@ -120,6 +120,12 @@ export default class WorldUtil {
             case "a":
                 this.left = isDown;
                 break;
+            case "A":
+                this.left = isDown;
+                break;
+            case "D":
+                this.right = isDown;
+                break;
             case "d":
                 this.right = isDown;
                 break;

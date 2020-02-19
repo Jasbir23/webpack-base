@@ -16,7 +16,7 @@ function addCar(pos, engine, World, Bodies) {
     isStatic: false,
     label: 'car',
     friction: 0.05,
-    frictionAir: 0.006,
+    frictionAir: 0.03,
     frictionStatic: 0,
     collisionFilter: {
       mask: defaultCategory
