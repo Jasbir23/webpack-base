@@ -4,7 +4,7 @@ import {
     FORCE_CONST,
     CAR_WIDTH,
     CAR_HEIGHT,
-    ANGLE_CHANGE_CONST
+    ANGULAR_VELOCITY_FACTOR
 } from './constants'
 
 import {
@@ -42,6 +42,11 @@ export default class WorldUtil {
                 wireframes: false
             }
         });
+
+        this.carView = document.querySelector(".car")
+        this.carView.style.height = CAR_HEIGHT;
+        this.carView.style.width = CAR_WIDTH;
+
         this.left = false;
         this.right = false;
         this.accelerate = false;
@@ -78,35 +83,27 @@ export default class WorldUtil {
         this.animationFrame = window.requestAnimationFrame(this.gameLoop);
     }
     gameLoop = () => {
-        if (this.accelerate) {
-            Body.applyForce(
-                this.car, {
-                    x: this.car.position.x,
-                    y: this.car.position.y
-                }, {
-                    x: FORCE_CONST * Math.sin(this.car.angle),
-                    y: -FORCE_CONST * Math.cos(this.car.angle)
-                }
-            );
-        }
-        if (this.deaccelerate) {
-            Body.applyForce(
-                this.car, {
-                    x: this.car.position.x,
-                    y: this.car.position.y
-                }, {
-                    x: -FORCE_CONST * Math.sin(this.car.angle),
-                    y: FORCE_CONST * Math.cos(this.car.angle)
-                }
-            );
-        }
+        this.carView.style.left = this.car.position.x - CAR_WIDTH / 2;
+        this.carView.style.top = this.car.position.y - CAR_HEIGHT / 2;
+        this.carView.style.transform = `rotate(${this.car.angle}rad)`;
+
+        const direction = (this.accelerate || this.deaccelerate) ? this.accelerate ? 1 : -1 : 0
+        Body.applyForce(
+            this.car, {
+                x: this.car.position.x,
+                y: this.car.position.y
+            }, {
+                x: direction * FORCE_CONST * Math.sin(this.car.angle),
+                y: -direction * FORCE_CONST * Math.cos(this.car.angle)
+            }
+        );
+
         if (this.left) {
-            Body.setAngle(this.car, this.car.angle - ANGLE_CHANGE_CONST)
+            Body.setAngularVelocity(this.car, -direction * ANGULAR_VELOCITY_FACTOR)
         }
         if (this.right) {
-            Body.setAngle(this.car, this.car.angle + ANGLE_CHANGE_CONST)
+            Body.setAngularVelocity(this.car, direction * ANGULAR_VELOCITY_FACTOR)
         }
-
         Engine.update(this.engine);
         window.requestAnimationFrame(this.gameLoop);
     }
@@ -144,14 +141,14 @@ export default class WorldUtil {
             pair = e.pairs[i];
             if (pair.bodyA.label === 'car' && pair.bodyB.label === 'grass') {
                 Body.set(this.car, {
-                    frictionAir: 0.1
+                    frictionAir: 0.2
                 })
             }
         }
     }
     collisionEnd = (e) => {
         Body.set(this.car, {
-            frictionAir: 0
+            frictionAir: 0.08
         })
     }
 }

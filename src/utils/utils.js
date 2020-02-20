@@ -12,11 +12,12 @@ import {
 } from './constants'
 
 function addCar(pos, engine, World, Bodies) {
-  const car = Bodies.trapezoid(pos.x, pos.y, CAR_WIDTH, CAR_HEIGHT, 1, {
+  const car = Bodies.rectangle(pos.x, pos.y, CAR_WIDTH, CAR_HEIGHT, {
     isStatic: false,
+    density: 0.01,
     label: 'car',
     friction: 0.05,
-    frictionAir: 0.03,
+    frictionAir: 0.06,
     frictionStatic: 0,
     collisionFilter: {
       mask: defaultCategory

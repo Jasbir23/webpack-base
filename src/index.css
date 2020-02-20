@@ -17,25 +17,3 @@ canvas {
   position: absolute;
   background-color: aquamarine;
 }
-
-.steering {
-  position: fixed;
-  width: 16vw;
-  height: 16vw;
-  border-radius: 8vw;
-  background-image: linear-gradient(to right, rgb(3, 3, 192), red, yellow);
-  opacity: 0.6;
-}
-
-.accelerator {
-  position: fixed;
-  width: 6vw;
-  height: 8vw;
-  opacity: 0.8;
-}
-.deaccelerator {
-  position: fixed;
-  width: 6vw;
-  height: 8vw;
-  opacity: 0.5;
-}
