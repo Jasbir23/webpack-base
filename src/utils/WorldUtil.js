@@ -1,11 +1,13 @@
 import Matter from "matter-js";
 
 import {
-    FORCE_CONST,
+    MAX_POWER,
     CAR_WIDTH,
     CAR_HEIGHT,
+    REVERSE_FAC,
+    POWER_FAC,
     BRAKE_CONST,
-    REVERSE_CONST,
+    MAX_REVERSE,
     ANGULAR_VELOCITY_FACTOR
 } from './constants'
 
@@ -60,6 +62,8 @@ export default class WorldUtil {
             x: 0.1 * w,
             y: 0.8 * h
         }, this.engine, World, Bodies);
+        this.car.power = 0;
+        this.car.reverse = 0;
 
         addBlock({
             x: 0.3 * w,
@@ -91,16 +95,35 @@ export default class WorldUtil {
         this.carView.style.transform = `rotate(${this.car.angle}rad)`;
 
         const direction = (this.accelerate || this.deaccelerate) ? this.accelerate ? 1 : -1 : 0
-        const POWER = direction === -1 ? REVERSE_CONST : FORCE_CONST
-        Body.applyForce(
-            this.car, {
-                x: this.car.position.x,
-                y: this.car.position.y
-            }, {
-                x: direction * POWER * Math.sin(this.car.angle),
-                y: -direction * POWER * Math.cos(this.car.angle)
-            }
-        );
+
+        if (this.accelerate) this.car.power += POWER_FAC;
+        else this.car.power -= POWER_FAC;
+
+        if (this.deaccelerate) this.car.reverse += REVERSE_FAC;
+        else this.car.reverse -= REVERSE_FAC;
+        this.car.power = Math.max(0, Math.min(MAX_POWER, this.car.power));
+        this.car.reverse = Math.max(0, Math.min(MAX_REVERSE, this.car.reverse));
+        if (this.accelerate)
+            Body.applyForce(
+                this.car, {
+                    x: this.car.position.x,
+                    y: this.car.position.y
+                }, {
+                    x: this.car.power * Math.sin(this.car.angle),
+                    y: -this.car.power * Math.cos(this.car.angle)
+                }
+            )
+        if (this.deaccelerate)
+            Body.applyForce(
+                this.car, {
+                    x: this.car.position.x,
+                    y: this.car.position.y
+                }, {
+                    x: -this.car.reverse * Math.sin(this.car.angle),
+                    y: this.car.reverse * Math.cos(this.car.angle)
+                }
+            )
+
         // if (this.brake) {
         //     Body.applyForce(
         //         this.car, {
@@ -117,11 +140,6 @@ export default class WorldUtil {
         }
         if (this.right) {
             Body.setAngularVelocity(this.car, direction * ANGULAR_VELOCITY_FACTOR)
-        }
-        if (!direction) {
-            Body.set(this.car, {
-                frictionAir: 0.04
-            })
         }
         Engine.update(this.engine);
         window.requestAnimationFrame(this.gameLoop);
@@ -170,7 +188,7 @@ export default class WorldUtil {
     }
     collisionEnd = (e) => {
         Body.set(this.car, {
-            frictionAir: 0.08
+            frictionAir: 0.04
         })
     }
 }

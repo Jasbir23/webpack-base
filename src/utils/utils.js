@@ -17,7 +17,7 @@ function addCar(pos, engine, World, Bodies) {
     density: 0.01,
     label: 'car',
     friction: 0.05,
-    frictionAir: 0.06,
+    frictionAir: 0.04,
     frictionStatic: 0,
     collisionFilter: {
       mask: defaultCategory
