@@ -136,10 +136,10 @@ export default class WorldUtil {
         //     );
         // }
         if (this.left) {
-            Body.setAngularVelocity(this.car, -direction * ANGULAR_VELOCITY_FACTOR)
+            Body.setAngularVelocity(this.car, this.car.speed < 1 ? 0 : -ANGULAR_VELOCITY_FACTOR)
         }
         if (this.right) {
-            Body.setAngularVelocity(this.car, direction * ANGULAR_VELOCITY_FACTOR)
+            Body.setAngularVelocity(this.car, this.car.speed < 1 ? 0 : ANGULAR_VELOCITY_FACTOR)
         }
         Engine.update(this.engine);
         window.requestAnimationFrame(this.gameLoop);
