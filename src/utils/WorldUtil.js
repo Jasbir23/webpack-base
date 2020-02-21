@@ -4,6 +4,8 @@ import {
     FORCE_CONST,
     CAR_WIDTH,
     CAR_HEIGHT,
+    BRAKE_CONST,
+    REVERSE_CONST,
     ANGULAR_VELOCITY_FACTOR
 } from './constants'
 
@@ -48,6 +50,7 @@ export default class WorldUtil {
         this.carView.style.width = CAR_WIDTH;
 
         this.left = false;
+        this.brake = false;
         this.right = false;
         this.accelerate = false;
         this.deaccelerate = false;
@@ -88,21 +91,37 @@ export default class WorldUtil {
         this.carView.style.transform = `rotate(${this.car.angle}rad)`;
 
         const direction = (this.accelerate || this.deaccelerate) ? this.accelerate ? 1 : -1 : 0
+        const POWER = direction === -1 ? REVERSE_CONST : FORCE_CONST
         Body.applyForce(
             this.car, {
                 x: this.car.position.x,
                 y: this.car.position.y
             }, {
-                x: direction * FORCE_CONST * Math.sin(this.car.angle),
-                y: -direction * FORCE_CONST * Math.cos(this.car.angle)
+                x: direction * POWER * Math.sin(this.car.angle),
+                y: -direction * POWER * Math.cos(this.car.angle)
             }
         );
-
+        // if (this.brake) {
+        //     Body.applyForce(
+        //         this.car, {
+        //             x: this.car.position.x + CAR_HEIGHT * Math.sin(this.car.angle) / 2,
+        //             y: this.car.position.y + CAR_HEIGHT * Math.cos(this.car.angle) / 2,
+        //         }, {
+        //             x: -direction * BRAKE_CONST * Math.sin(this.car.angle),
+        //             y: direction * BRAKE_CONST * Math.cos(this.car.angle)
+        //         }
+        //     );
+        // }
         if (this.left) {
             Body.setAngularVelocity(this.car, -direction * ANGULAR_VELOCITY_FACTOR)
         }
         if (this.right) {
             Body.setAngularVelocity(this.car, direction * ANGULAR_VELOCITY_FACTOR)
+        }
+        if (!direction) {
+            Body.set(this.car, {
+                frictionAir: 0.04
+            })
         }
         Engine.update(this.engine);
         window.requestAnimationFrame(this.gameLoop);
@@ -128,6 +147,9 @@ export default class WorldUtil {
                 break;
             case " ":
                 this.accelerate = isDown;
+                break;
+            case "CapsLock":
+                this.brake = isDown;
                 break;
             case "Shift":
                 this.deaccelerate = isDown;
