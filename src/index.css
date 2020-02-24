@@ -1,6 +1,7 @@
 body {
   margin: 0;
   display: flex;
+  background: black;
   flex-direction: column;
 }
 
@@ -20,6 +21,7 @@ canvas {
   background: white;
   overflow: hidden;
   margin: 0;
+  /* transition: 20ms linear; */
   align-self: center;
 }
 
