@@ -11,13 +11,19 @@ import {
   redCategory
 } from './constants'
 
+function getAngleBtwVectores(a, b) {
+  const aMod = Math.sqrt(a.x * a.x + a.y * a.y);
+  const bMod = Math.sqrt(b.x * b.x + b.y * b.y);
+  return (a.x * b.x + a.y * b.y) / (aMod * bMod);
+}
+
 function addCar(pos, engine, World, Bodies) {
   const car = Bodies.rectangle(pos.x, pos.y, CAR_WIDTH, CAR_HEIGHT, {
     isStatic: false,
     density: 0.01,
     label: 'car',
-    friction: 0.05,
-    frictionAir: 0.04,
+    friction: 0.1,
+    frictionAir: 0.03,
     frictionStatic: 0,
     collisionFilter: {
       mask: defaultCategory
@@ -66,6 +72,7 @@ function addWalls(engine, World, Bodies) {
   const wallThickness = 10
   const bottom = Bodies.rectangle(0 + w / 2, h - wallThickness / 2, w, wallThickness, {
     isStatic: true,
+    friction: 0.1,
     collisionFilter: {
       mask: defaultCategory
     },
@@ -75,6 +82,7 @@ function addWalls(engine, World, Bodies) {
   });
   const top = Bodies.rectangle(0 + w / 2, wallThickness / 2, w, wallThickness, {
     isStatic: true,
+    friction: 0.1,
     collisionFilter: {
       mask: defaultCategory
     },
@@ -84,6 +92,7 @@ function addWalls(engine, World, Bodies) {
   });
   const left = Bodies.rectangle(0 + wallThickness / 2, h / 2, wallThickness, h, {
     isStatic: true,
+    friction: 0.1,
     collisionFilter: {
       mask: defaultCategory
     },
@@ -93,6 +102,7 @@ function addWalls(engine, World, Bodies) {
   });
   const right = Bodies.rectangle(w - wallThickness / 2, h / 2, wallThickness, h, {
     isStatic: true,
+    friction: 0.1,
     collisionFilter: {
       mask: defaultCategory
     },
@@ -114,5 +124,6 @@ export {
   addCar,
   addBlock,
   addGrass,
-  getTouchPoints
+  getTouchPoints,
+  getAngleBtwVectores
 }

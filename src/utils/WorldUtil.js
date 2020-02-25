@@ -15,7 +15,8 @@ import {
     addWalls,
     addCar,
     addBlock,
-    addGrass
+    addGrass,
+    getAngleBtwVectores
 } from './utils'
 
 const {
@@ -52,7 +53,6 @@ export default class WorldUtil {
         this.carView.style.width = CAR_WIDTH;
 
         this.left = false;
-        this.brake = false;
         this.right = false;
         this.accelerate = false;
         this.deaccelerate = false;
@@ -93,17 +93,23 @@ export default class WorldUtil {
         this.carView.style.left = this.car.position.x - CAR_WIDTH / 2;
         this.carView.style.top = this.car.position.y - CAR_HEIGHT / 2;
         this.carView.style.transform = `rotate(${this.car.angle}rad)`;
+        let direction = (this.accelerate || this.deaccelerate) ? this.accelerate ? 1 : -1 : 0
 
-        const direction = (this.accelerate || this.deaccelerate) ? this.accelerate ? 1 : -1 : 0
+        if (this.accelerate) {
+            this.car.power += POWER_FAC;
+            this.car.reverse = 0;
+        } else {
+            this.car.power -= POWER_FAC;
+        }
 
-        if (this.accelerate) this.car.power += POWER_FAC;
-        else this.car.power -= POWER_FAC;
+        if (this.deaccelerate) {
+            this.car.reverse += REVERSE_FAC;
+            this.car.power = 0;
+        } else this.car.reverse -= REVERSE_FAC;
 
-        if (this.deaccelerate) this.car.reverse += REVERSE_FAC;
-        else this.car.reverse -= REVERSE_FAC;
         this.car.power = Math.max(0, Math.min(MAX_POWER, this.car.power));
         this.car.reverse = Math.max(0, Math.min(MAX_REVERSE, this.car.reverse));
-        if (this.accelerate)
+        if (this.accelerate) {
             Body.applyForce(
                 this.car, {
                     x: this.car.position.x,
@@ -113,7 +119,12 @@ export default class WorldUtil {
                     y: -this.car.power * Math.cos(this.car.angle)
                 }
             )
-        if (this.deaccelerate)
+            this.angleBtwFNV = getAngleBtwVectores({
+                x: this.car.power * Math.sin(this.car.angle),
+                y: -this.car.power * Math.cos(this.car.angle)
+            }, this.car.velocity);
+        }
+        if (this.deaccelerate) {
             Body.applyForce(
                 this.car, {
                     x: this.car.position.x,
@@ -123,23 +134,21 @@ export default class WorldUtil {
                     y: this.car.reverse * Math.cos(this.car.angle)
                 }
             )
+            this.angleBtwFNV = getAngleBtwVectores({
+                x: -this.car.reverse * Math.sin(this.car.angle),
+                y: this.car.reverse * Math.cos(this.car.angle)
+            }, this.car.velocity);
+        }
 
-        // if (this.brake) {
-        //     Body.applyForce(
-        //         this.car, {
-        //             x: this.car.position.x + CAR_HEIGHT * Math.sin(this.car.angle) / 2,
-        //             y: this.car.position.y + CAR_HEIGHT * Math.cos(this.car.angle) / 2,
-        //         }, {
-        //             x: -direction * BRAKE_CONST * Math.sin(this.car.angle),
-        //             y: direction * BRAKE_CONST * Math.cos(this.car.angle)
-        //         }
-        //     );
-        // }
+        direction = this.angleBtwFNV ? this.angleBtwFNV * direction : direction
+
+        let angularVelFac = direction ? ANGULAR_VELOCITY_FACTOR * direction : ANGULAR_VELOCITY_FACTOR;
+
         if (this.left) {
-            Body.setAngularVelocity(this.car, this.car.speed < 1 ? 0 : -ANGULAR_VELOCITY_FACTOR)
+            Body.setAngularVelocity(this.car, -angularVelFac * this.car.speed)
         }
         if (this.right) {
-            Body.setAngularVelocity(this.car, this.car.speed < 1 ? 0 : ANGULAR_VELOCITY_FACTOR)
+            Body.setAngularVelocity(this.car, angularVelFac * this.car.speed)
         }
         Engine.update(this.engine);
         window.requestAnimationFrame(this.gameLoop);
@@ -163,13 +172,16 @@ export default class WorldUtil {
             case "d":
                 this.right = isDown;
                 break;
-            case " ":
+            case "w":
                 this.accelerate = isDown;
                 break;
-            case "CapsLock":
-                this.brake = isDown;
+            case "W":
+                this.accelerate = isDown;
                 break;
-            case "Shift":
+            case "s":
+                this.deaccelerate = isDown;
+                break;
+            case "S":
                 this.deaccelerate = isDown;
                 break;
         }
@@ -181,14 +193,14 @@ export default class WorldUtil {
             pair = e.pairs[i];
             if (pair.bodyA.label === 'car' && pair.bodyB.label === 'grass') {
                 Body.set(this.car, {
-                    frictionAir: 0.2
+                    frictionAir: 0.1
                 })
             }
         }
     }
     collisionEnd = (e) => {
         Body.set(this.car, {
-            frictionAir: 0.04
+            frictionAir: 0.03
         })
     }
 }
