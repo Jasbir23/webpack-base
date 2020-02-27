@@ -8,6 +8,7 @@ import {
     POWER_FAC,
     BRAKE_CONST,
     MAX_REVERSE,
+    DRAG,
     ANGULAR_VELOCITY_FACTOR
 } from './constants'
 
@@ -16,6 +17,7 @@ import {
     addCar,
     addBlock,
     addGrass,
+    createTrack,
     getAngleBtwVectores
 } from './utils'
 
@@ -64,21 +66,23 @@ export default class WorldUtil {
         }, this.engine, World, Bodies);
         this.car.power = 0;
         this.car.reverse = 0;
+        this.car.isThrottling = false;
+        this.car.isReversing = false;
+        createTrack(w, h, this.engine, World, Bodies)
+        // addBlock({
+        //     x: 0.3 * w,
+        //     y: 0.4 * h
+        // }, this.engine, World, Bodies);
 
-        addBlock({
-            x: 0.3 * w,
-            y: 0.4 * h
-        }, this.engine, World, Bodies);
+        // addBlock({
+        //     x: 0.7 * w,
+        //     y: 0.4 * h
+        // }, this.engine, World, Bodies);
 
-        addBlock({
-            x: 0.7 * w,
-            y: 0.4 * h
-        }, this.engine, World, Bodies);
-
-        this.grass = addGrass({
-            x: 0.5 * w,
-            y: 0.4 * h
-        }, this.engine, World, Bodies)
+        // addGrass({
+        //     x: 0.5 * w,
+        //     y: 0.4 * h
+        // }, this.engine, World, Bodies)
 
         addWalls(this.engine, World, Bodies);
         Events.on(this.engine, "collisionActive", this.collisionActive)
@@ -97,23 +101,30 @@ export default class WorldUtil {
 
         if (this.accelerate) {
             this.car.power += POWER_FAC;
-            this.car.reverse = 0;
         } else {
             this.car.power -= POWER_FAC;
         }
 
         if (this.deaccelerate) {
             this.car.reverse += REVERSE_FAC;
-            this.car.power = 0;
         } else this.car.reverse -= REVERSE_FAC;
 
         this.car.power = Math.max(0, Math.min(MAX_POWER, this.car.power));
         this.car.reverse = Math.max(0, Math.min(MAX_REVERSE, this.car.reverse));
+        if (this.left) {
+            this.car.angularVelocity -= direction * ANGULAR_VELOCITY_FACTOR;
+            !this.isCollisionActive && Body.setAngularVelocity(this.car, this.car.angularVelocity);
+        }
+        if (this.right) {
+            this.car.angularVelocity += direction * ANGULAR_VELOCITY_FACTOR;
+            !this.isCollisionActive && Body.setAngularVelocity(this.car, this.car.angularVelocity);
+        }
+        this.car.angularVelocity *= DRAG;
         if (this.accelerate) {
             Body.applyForce(
                 this.car, {
-                    x: this.car.position.x,
-                    y: this.car.position.y
+                    x: this.car.position.x - (CAR_HEIGHT * Math.sin(this.car.angle)) / 2,
+                    y: this.car.position.y + (CAR_HEIGHT * Math.cos(this.car.angle)) / 2
                 }, {
                     x: this.car.power * Math.sin(this.car.angle),
                     y: -this.car.power * Math.cos(this.car.angle)
@@ -127,8 +138,8 @@ export default class WorldUtil {
         if (this.deaccelerate) {
             Body.applyForce(
                 this.car, {
-                    x: this.car.position.x,
-                    y: this.car.position.y
+                    x: this.car.position.x - (CAR_HEIGHT * Math.sin(this.car.angle)) / 2,
+                    y: this.car.position.y + (CAR_HEIGHT * Math.cos(this.car.angle)) / 2
                 }, {
                     x: -this.car.reverse * Math.sin(this.car.angle),
                     y: this.car.reverse * Math.cos(this.car.angle)
@@ -142,14 +153,12 @@ export default class WorldUtil {
 
         direction = this.angleBtwFNV ? this.angleBtwFNV * direction : direction
 
-        let angularVelFac = direction ? ANGULAR_VELOCITY_FACTOR * direction : ANGULAR_VELOCITY_FACTOR;
-
-        if (this.left) {
-            Body.setAngularVelocity(this.car, -angularVelFac * this.car.speed)
-        }
-        if (this.right) {
-            Body.setAngularVelocity(this.car, angularVelFac * this.car.speed)
-        }
+        // Body.set(this.car, {
+        //     velocity: {
+        //         x: this.car.velocity.x * DRAG,
+        //         y: this.car.velocity.y * DRAG
+        //     }
+        // })
         Engine.update(this.engine);
         window.requestAnimationFrame(this.gameLoop);
     }
@@ -187,6 +196,7 @@ export default class WorldUtil {
         }
     };
     collisionActive = (e) => {
+        this.isCollisionActive = true
         var i, pair,
             length = e.pairs.length;
         for (i = 0; i < length; i++) {
@@ -199,6 +209,7 @@ export default class WorldUtil {
         }
     }
     collisionEnd = (e) => {
+        this.isCollisionActive = false
         Body.set(this.car, {
             frictionAir: 0.03
         })
