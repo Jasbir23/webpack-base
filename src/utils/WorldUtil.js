@@ -8,9 +8,23 @@ import {
     POWER_FAC,
     BRAKE_CONST,
     MAX_REVERSE,
-    DRAG,
     ANGULAR_VELOCITY_FACTOR
 } from './constants'
+
+
+import {
+    Scene,
+    PerspectiveCamera,
+    BoxGeometry,
+    MeshPhongMaterial,
+    Mesh,
+    WebGLRenderer,
+    DirectionalLight,
+} from "three";
+
+// import { GLTFLoader } from "three/examples/js/loaders/";
+
+import carModel from '../assets/car/strts.gltf'
 
 import {
     addWalls,
@@ -32,6 +46,8 @@ const Engine = Matter.Engine,
     Bodies = Matter.Bodies,
     Events = Matter.Events,
     Body = Matter.Body;
+
+// const loader = new GLTFLoader();
 
 export default class WorldUtil {
     constructor(props) {
@@ -66,38 +82,81 @@ export default class WorldUtil {
         }, this.engine, World, Bodies);
         this.car.power = 0;
         this.car.reverse = 0;
-        this.car.isThrottling = false;
-        this.car.isReversing = false;
+        this.car.isTurning = false;
         createTrack(w, h, this.engine, World, Bodies)
-        // addBlock({
-        //     x: 0.3 * w,
-        //     y: 0.4 * h
-        // }, this.engine, World, Bodies);
-
-        // addBlock({
-        //     x: 0.7 * w,
-        //     y: 0.4 * h
-        // }, this.engine, World, Bodies);
-
-        // addGrass({
-        //     x: 0.5 * w,
-        //     y: 0.4 * h
-        // }, this.engine, World, Bodies)
 
         addWalls(this.engine, World, Bodies);
         Events.on(this.engine, "collisionActive", this.collisionActive)
         Events.on(this.engine, 'collisionEnd', this.collisionEnd)
-        Render.run(render)
+        Render.run(render);
+        const scene = new Scene();
+        const camera = new PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        10000
+        );
+        this.carMeshes = [];
+        // this.getCarModel();
+
+        const raceContainer = document.querySelector(".raceContainer");
+        const renderer = new WebGLRenderer();
+        renderer.setSize(w, h);
+        raceContainer.appendChild(renderer.domElement);
+        // renderer.render(scene, camera);
     }
 
     startGame() {
         this.animationFrame = window.requestAnimationFrame(this.gameLoop);
     }
+
     gameLoop = () => {
         this.carView.style.left = this.car.position.x - CAR_WIDTH / 2;
         this.carView.style.top = this.car.position.y - CAR_HEIGHT / 2;
         this.carView.style.transform = `rotate(${this.car.angle}rad)`;
+
+        this.updateCar();
+
+        Engine.update(this.engine);
+        window.requestAnimationFrame(this.gameLoop);
+    }
+
+    addCarModels(carModel) {
+        this.carMeshes.forEach(carMesh => carMesh.add(carModel.clone()));
+      }
+    drawCarMesh(x, y, edge) {
+        const car = new Mesh();
+        car.position.set(x, -y, 0);
+        carMeshes.push(car);
+        scene.add(car);
+    }
+
+    getCarModel() {
+        loader.load(
+            carModel,
+            ( gltf ) => {
+                // called when the resource is loaded
+                scene.add( gltf.scene );
+            },
+            ( xhr ) => {
+                // called while loading is progressing
+                console.log( `${( xhr.loaded / xhr.total * 100 )}% loaded` );
+            },
+            ( error ) => {
+                // called when loading has errors
+                console.error( 'An error happened', error );
+            },
+        );
+    }
+    updateCar() {
+        this.car.isTurning = this.left || this.right;
+        this.angleBtwFNV = getAngleBtwVectores({
+            x: this.car.power * Math.sin(this.car.angle),
+            y: -this.car.power * Math.cos(this.car.angle)
+        }, this.car.velocity);
+
         let direction = (this.accelerate || this.deaccelerate) ? this.accelerate ? 1 : -1 : 0
+        direction = this.angleBtwFNV ? this.angleBtwFNV * direction : direction
 
         if (this.accelerate) {
             this.car.power += POWER_FAC;
@@ -111,6 +170,7 @@ export default class WorldUtil {
 
         this.car.power = Math.max(0, Math.min(MAX_POWER, this.car.power));
         this.car.reverse = Math.max(0, Math.min(MAX_REVERSE, this.car.reverse));
+
         if (this.left) {
             this.car.angularVelocity -= direction * ANGULAR_VELOCITY_FACTOR;
             !this.isCollisionActive && Body.setAngularVelocity(this.car, this.car.angularVelocity);
@@ -119,7 +179,11 @@ export default class WorldUtil {
             this.car.angularVelocity += direction * ANGULAR_VELOCITY_FACTOR;
             !this.isCollisionActive && Body.setAngularVelocity(this.car, this.car.angularVelocity);
         }
-        this.car.angularVelocity *= DRAG;
+
+        if (this.car.isTurning) {
+            this.car.power = Math.min(this.car.power, 0.62 * MAX_POWER)
+            this.car.reverse = Math.min(this.car.reverse, 0.62 * MAX_REVERSE)
+        }
         if (this.accelerate) {
             Body.applyForce(
                 this.car, {
@@ -130,10 +194,7 @@ export default class WorldUtil {
                     y: -this.car.power * Math.cos(this.car.angle)
                 }
             )
-            this.angleBtwFNV = getAngleBtwVectores({
-                x: this.car.power * Math.sin(this.car.angle),
-                y: -this.car.power * Math.cos(this.car.angle)
-            }, this.car.velocity);
+
         }
         if (this.deaccelerate) {
             Body.applyForce(
@@ -145,23 +206,9 @@ export default class WorldUtil {
                     y: this.car.reverse * Math.cos(this.car.angle)
                 }
             )
-            this.angleBtwFNV = getAngleBtwVectores({
-                x: -this.car.reverse * Math.sin(this.car.angle),
-                y: this.car.reverse * Math.cos(this.car.angle)
-            }, this.car.velocity);
         }
-
-        direction = this.angleBtwFNV ? this.angleBtwFNV * direction : direction
-
-        // Body.set(this.car, {
-        //     velocity: {
-        //         x: this.car.velocity.x * DRAG,
-        //         y: this.car.velocity.y * DRAG
-        //     }
-        // })
-        Engine.update(this.engine);
-        window.requestAnimationFrame(this.gameLoop);
     }
+
     addControls = () => {
         document.onkeydown = key => this.setMovement(key, true);
         document.onkeyup = key => this.setMovement(key, false);
