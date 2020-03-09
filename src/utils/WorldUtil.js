@@ -1,4 +1,6 @@
-import Matter from "matter-js";
+import Matter, {
+    Vector
+} from "matter-js";
 
 import {
     MAX_POWER,
@@ -8,23 +10,34 @@ import {
     POWER_FAC,
     BRAKE_CONST,
     MAX_REVERSE,
-    ANGULAR_VELOCITY_FACTOR
-} from './constants'
-
+    HEART_VEC,
+    ANGLE_FACTOR,
+} from "./constants";
 
 import {
     Scene,
     PerspectiveCamera,
     BoxGeometry,
+    MeshBasicMaterial,
     MeshPhongMaterial,
     Mesh,
     WebGLRenderer,
     DirectionalLight,
+    AmbientLight,
+    CubeCamera,
+    Vector3
 } from "three";
 
-// import { GLTFLoader } from "three/examples/js/loaders/";
+import {
+    GLTFLoader
+} from "three/examples/jsm/loaders/GLTFLoader";
+import {
+    OrbitControls
+} from "three/examples/jsm/controls/OrbitControls";
 
-import carModel from '../assets/car/strts.gltf'
+import carModel from "../assets/car/SportsCar.gltf";
+
+const raceContainer = document.querySelector(".raceContainer");
 
 import {
     addWalls,
@@ -32,8 +45,9 @@ import {
     addBlock,
     addGrass,
     createTrack,
-    getAngleBtwVectores
-} from './utils'
+    getAngleBtwVectores,
+    addGround,
+} from "./utils";
 
 const {
     innerHeight: h,
@@ -47,8 +61,10 @@ const Engine = Matter.Engine,
     Events = Matter.Events,
     Body = Matter.Body;
 
-// const loader = new GLTFLoader();
-
+const loader = new GLTFLoader();
+const THREE = require("three");
+var camera, scene, renderer;
+var geometry, material, mesh;
 export default class WorldUtil {
     constructor(props) {
         this.engine = Engine.create();
@@ -66,7 +82,7 @@ export default class WorldUtil {
             }
         });
 
-        this.carView = document.querySelector(".car")
+        this.carView = document.querySelector(".car");
         this.carView.style.height = CAR_HEIGHT;
         this.carView.style.width = CAR_WIDTH;
 
@@ -77,33 +93,56 @@ export default class WorldUtil {
         this.addControls();
 
         this.car = addCar({
-            x: 0.1 * w,
-            y: 0.8 * h
-        }, this.engine, World, Bodies);
+                x: 0.08 * w,
+                y: 0.8 * h
+            },
+            this.engine,
+            World,
+            Bodies
+        );
         this.car.power = 0;
         this.car.reverse = 0;
         this.car.isTurning = false;
-        createTrack(w, h, this.engine, World, Bodies)
-
+        createTrack(w, h, this.engine, World, Bodies);
         addWalls(this.engine, World, Bodies);
-        Events.on(this.engine, "collisionActive", this.collisionActive)
-        Events.on(this.engine, 'collisionEnd', this.collisionEnd)
+        Events.on(this.engine, "collisionActive", this.collisionActive);
+        Events.on(this.engine, "collisionEnd", this.collisionEnd);
         Render.run(render);
-        const scene = new Scene();
-        const camera = new PerspectiveCamera(
-        75,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        10000
-        );
-        this.carMeshes = [];
-        // this.getCarModel();
 
-        const raceContainer = document.querySelector(".raceContainer");
-        const renderer = new WebGLRenderer();
+        this.carMeshes = [];
+        this.init();
+    }
+
+    init() {
+        //creating scene
+        scene = new Scene();
+        scene.background = new THREE.Color(0xfffff0);
+        scene.castShadow = true;
+
+        //renderer
+        renderer = new WebGLRenderer({
+            alpha: true
+        });
+        renderer.setClearColor(0xffffff, 0);
         renderer.setSize(w, h);
-        raceContainer.appendChild(renderer.domElement);
-        // renderer.render(scene, camera);
+
+        //camera
+        camera = new PerspectiveCamera(70, w / h, 0.01, 1000);
+        camera.position.set(0, -200, 300);
+
+        this.getCarModel(scene);
+
+        const light = new AmbientLight(0xffffff, 1);
+        light.castShadow = true;
+        light.position.set(-h / 2, -h / 2, 600);
+        scene.add(light);
+
+        addGround(scene);
+
+        var axesHelper = new THREE.AxesHelper(500);
+        scene.add(axesHelper);
+        // this.orbitalControls = new OrbitControls(camera, raceContainer);
+        // raceContainer.appendChild(renderer.domElement);
     }
 
     startGame() {
@@ -115,48 +154,62 @@ export default class WorldUtil {
         this.carView.style.top = this.car.position.y - CAR_HEIGHT / 2;
         this.carView.style.transform = `rotate(${this.car.angle}rad)`;
 
+        if (this.model && this.model.position) {
+            this.model.position.x = this.car.position.x - w / 2;
+            this.model.position.y = -this.car.position.y + h / 2;
+            this.model.position.z = 0;
+            this.model.rotation.z = -this.car.angle + (3 * Math.PI) / 2;
+        }
+
+        renderer.render(scene, camera);
+
         this.updateCar();
-
+        camera.updateProjectionMatrix();
         Engine.update(this.engine);
+        // this.orbitalControls.update();
+
         window.requestAnimationFrame(this.gameLoop);
-    }
+    };
 
-    addCarModels(carModel) {
-        this.carMeshes.forEach(carMesh => carMesh.add(carModel.clone()));
-      }
-    drawCarMesh(x, y, edge) {
-        const car = new Mesh();
-        car.position.set(x, -y, 0);
-        carMeshes.push(car);
-        scene.add(car);
-    }
-
-    getCarModel() {
+    getCarModel(scene) {
         loader.load(
             carModel,
-            ( gltf ) => {
+            gltf => {
                 // called when the resource is loaded
-                scene.add( gltf.scene );
+                // gltf.scene.add(camera);
+                this.model = gltf.scene;
+                this.model.scale.x = 0.2;
+                this.model.scale.y = 0.2;
+                this.model.scale.z = 0.2;
+                this.model.position.x = this.car.position.x - w / 2;
+                this.model.position.y = -this.car.position.y - h / 2;
+                this.model.position.z = 0;
+                this.model.rotation.z = -this.car.angle + Math.PI / 2;
+                scene.add(gltf.scene);
             },
-            ( xhr ) => {
+            xhr => {
                 // called while loading is progressing
-                console.log( `${( xhr.loaded / xhr.total * 100 )}% loaded` );
+                console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
             },
-            ( error ) => {
+            error => {
                 // called when loading has errors
-                console.error( 'An error happened', error );
-            },
+                console.error("An error happened", error);
+            }
         );
     }
+
     updateCar() {
         this.car.isTurning = this.left || this.right;
         this.angleBtwFNV = getAngleBtwVectores({
-            x: this.car.power * Math.sin(this.car.angle),
-            y: -this.car.power * Math.cos(this.car.angle)
-        }, this.car.velocity);
+                x: this.car.power * Math.sin(this.car.angle),
+                y: -this.car.power * Math.cos(this.car.angle)
+            },
+            this.car.velocity
+        );
 
-        let direction = (this.accelerate || this.deaccelerate) ? this.accelerate ? 1 : -1 : 0
-        direction = this.angleBtwFNV ? this.angleBtwFNV * direction : direction
+        let direction =
+            this.accelerate || this.deaccelerate ? (this.accelerate ? 1 : -1) : 0;
+        direction = this.angleBtwFNV ? this.angleBtwFNV * direction : direction;
 
         if (this.accelerate) {
             this.car.power += POWER_FAC;
@@ -170,19 +223,23 @@ export default class WorldUtil {
 
         this.car.power = Math.max(0, Math.min(MAX_POWER, this.car.power));
         this.car.reverse = Math.max(0, Math.min(MAX_REVERSE, this.car.reverse));
-
-        if (this.left) {
-            this.car.angularVelocity -= direction * ANGULAR_VELOCITY_FACTOR;
-            !this.isCollisionActive && Body.setAngularVelocity(this.car, this.car.angularVelocity);
+        this.shouldRotate = this.car.power > 0.0004 || this.car.reverse > 0.0003 ? true : false
+        if (this.left && this.shouldRotate) {
+            this.car.angle -= direction * ANGLE_FACTOR;
+            Body.set(this.car, {
+                angle: this.car.angle
+            })
         }
-        if (this.right) {
-            this.car.angularVelocity += direction * ANGULAR_VELOCITY_FACTOR;
-            !this.isCollisionActive && Body.setAngularVelocity(this.car, this.car.angularVelocity);
+        if (this.right && this.shouldRotate) {
+            this.car.angle += direction * ANGLE_FACTOR;
+            Body.set(this.car, {
+                angle: this.car.angle
+            })
         }
 
         if (this.car.isTurning) {
-            this.car.power = Math.min(this.car.power, 0.62 * MAX_POWER)
-            this.car.reverse = Math.min(this.car.reverse, 0.62 * MAX_REVERSE)
+            this.car.power = Math.min(this.car.power, 0.56 * MAX_POWER);
+            this.car.reverse = Math.min(this.car.reverse, 0.56 * MAX_REVERSE);
         }
         if (this.accelerate) {
             Body.applyForce(
@@ -193,8 +250,7 @@ export default class WorldUtil {
                     x: this.car.power * Math.sin(this.car.angle),
                     y: -this.car.power * Math.cos(this.car.angle)
                 }
-            )
-
+            );
         }
         if (this.deaccelerate) {
             Body.applyForce(
@@ -205,7 +261,7 @@ export default class WorldUtil {
                     x: -this.car.reverse * Math.sin(this.car.angle),
                     y: this.car.reverse * Math.cos(this.car.angle)
                 }
-            )
+            );
         }
     }
 
@@ -242,23 +298,22 @@ export default class WorldUtil {
                 break;
         }
     };
-    collisionActive = (e) => {
-        this.isCollisionActive = true
-        var i, pair,
+    collisionActive = e => {
+        var i,
+            pair,
             length = e.pairs.length;
         for (i = 0; i < length; i++) {
             pair = e.pairs[i];
-            if (pair.bodyA.label === 'car' && pair.bodyB.label === 'grass') {
+            if (pair.bodyA.label === "car" && pair.bodyB.label === "grass") {
                 Body.set(this.car, {
                     frictionAir: 0.1
-                })
+                });
             }
         }
-    }
-    collisionEnd = (e) => {
-        this.isCollisionActive = false
+    };
+    collisionEnd = e => {
         Body.set(this.car, {
             frictionAir: 0.03
-        })
-    }
+        });
+    };
 }

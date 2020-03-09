@@ -2,6 +2,7 @@ const {
   innerHeight: h,
   innerWidth: w
 } = window
+const THREE = require('three');
 
 import {
   CAR_HEIGHT,
@@ -20,7 +21,7 @@ function getAngleBtwVectores(a, b) {
 function addCar(pos, engine, World, Bodies) {
   const car = Bodies.rectangle(pos.x, pos.y, CAR_WIDTH, CAR_HEIGHT, {
     isStatic: false,
-    density: 0.01,
+    density: 0.02,
     label: 'car',
     friction: 0.02,
     frictionAir: 0.03,
@@ -40,76 +41,137 @@ function addCar(pos, engine, World, Bodies) {
 }
 
 function createTrack(w, h, engine, World, Bodies) {
-  const block = Bodies.trapezoid(w * 0.24, h * 0.52, w * 0.1, h * 0.5, -0.8, {
+  const rectangle = Bodies.rectangle(w * 0.2, h * 0.572, w * 0.124, h * 0.574, {
     isStatic: true,
     frictionStatic: 0,
     collisionFilter: {
       mask: defaultCategory
     },
     chamfer: {
-      radius: [50, 50, 50, 50]
+      radius: [44, 44, 0, 10]
     },
     render: {
       fillStyle: '#FFA700'
     }
   })
-  const circle = Bodies.circle(w * 0.24, h * 0.32, w * 0.1, {
-    isStatic: true,
-    frictionStatic: 0,
-    collisionFilter: {
-      mask: defaultCategory
-    },
-    render: {
-      fillStyle: '#FFA700'
-    }
-  })
-  const circle2 = Bodies.circle(w * 0.28, h * 0.7, w * 0.08, {
-    isStatic: true,
-    frictionStatic: 0,
-    collisionFilter: {
-      mask: defaultCategory
-    },
-    render: {
-      fillStyle: '#FFA700'
-    }
-  })
-  const circle3 = Bodies.circle(w * 0.77, h * 0.7, w * 0.076, {
-    isStatic: true,
-    frictionStatic: 0,
-    collisionFilter: {
-      mask: defaultCategory
-    },
-    render: {
-      fillStyle: '#FFA700'
-    }
-  })
-  const block2 = Bodies.trapezoid(w * 0.5, h * 0.74, w * 0.6, h * 0.2, 1, {
+  const rectangle2 = Bodies.rectangle(w * 0.386, h * 0.14, w * 0.14, h * 0.28, {
     isStatic: true,
     frictionStatic: 0,
     collisionFilter: {
       mask: defaultCategory
     },
     chamfer: {
-      radius: [30, 30, 30, 30]
+      radius: [0, 0, 50, 50]
     },
     render: {
       fillStyle: '#FFA700'
     }
   })
-  const block3 = Bodies.polygon(w * 0.68, 0.13 * h, 6, 0.2 * w, {
+  const rectangle3 = Bodies.rectangle(w * 0.4, h * 0.688, w * 0.3, h * 0.316, {
     isStatic: true,
     frictionStatic: 0,
     collisionFilter: {
       mask: defaultCategory
     },
     chamfer: {
-      radius: [90, 100, 60, 40]
+      radius: [20, 20, 0, 0]
     },
     render: {
       fillStyle: '#FFA700'
     }
   })
-  World.add(engine.world, [block, block2, block3, circle, circle2, circle3]);
+  const rectangle4 = Bodies.rectangle(w * 0.776, h * 0.14, w * 0.07, h * 0.36, {
+    isStatic: true,
+    frictionStatic: 0,
+    collisionFilter: {
+      mask: defaultCategory
+    },
+    chamfer: {
+      radius: [0, 0, 0, 0]
+    },
+    render: {
+      fillStyle: '#FFA700'
+    }
+  })
+  const rectangle5 = Bodies.rectangle(w * 0.746, h * 0.436, w * 0.07, h * 0.33, {
+    isStatic: true,
+    angle: Math.PI / 8,
+    frictionStatic: 0,
+    collisionFilter: {
+      mask: defaultCategory
+    },
+    chamfer: {
+      radius: [0, 6, 30, 30]
+    },
+    render: {
+      fillStyle: '#FFA700'
+    }
+  })
+  const rectangle6 = Bodies.rectangle(w * 0.55, h * 0.4, w * 0.09, h * 0.4, {
+    isStatic: true,
+    angle: Math.PI * 1.144,
+    frictionStatic: 0,
+    collisionFilter: {
+      mask: defaultCategory
+    },
+    chamfer: {
+      radius: [0, 0, 30, 30]
+    },
+    render: {
+      fillStyle: '#FFA700'
+    }
+  })
+  const rectangle7 = Bodies.rectangle(w * 0.68, h * 0.81, w * 0.35, h * 0.07, {
+    isStatic: true,
+    frictionStatic: 0,
+    collisionFilter: {
+      mask: defaultCategory
+    },
+    chamfer: {
+      radius: [0, 0, 40, 0]
+    },
+    render: {
+      fillStyle: '#FFA700'
+    }
+  })
+  const rectangle8 = Bodies.rectangle(w * 0.864, h * 0.68, w * 0.038, h * 0.3, {
+    isStatic: true,
+    angle: Math.PI * 1.12,
+    frictionStatic: 0,
+    collisionFilter: {
+      mask: defaultCategory
+    },
+    chamfer: {
+      radius: [20, 20, 10, 0]
+    },
+    render: {
+      fillStyle: '#FFA700'
+    }
+  })
+  const trapezoid = Bodies.trapezoid(w * 0.29, h * 0.6, w * 0.14, h * 0.3, 1.8, {
+    isStatic: true,
+    frictionStatic: 0,
+    collisionFilter: {
+      mask: defaultCategory
+    },
+    render: {
+      fillStyle: '#FFA700'
+    }
+  })
+  const trapezoid2 = Bodies.trapezoid(w * 0.89, h * 0.5, w * 0.2, h * 0.1, 3, {
+    isStatic: true,
+    frictionStatic: 0,
+    angle: Math.PI * 1.48,
+    collisionFilter: {
+      mask: defaultCategory
+    },
+    render: {
+      fillStyle: '#FFA700'
+    }
+  })
+
+
+  World.add(engine.world, [rectangle, rectangle2, rectangle3, rectangle4, rectangle5, rectangle6, rectangle7, rectangle8, trapezoid, trapezoid2]);
 }
 
 function addBlock(pos, engine, World, Bodies) {
@@ -147,7 +209,7 @@ function addGrass(pos, engine, World, Bodies) {
 }
 
 function addWalls(engine, World, Bodies) {
-  const wallThickness = 10
+  const wallThickness = 5
   const bottom = Bodies.rectangle(0 + w / 2, h - wallThickness / 2, w, wallThickness, {
     isStatic: true,
     friction: 0.02,
@@ -195,6 +257,17 @@ function addWalls(engine, World, Bodies) {
   World.add(engine.world, [bottom, top, left, right])
 }
 
+function addGround(scene) {
+  let geometry = new THREE.BoxGeometry(w, h, 1);
+  let material = new THREE.MeshBasicMaterial({
+    color: 0xD3D3D3
+  })
+  let cube = new THREE.Mesh(geometry, material);
+  cube.position.x = 0;
+  cube.position.y = 0;
+  scene.add(cube);
+}
+
 function getTouchPoints(e) {
   return {
     x: e.changedTouches[0].clientX,
@@ -208,5 +281,6 @@ export {
   addGrass,
   getTouchPoints,
   getAngleBtwVectores,
-  createTrack
+  createTrack,
+  addGround,
 }
