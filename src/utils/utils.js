@@ -3,14 +3,27 @@ const {
   innerWidth: w
 } = window
 const THREE = require('three');
+import Matter from "matter-js";
+
+const Engine = Matter.Engine,
+  Render = Matter.Render,
+  World = Matter.World,
+  Bodies = Matter.Bodies,
+  Events = Matter.Events,
+  Body = Matter.Body;
 
 import {
   CAR_HEIGHT,
   CAR_WIDTH,
   BLOCK_WIDTH,
   defaultCategory,
-  redCategory
+  redCategory,
+  THREE_D_X_SHIFT,
+  THREE_D_Y_SHIFT
 } from './constants'
+import {
+  Vector3
+} from "three";
 
 function getAngleBtwVectores(a, b) {
   const aMod = Math.sqrt(a.x * a.x + a.y * a.y);
@@ -18,19 +31,16 @@ function getAngleBtwVectores(a, b) {
   return (a.x * b.x + a.y * b.y) / (aMod * bMod);
 }
 
-function addCar(pos, engine, World, Bodies) {
+function addCar(pos, engine) {
   const car = Bodies.rectangle(pos.x, pos.y, CAR_WIDTH, CAR_HEIGHT, {
     isStatic: false,
-    density: 0.02,
+    density: 0.1,
     label: 'car',
     friction: 0.02,
     frictionAir: 0.03,
     frictionStatic: 0,
     collisionFilter: {
       mask: defaultCategory
-    },
-    chamfer: {
-      radius: [4, 4, 4, 4]
     },
     render: {
       fillStyle: 'red'
@@ -40,221 +50,236 @@ function addCar(pos, engine, World, Bodies) {
   return car;
 }
 
-function createTrack(w, h, engine, World, Bodies) {
-  const rectangle = Bodies.rectangle(w * 0.2, h * 0.572, w * 0.124, h * 0.574, {
-    isStatic: true,
-    frictionStatic: 0,
-    collisionFilter: {
-      mask: defaultCategory
-    },
-    chamfer: {
-      radius: [44, 44, 0, 10]
-    },
-    render: {
-      fillStyle: '#FFA700'
-    }
-  })
-  const rectangle2 = Bodies.rectangle(w * 0.386, h * 0.14, w * 0.14, h * 0.28, {
-    isStatic: true,
-    frictionStatic: 0,
-    collisionFilter: {
-      mask: defaultCategory
-    },
-    chamfer: {
-      radius: [0, 0, 50, 50]
-    },
-    render: {
-      fillStyle: '#FFA700'
-    }
-  })
-  const rectangle3 = Bodies.rectangle(w * 0.4, h * 0.688, w * 0.3, h * 0.316, {
-    isStatic: true,
-    frictionStatic: 0,
-    collisionFilter: {
-      mask: defaultCategory
-    },
-    chamfer: {
-      radius: [20, 20, 0, 0]
-    },
-    render: {
-      fillStyle: '#FFA700'
-    }
-  })
-  const rectangle4 = Bodies.rectangle(w * 0.776, h * 0.14, w * 0.07, h * 0.36, {
-    isStatic: true,
-    frictionStatic: 0,
-    collisionFilter: {
-      mask: defaultCategory
-    },
-    chamfer: {
-      radius: [0, 0, 0, 0]
-    },
-    render: {
-      fillStyle: '#FFA700'
-    }
-  })
-  const rectangle5 = Bodies.rectangle(w * 0.746, h * 0.436, w * 0.07, h * 0.33, {
-    isStatic: true,
-    angle: Math.PI / 8,
-    frictionStatic: 0,
-    collisionFilter: {
-      mask: defaultCategory
-    },
-    chamfer: {
-      radius: [0, 6, 30, 30]
-    },
-    render: {
-      fillStyle: '#FFA700'
-    }
-  })
-  const rectangle6 = Bodies.rectangle(w * 0.55, h * 0.4, w * 0.09, h * 0.4, {
-    isStatic: true,
-    angle: Math.PI * 1.144,
-    frictionStatic: 0,
-    collisionFilter: {
-      mask: defaultCategory
-    },
-    chamfer: {
-      radius: [0, 0, 30, 30]
-    },
-    render: {
-      fillStyle: '#FFA700'
-    }
-  })
-  const rectangle7 = Bodies.rectangle(w * 0.68, h * 0.81, w * 0.35, h * 0.07, {
-    isStatic: true,
-    frictionStatic: 0,
-    collisionFilter: {
-      mask: defaultCategory
-    },
-    chamfer: {
-      radius: [0, 0, 40, 0]
-    },
-    render: {
-      fillStyle: '#FFA700'
-    }
-  })
-  const rectangle8 = Bodies.rectangle(w * 0.864, h * 0.68, w * 0.038, h * 0.3, {
-    isStatic: true,
-    angle: Math.PI * 1.12,
-    frictionStatic: 0,
-    collisionFilter: {
-      mask: defaultCategory
-    },
-    chamfer: {
-      radius: [20, 20, 10, 0]
-    },
-    render: {
-      fillStyle: '#FFA700'
-    }
-  })
-  const trapezoid = Bodies.trapezoid(w * 0.29, h * 0.6, w * 0.14, h * 0.3, 1.8, {
-    isStatic: true,
-    frictionStatic: 0,
-    collisionFilter: {
-      mask: defaultCategory
-    },
-    render: {
-      fillStyle: '#FFA700'
-    }
-  })
-  const trapezoid2 = Bodies.trapezoid(w * 0.89, h * 0.5, w * 0.2, h * 0.1, 3, {
-    isStatic: true,
-    frictionStatic: 0,
-    angle: Math.PI * 1.48,
-    collisionFilter: {
-      mask: defaultCategory
-    },
-    render: {
-      fillStyle: '#FFA700'
-    }
-  })
-
-
-  World.add(engine.world, [rectangle, rectangle2, rectangle3, rectangle4, rectangle5, rectangle6, rectangle7, rectangle8, trapezoid, trapezoid2]);
-}
-
-function addBlock(pos, engine, World, Bodies) {
-  const block = Bodies.rectangle(pos.x, pos.y, BLOCK_WIDTH, BLOCK_WIDTH, {
+function addRect(engine, x, y, width, height, scene, angle = 0) {
+  const body = Bodies.rectangle(x, y, width, height, {
     isStatic: true,
     friction: 0.02,
+    frictionStatic: 0,
+    angle,
     collisionFilter: {
       mask: defaultCategory
     },
-    chamfer: {
-      radius: [10, 20, 30, 40, 50, 60]
-    },
     render: {
-      fillStyle: '#FFA700'
+      fillStyle: "grey"
     }
+  });
+  World.add(engine.world, body);
+
+  let geometry = new THREE.BoxGeometry(width, height, 1);
+  let material = new THREE.MeshBasicMaterial({
+    color: 0xD2691E
   })
-  World.add(engine.world, block);
+  let cube = new THREE.Mesh(geometry, material);
+  cube.position.x = THREE_D_X_SHIFT + x;
+  cube.position.y = THREE_D_Y_SHIFT - y;
+  cube.rotateOnAxis(new Vector3(0, 0, 1), Math.PI - angle)
+  scene && scene.add(cube);
 }
 
-function addGrass(pos, engine, World, Bodies) {
-  const grass = Bodies.rectangle(pos.x, pos.y, 2 * BLOCK_WIDTH, 2 * BLOCK_WIDTH, {
-    isSensor: true,
-    label: 'grass',
-    friction: 0.05,
-    collisionFilter: {
-      mask: defaultCategory,
-    },
-    render: {
-      fillStyle: '#4A7023',
-      opacity: 0.4,
-    }
-  })
-  World.add(engine.world, grass);
-  return grass;
+function createTrack(engine, scene) {
+  const thickness = 4;
+  // top left part
+  addRect(engine, w / 20, 3 * thickness / 2, w / 10, thickness, scene);
+  addRect(engine, w / 24, 5 * thickness / 2, w / 12, thickness, scene);
+  addRect(engine, w / 28, 7 * thickness / 2, w / 14, thickness, scene);
+  addRect(engine, w / 32, 9 * thickness / 2, w / 16, thickness, scene);
+  addRect(engine, w / 36, 11 * thickness / 2, w / 18, thickness, scene);
+  addRect(engine, w / 40, 13 * thickness / 2, w / 20, thickness, scene);
+  addRect(engine, w / 44, 15 * thickness / 2, w / 22, thickness, scene);
+  addRect(engine, w / 48, 17 * thickness / 2, w / 24, thickness, scene);
+  addRect(engine, w / 52, 19 * thickness / 2, w / 26, thickness, scene);
+  addRect(engine, w / 56, 21 * thickness / 2, w / 28, thickness, scene);
+  addRect(engine, w / 60, 23 * thickness / 2, w / 30, thickness, scene);
+  addRect(engine, w / 64, 25 * thickness / 2, w / 32, thickness, scene);
+  addRect(engine, w / 68, 27 * thickness / 2, w / 34, thickness, scene);
+  addRect(engine, w / 72, 29 * thickness / 2, w / 36, thickness, scene);
+
+  addRect(engine, w / 72, 36 * thickness / 2, w / 36, 10 * thickness, scene);
+
+  //left middle pyramid
+  addRect(engine, w / 16, 79 * thickness / 2, w / 8, thickness, scene);
+
+  addRect(engine, w / 12, 77 * thickness / 2, w / 6, thickness, scene);
+  addRect(engine, w / 12, 75 * thickness / 2, w / 6, thickness, scene);
+  addRect(engine, w / 16, 73 * thickness / 2, w / 8, thickness, scene);
+  addRect(engine, w / 20, 71 * thickness / 2, w / 10, thickness, scene);
+  addRect(engine, w / 24, 69 * thickness / 2, w / 12, thickness, scene);
+  addRect(engine, w / 28, 67 * thickness / 2, w / 14, thickness, scene);
+  addRect(engine, w / 32, 65 * thickness / 2, w / 16, thickness, scene);
+  addRect(engine, w / 36, 63 * thickness / 2, w / 18, thickness, scene);
+  addRect(engine, w / 40, 61 * thickness / 2, w / 20, thickness, scene);
+  addRect(engine, w / 44, 59 * thickness / 2, w / 22, thickness, scene);
+  addRect(engine, w / 48, 57 * thickness / 2, w / 24, thickness, scene);
+  addRect(engine, w / 52, 55 * thickness / 2, w / 26, thickness, scene);
+  addRect(engine, w / 56, 53 * thickness / 2, w / 28, thickness, scene);
+  addRect(engine, w / 60, 51 * thickness / 2, w / 30, thickness, scene);
+  addRect(engine, w / 64, 49 * thickness / 2, w / 32, thickness, scene);
+  addRect(engine, w / 68, 47 * thickness / 2, w / 34, thickness, scene);
+  addRect(engine, w / 72, 45 * thickness / 2, w / 36, thickness, scene);
+
+  addRect(engine, w / 24, 79 * thickness / 2, w / 12, thickness, scene);
+  addRect(engine, w / 28, 81 * thickness / 2, w / 14, thickness, scene);
+  addRect(engine, w / 32, 83 * thickness / 2, w / 16, thickness, scene);
+  addRect(engine, w / 36, 85 * thickness / 2, w / 18, thickness, scene);
+  addRect(engine, w / 40, 87 * thickness / 2, w / 20, thickness, scene);
+  addRect(engine, w / 44, 89 * thickness / 2, w / 22, thickness, scene);
+  addRect(engine, w / 48, 91 * thickness / 2, w / 24, thickness, scene);
+  addRect(engine, w / 52, 93 * thickness / 2, w / 26, thickness, scene);
+  addRect(engine, w / 56, 95 * thickness / 2, w / 28, thickness, scene);
+  addRect(engine, w / 60, 97 * thickness / 2, w / 30, thickness, scene);
+  addRect(engine, w / 64, 99 * thickness / 2, w / 32, thickness, scene);
+  addRect(engine, w / 68, 101 * thickness / 2, w / 34, thickness, scene);
+
+  addRect(engine, w / 72, 119 * thickness / 2, w / 36, 20 * thickness, scene);
+
+  //bottom left
+  addRect(engine, w / 2, 171 * thickness / 2, w, thickness, scene);
+  addRect(engine, w / 8, 169 * thickness / 2, w / 4, thickness, scene);
+  addRect(engine, w / 12, 167 * thickness / 2, w / 6, thickness, scene);
+  addRect(engine, w / 16, 165 * thickness / 2, w / 8, thickness, scene);
+  addRect(engine, w / 20, 163 * thickness / 2, w / 10, thickness, scene);
+  addRect(engine, w / 24, 161 * thickness / 2, w / 12, thickness, scene);
+  addRect(engine, w / 28, 159 * thickness / 2, w / 14, thickness, scene);
+  addRect(engine, w / 32, 157 * thickness / 2, w / 16, thickness, scene);
+  addRect(engine, w / 36, 155 * thickness / 2, w / 18, thickness, scene);
+  addRect(engine, w / 40, 153 * thickness / 2, w / 20, thickness, scene);
+  addRect(engine, w / 44, 151 * thickness / 2, w / 22, thickness, scene);
+  addRect(engine, w / 48, 149 * thickness / 2, w / 24, thickness, scene);
+  addRect(engine, w / 52, 147 * thickness / 2, w / 26, thickness, scene);
+  addRect(engine, w / 56, 145 * thickness / 2, w / 28, thickness, scene);
+  addRect(engine, w / 60, 143 * thickness / 2, w / 30, thickness, scene);
+  addRect(engine, w / 64, 141 * thickness / 2, w / 32, thickness, scene);
+  addRect(engine, w / 68, 139 * thickness / 2, w / 34, thickness, scene);
+
+  // top middle pyramid
+  addRect(engine, w / 5 + 69 * thickness / 2, w / 24, thickness, w / 12, scene);
+  addRect(engine, w / 5 + 67 * thickness / 2, w / 24, thickness, w / 12, scene);
+  addRect(engine, w / 5 + 65 * thickness / 2, w / 24, thickness, w / 12, scene);
+  addRect(engine, w / 5 + 63 * thickness / 2, w / 28, thickness, w / 14, scene);
+  addRect(engine, w / 5 + 61 * thickness / 2, w / 32, thickness, w / 16, scene);
+  addRect(engine, w / 5 + 59 * thickness / 2, w / 36, thickness, w / 18, scene);
+  addRect(engine, w / 5 + 57 * thickness / 2, w / 40, thickness, w / 20, scene);
+  addRect(engine, w / 5 + 55 * thickness / 2, w / 44, thickness, w / 22, scene);
+  addRect(engine, w / 5 + 53 * thickness / 2, w / 48, thickness, w / 24, scene);
+  addRect(engine, w / 5 + 51 * thickness / 2, w / 52, thickness, w / 26, scene);
+  addRect(engine, w / 5 + 49 * thickness / 2, w / 56, thickness, w / 28, scene);
+  addRect(engine, w / 5 + 47 * thickness / 2, w / 60, thickness, w / 30, scene);
+  addRect(engine, w / 5 + 45 * thickness / 2, w / 64, thickness, w / 32, scene);
+  addRect(engine, w / 5 + 43 * thickness / 2, w / 68, thickness, w / 34, scene);
+  addRect(engine, w / 5 + 41 * thickness / 2, w / 72, thickness, w / 36, scene);
+
+  addRect(engine, w / 5 + 71 * thickness / 2, w / 24, thickness, w / 12, scene);
+  addRect(engine, w / 5 + 73 * thickness / 2, w / 28, thickness, w / 14, scene);
+  addRect(engine, w / 5 + 75 * thickness / 2, w / 32, thickness, w / 16, scene);
+  addRect(engine, w / 5 + 77 * thickness / 2, w / 36, thickness, w / 18, scene);
+  addRect(engine, w / 5 + 79 * thickness / 2, w / 40, thickness, w / 20, scene);
+  addRect(engine, w / 5 + 81 * thickness / 2, w / 44, thickness, w / 22, scene);
+  addRect(engine, w / 5 + 83 * thickness / 2, w / 48, thickness, w / 24, scene);
+  addRect(engine, w / 5 + 85 * thickness / 2, w / 52, thickness, w / 26, scene);
+  addRect(engine, w / 5 + 87 * thickness / 2, w / 56, thickness, w / 28, scene);
+  addRect(engine, w / 5 + 89 * thickness / 2, w / 60, thickness, w / 30, scene);
+  addRect(engine, w / 5 + 91 * thickness / 2, w / 64, thickness, w / 32, scene);
+  addRect(engine, w / 5 + 93 * thickness / 2, w / 68, thickness, w / 34, scene);
+
+
+
+  addRect(engine, w / 4 + 136 * thickness / 2, w / 88, 68 * thickness, w / 44, scene);
+
+  //top right corner
+  addRect(engine, w / 1.5 + 69 * thickness / 2, w / 16, thickness, w / 8, scene);
+  addRect(engine, w / 1.5 + 67 * thickness / 2, w / 20, thickness, w / 10, scene);
+  addRect(engine, w / 1.5 + 65 * thickness / 2, w / 24, thickness, w / 12, scene);
+  addRect(engine, w / 1.5 + 63 * thickness / 2, w / 28, thickness, w / 14, scene);
+  addRect(engine, w / 1.5 + 61 * thickness / 2, w / 32, thickness, w / 16, scene);
+  addRect(engine, w / 1.5 + 59 * thickness / 2, w / 36, thickness, w / 18, scene);
+  addRect(engine, w / 1.5 + 57 * thickness / 2, w / 40, thickness, w / 20, scene);
+  addRect(engine, w / 1.5 + 55 * thickness / 2, w / 44, thickness, w / 22, scene);
+  addRect(engine, w / 1.5 + 53 * thickness / 2, w / 48, thickness, w / 24, scene);
+  addRect(engine, w / 1.5 + 51 * thickness / 2, w / 52, thickness, w / 26, scene);
+  addRect(engine, w / 1.5 + 49 * thickness / 2, w / 56, thickness, w / 28, scene);
+  addRect(engine, w / 1.5 + 47 * thickness / 2, w / 60, thickness, w / 30, scene);
+  addRect(engine, w / 1.5 + 45 * thickness / 2, w / 64, thickness, w / 32, scene);
+  addRect(engine, w / 1.5 + 43 * thickness / 2, w / 68, thickness, w / 34, scene);
+  addRect(engine, w / 1.5 + 41 * thickness / 2, w / 72, thickness, w / 36, scene);
+
+  //bottom right
+  addRect(engine, w / 1.12 - w / 8, 169 * thickness / 2, w / 4, thickness, scene);
+  addRect(engine, w / 1.12 - w / 12, 167 * thickness / 2, w / 6, thickness, scene);
+  addRect(engine, w / 1.12 - w / 16, 165 * thickness / 2, w / 8, thickness, scene);
+  addRect(engine, w / 1.12 - w / 20, 163 * thickness / 2, w / 10, thickness, scene);
+  addRect(engine, w / 1.12 - w / 24, 161 * thickness / 2, w / 12, thickness, scene);
+  addRect(engine, w / 1.12 - w / 28, 159 * thickness / 2, w / 14, thickness, scene);
+  addRect(engine, w / 1.12 - w / 32, 157 * thickness / 2, w / 16, thickness, scene);
+  addRect(engine, w / 1.12 - w / 36, 155 * thickness / 2, w / 18, thickness, scene);
+  addRect(engine, w / 1.12 - w / 40, 153 * thickness / 2, w / 20, thickness, scene);
+  addRect(engine, w / 1.12 - w / 44, 151 * thickness / 2, w / 22, thickness, scene);
+  addRect(engine, w / 1.12 - w / 48, 149 * thickness / 2, w / 24, thickness, scene);
+  addRect(engine, w / 1.12 - w / 52, 147 * thickness / 2, w / 26, thickness, scene);
+  addRect(engine, w / 1.12 - w / 56, 145 * thickness / 2, w / 28, thickness, scene);
+  addRect(engine, w / 1.12 - w / 60, 143 * thickness / 2, w / 30, thickness, scene);
+  addRect(engine, w / 1.12 - w / 88, 141 * thickness / 2, w / 46, thickness, scene);
+  addRect(engine, w / 1.12 - w / 96, 139 * thickness / 2, w / 48, thickness, scene);
+
+
+  addRect(engine, w - w / 16, h / 2, w / 8, h, scene);
+  //center part
+  addRect(engine, w / 1.5 - w / 8, 101 * thickness / 2 - w / 10, w / 4, thickness, scene);
+  addRect(engine, w / 1.5 - w / 8.4, 99 * thickness / 2 - w / 10, w / 4.2, thickness, scene);
+  addRect(engine, w / 1.5 - w / 8.8, 97 * thickness / 2 - w / 10, w / 4.4, thickness, scene);
+  addRect(engine, w / 1.5 - w / 9.2, 95 * thickness / 2 - w / 10, w / 4.6, thickness, scene);
+  addRect(engine, w / 1.5 - w / 9.6, 93 * thickness / 2 - w / 10, w / 4.8, thickness, scene);
+  addRect(engine, w / 1.5 - w / 10, 91 * thickness / 2 - w / 10, w / 5, thickness, scene);
+  addRect(engine, w / 1.5 - w / 10.4, 89 * thickness / 2 - w / 10, w / 5.2, thickness, scene);
+  addRect(engine, w / 1.5 - w / 10.8, 87 * thickness / 2 - w / 10, w / 5.4, thickness, scene);
+  addRect(engine, w / 1.5 - w / 11.2, 85 * thickness / 2 - w / 10, w / 5.6, thickness, scene);
+  addRect(engine, w / 1.5 - w / 11.6, 83 * thickness / 2 - w / 10, w / 5.8, thickness, scene);
+  addRect(engine, w / 1.5 - w / 12, 81 * thickness / 2 - w / 10, w / 6, thickness, scene);
+  addRect(engine, w / 1.5 - w / 16, 79 * thickness / 2 - w / 10, w / 8, thickness, scene);
+  addRect(engine, w / 1.5 - w / 20, 77 * thickness / 2 - w / 10, w / 10, thickness, scene);
+  addRect(engine, w / 1.5 - w / 24, 75 * thickness / 2 - w / 10, w / 12, thickness, scene);
+  addRect(engine, w / 1.5 - w / 28, 73 * thickness / 2 - w / 10, w / 14, thickness, scene);
+  addRect(engine, w / 1.5 - w / 32, 71 * thickness / 2 - w / 10, w / 16, thickness, scene);
+  addRect(engine, w / 1.5 - w / 36, 69 * thickness / 2 - w / 10, w / 18, thickness, scene);
+  addRect(engine, w / 1.5 - w / 40, 67 * thickness / 2 - w / 10, w / 20, thickness, scene);
+  addRect(engine, w / 1.5 - w / 44, 65 * thickness / 2 - w / 10, w / 22, thickness, scene);
+  addRect(engine, w / 1.5 - w / 48, 63 * thickness / 2 - w / 10, w / 24, thickness, scene);
+
+  addRect(engine, w / 1.5 - w / 6, 109 * thickness / 2, w / 3, thickness, scene);
+  addRect(engine, w / 1.5 - w / 6.4, 107 * thickness / 2, w / 3.2, thickness, scene);
+  addRect(engine, w / 1.5 - w / 6.8, 105 * thickness / 2, w / 3.4, thickness, scene);
+  addRect(engine, w / 1.5 - w / 7.2, 103 * thickness / 2, w / 3.6, thickness, scene);
+  addRect(engine, w / 1.5 - w / 7.6, 101 * thickness / 2, w / 3.8, thickness, scene);
+  addRect(engine, w / 1.5 - w / 8, 99 * thickness / 2, w / 4, thickness, scene);
+  addRect(engine, w / 1.5 - w / 8.4, 97 * thickness / 2, w / 4.2, thickness, scene);
+  addRect(engine, w / 1.5 - w / 8.8, 95 * thickness / 2, w / 4.4, thickness, scene);
+  addRect(engine, w / 1.5 - w / 9.2, 93 * thickness / 2, w / 4.6, thickness, scene);
+  addRect(engine, w / 1.5 - w / 9.6, 91 * thickness / 2, w / 4.8, thickness, scene);
+  addRect(engine, w / 1.5 - w / 10, 89 * thickness / 2, w / 5, thickness, scene);
+  addRect(engine, w / 1.5 - w / 10, 87 * thickness / 2, w / 5, thickness, scene);
+  addRect(engine, w / 1.5 - w / 10, 85 * thickness / 2, w / 5, thickness, scene);
+  addRect(engine, w / 1.5 - w / 10, 83 * thickness / 2, w / 5, thickness, scene);
+  addRect(engine, w / 1.5 - w / 10, 81 * thickness / 2, w / 5, thickness, scene);
+  addRect(engine, w / 1.5 - w / 9.6, 79 * thickness / 2, w / 4.8, thickness, scene);
+  addRect(engine, w / 1.5 - w / 9.2, 77 * thickness / 2, w / 4.6, thickness, scene);
+  addRect(engine, w / 1.5 - w / 8.8, 75 * thickness / 2, w / 4.4, thickness, scene);
+  addRect(engine, w / 1.5 - w / 8.4, 73 * thickness / 2, w / 4.2, thickness, scene);
+  addRect(engine, w / 1.5 - w / 8, 71 * thickness / 2, w / 4, thickness, scene);
+  addRect(engine, w / 2.18, 120 * thickness / 2, w / 2.4, 10 * thickness, scene);
+
+
+  addRect(engine, w / 3, h / 3.2, w / 4.2, 2 * thickness, scene, Math.PI / 7.4);
 }
 
-function addWalls(engine, World, Bodies) {
+function addWalls(engine) {
   const wallThickness = 5
-  const bottom = Bodies.rectangle(0 + w / 2, h - wallThickness / 2, w, wallThickness, {
-    isStatic: true,
-    friction: 0.02,
-    frictionStatic: 0,
-    collisionFilter: {
-      mask: defaultCategory
-    },
-    render: {
-      fillStyle: "grey"
-    }
-  });
-  const top = Bodies.rectangle(0 + w / 2, wallThickness / 2, w, wallThickness, {
-    isStatic: true,
-    friction: 0.02,
-    frictionStatic: 0,
-    collisionFilter: {
-      mask: defaultCategory
-    },
-    render: {
-      fillStyle: "grey"
-    }
-  });
-  const left = Bodies.rectangle(0 + wallThickness / 2, h / 2, wallThickness, h, {
-    isStatic: true,
-    friction: 0.02,
-    frictionStatic: 0,
-    collisionFilter: {
-      mask: defaultCategory
-    },
-    render: {
-      fillStyle: "grey"
-    }
-  });
-  const right = Bodies.rectangle(w - wallThickness / 2, h / 2, wallThickness, h, {
-    isStatic: true,
-    friction: 0.02,
-    frictionStatic: 0,
-    collisionFilter: {
-      mask: defaultCategory
-    },
-    render: {
-      fillStyle: "grey"
-    }
-  });
-  World.add(engine.world, [bottom, top, left, right])
+  //bottom
+  addRect(engine, 0 + w / 2, h - wallThickness / 2, h / 1.1 + w, wallThickness);
+  //top
+  addRect(engine, 0 + w / 2, wallThickness / 2, w, wallThickness);
+  //left
+  addRect(engine, 0 + wallThickness / 2, h / 2, wallThickness, h);
+  //right
+  addRect(engine, w - wallThickness / 2, h / 2, wallThickness, h);
 }
 
 function addGround(scene) {
@@ -277,10 +302,8 @@ function getTouchPoints(e) {
 export {
   addWalls,
   addCar,
-  addBlock,
-  addGrass,
   getTouchPoints,
   getAngleBtwVectores,
-  createTrack,
   addGround,
+  createTrack
 }

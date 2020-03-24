@@ -1,6 +1,4 @@
-import Matter, {
-    Vector
-} from "matter-js";
+import Matter from "matter-js";
 
 import {
     MAX_POWER,
@@ -12,6 +10,8 @@ import {
     MAX_REVERSE,
     HEART_VEC,
     ANGLE_FACTOR,
+    THREE_D_X_SHIFT,
+    THREE_D_Y_SHIFT
 } from "./constants";
 
 import {
@@ -36,17 +36,16 @@ import {
 } from "three/examples/jsm/controls/OrbitControls";
 
 import carModel from "../assets/car/SportsCar.gltf";
+import islandModel from "../assets/island/1220 Island.gltf";
 
 const raceContainer = document.querySelector(".raceContainer");
 
 import {
     addWalls,
     addCar,
-    addBlock,
-    addGrass,
-    createTrack,
     getAngleBtwVectores,
     addGround,
+    createTrack,
 } from "./utils";
 
 const {
@@ -93,18 +92,15 @@ export default class WorldUtil {
         this.addControls();
 
         this.car = addCar({
-                x: 0.08 * w,
+                x: 0.14 * w,
                 y: 0.8 * h
             },
-            this.engine,
-            World,
-            Bodies
+            this.engine
         );
         this.car.power = 0;
         this.car.reverse = 0;
         this.car.isTurning = false;
-        createTrack(w, h, this.engine, World, Bodies);
-        addWalls(this.engine, World, Bodies);
+        addWalls(this.engine);
         Events.on(this.engine, "collisionActive", this.collisionActive);
         Events.on(this.engine, "collisionEnd", this.collisionEnd);
         Render.run(render);
@@ -138,7 +134,7 @@ export default class WorldUtil {
         scene.add(light);
 
         addGround(scene);
-
+        createTrack(this.engine, scene);
         var axesHelper = new THREE.AxesHelper(500);
         scene.add(axesHelper);
         // this.orbitalControls = new OrbitControls(camera, raceContainer);
@@ -155,8 +151,8 @@ export default class WorldUtil {
         this.carView.style.transform = `rotate(${this.car.angle}rad)`;
 
         if (this.model && this.model.position) {
-            this.model.position.x = this.car.position.x - w / 2;
-            this.model.position.y = -this.car.position.y + h / 2;
+            this.model.position.x = this.car.position.x + THREE_D_X_SHIFT;
+            this.model.position.y = -this.car.position.y + THREE_D_Y_SHIFT;
             this.model.position.z = 0;
             this.model.rotation.z = -this.car.angle + (3 * Math.PI) / 2;
         }
@@ -171,6 +167,28 @@ export default class WorldUtil {
         window.requestAnimationFrame(this.gameLoop);
     };
 
+    // getIslandModel(scene, x, y) {
+    //     loader.load(
+    //         islandModel,
+    //         gltf => {
+    //             // called when the resource is loaded
+    //             this.model2 = gltf.scene;
+    //             this.model2.position.x = x;
+    //             this.model2.position.y = y;
+    //             this.model2.position.z = 0;
+    //             this.model2.rotation.x = Math.PI / 2;
+    //             scene.add(gltf.scene);
+    //         },
+    //         xhr => {
+    //             // called while loading is progressing
+    //             console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
+    //         },
+    //         error => {
+    //             // called when loading has errors
+    //             console.error("An error happened", error);
+    //         }
+    //     );
+    // }
     getCarModel(scene) {
         loader.load(
             carModel,
@@ -178,9 +196,9 @@ export default class WorldUtil {
                 // called when the resource is loaded
                 // gltf.scene.add(camera);
                 this.model = gltf.scene;
-                this.model.scale.x = 0.2;
-                this.model.scale.y = 0.2;
-                this.model.scale.z = 0.2;
+                this.model.scale.x = 0.18;
+                this.model.scale.y = 0.18;
+                this.model.scale.z = 0.18;
                 this.model.position.x = this.car.position.x - w / 2;
                 this.model.position.y = -this.car.position.y - h / 2;
                 this.model.position.z = 0;
@@ -223,46 +241,34 @@ export default class WorldUtil {
 
         this.car.power = Math.max(0, Math.min(MAX_POWER, this.car.power));
         this.car.reverse = Math.max(0, Math.min(MAX_REVERSE, this.car.reverse));
-        this.shouldRotate = this.car.power > 0.0004 || this.car.reverse > 0.0003 ? true : false
+        this.shouldRotate =
+            this.car.power > 0.00006 || this.car.reverse > 0.00004 ? true : false;
         if (this.left && this.shouldRotate) {
             this.car.angle -= direction * ANGLE_FACTOR;
             Body.set(this.car, {
                 angle: this.car.angle
-            })
+            });
         }
         if (this.right && this.shouldRotate) {
             this.car.angle += direction * ANGLE_FACTOR;
             Body.set(this.car, {
                 angle: this.car.angle
-            })
+            });
         }
 
         if (this.car.isTurning) {
-            this.car.power = Math.min(this.car.power, 0.56 * MAX_POWER);
-            this.car.reverse = Math.min(this.car.reverse, 0.56 * MAX_REVERSE);
+            this.car.power = Math.min(this.car.power, 0.6 * MAX_POWER);
+            this.car.reverse = Math.min(this.car.reverse, 0.6 * MAX_REVERSE);
         }
-        if (this.accelerate) {
-            Body.applyForce(
-                this.car, {
-                    x: this.car.position.x - (CAR_HEIGHT * Math.sin(this.car.angle)) / 2,
-                    y: this.car.position.y + (CAR_HEIGHT * Math.cos(this.car.angle)) / 2
-                }, {
-                    x: this.car.power * Math.sin(this.car.angle),
-                    y: -this.car.power * Math.cos(this.car.angle)
-                }
-            );
-        }
-        if (this.deaccelerate) {
-            Body.applyForce(
-                this.car, {
-                    x: this.car.position.x - (CAR_HEIGHT * Math.sin(this.car.angle)) / 2,
-                    y: this.car.position.y + (CAR_HEIGHT * Math.cos(this.car.angle)) / 2
-                }, {
-                    x: -this.car.reverse * Math.sin(this.car.angle),
-                    y: this.car.reverse * Math.cos(this.car.angle)
-                }
-            );
-        }
+        Body.applyForce(
+            this.car, {
+                x: this.car.position.x - (CAR_HEIGHT * Math.sin(this.car.angle)) / 2,
+                y: this.car.position.y + (CAR_HEIGHT * Math.cos(this.car.angle)) / 2
+            }, {
+                x: (this.car.power - this.car.reverse) * Math.sin(this.car.angle),
+                y: -(this.car.power - this.car.reverse) * Math.cos(this.car.angle)
+            }
+        );
     }
 
     addControls = () => {
