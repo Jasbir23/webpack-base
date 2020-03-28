@@ -35,6 +35,13 @@ import {
     OrbitControls
 } from "three/examples/jsm/controls/OrbitControls";
 
+import {
+    LightProbeGenerator
+} from 'three/examples/jsm/lights/LightProbeGenerator';
+import {
+    LightProbeHelper
+} from "three/examples/jsm/helpers/LightProbeHelper"
+
 import carModel from "../assets/car/SportsCar.gltf";
 import islandModel from "../assets/island/1220 Island.gltf";
 
@@ -62,7 +69,8 @@ const Engine = Matter.Engine,
 
 const loader = new GLTFLoader();
 const THREE = require("three");
-var camera, scene, renderer;
+var camera, scene, renderer, cubeCamera, lightProbe;
+var temp = new THREE.Vector3;
 var geometry, material, mesh;
 export default class WorldUtil {
     constructor(props) {
@@ -93,14 +101,13 @@ export default class WorldUtil {
 
         this.car = addCar({
                 x: 0.14 * w,
-                y: 0.8 * h
+                y: 0.86 * h
             },
             this.engine
         );
         this.car.power = 0;
         this.car.reverse = 0;
         this.car.isTurning = false;
-        addWalls(this.engine);
         Events.on(this.engine, "collisionActive", this.collisionActive);
         Events.on(this.engine, "collisionEnd", this.collisionEnd);
         Render.run(render);
@@ -124,8 +131,12 @@ export default class WorldUtil {
 
         //camera
         camera = new PerspectiveCamera(70, w / h, 0.01, 1000);
-        camera.position.set(0, -200, 300);
-
+        // camera.lookAt({
+        //     x: -230,
+        //     y: -200,
+        //     z: 50
+        // })
+        // scene.add(cubeCamera)
         this.getCarModel(scene);
 
         const light = new AmbientLight(0xffffff, 1);
@@ -135,10 +146,11 @@ export default class WorldUtil {
 
         addGround(scene);
         createTrack(this.engine, scene);
+        addWalls(this.engine, scene);
         var axesHelper = new THREE.AxesHelper(500);
         scene.add(axesHelper);
         // this.orbitalControls = new OrbitControls(camera, raceContainer);
-        // raceContainer.appendChild(renderer.domElement);
+        raceContainer.appendChild(renderer.domElement);
     }
 
     startGame() {
@@ -160,7 +172,7 @@ export default class WorldUtil {
         renderer.render(scene, camera);
 
         this.updateCar();
-        camera.updateProjectionMatrix();
+        // camera.updateProjectionMatrix();
         Engine.update(this.engine);
         // this.orbitalControls.update();
 
@@ -194,16 +206,21 @@ export default class WorldUtil {
             carModel,
             gltf => {
                 // called when the resource is loaded
-                // gltf.scene.add(camera);
+                // gltf.cameras.push(cubeCamera);
+
+                camera.position.set(-50, -20, 150);
                 this.model = gltf.scene;
-                this.model.scale.x = 0.18;
-                this.model.scale.y = 0.18;
-                this.model.scale.z = 0.18;
+                this.model.scale.x = 0.1;
+                this.model.scale.y = 0.1;
+                this.model.scale.z = 0.1;
                 this.model.position.x = this.car.position.x - w / 2;
                 this.model.position.y = -this.car.position.y - h / 2;
                 this.model.position.z = 0;
                 this.model.rotation.z = -this.car.angle + Math.PI / 2;
-                scene.add(gltf.scene);
+                const carMesh = new THREE.Mesh();
+                carMesh.add(camera);
+                carMesh.add(gltf.scene);
+                scene.add(carMesh);
             },
             xhr => {
                 // called while loading is progressing
@@ -218,17 +235,30 @@ export default class WorldUtil {
 
     updateCar() {
         this.car.isTurning = this.left || this.right;
-        this.angleBtwFNV = getAngleBtwVectores({
-                x: this.car.power * Math.sin(this.car.angle),
-                y: -this.car.power * Math.cos(this.car.angle)
-            },
-            this.car.velocity
-        );
+        // this.angleBtwFNV = getAngleBtwVectores({
+        //         x: this.car.power * Math.sin(this.car.angle),
+        //         y: -this.car.power * Math.cos(this.car.angle)
+        //     },
+        //     this.car.velocity
+        // );
 
-        let direction =
-            this.accelerate || this.deaccelerate ? (this.accelerate ? 1 : -1) : 0;
-        direction = this.angleBtwFNV ? this.angleBtwFNV * direction : direction;
-
+        // let direction =
+        //     this.accelerate || this.deaccelerate ? (this.accelerate ? 1 : -1) : 0;
+        // direction = this.angleBtwFNV ? this.angleBtwFNV * direction : direction;
+        // this.model && camera.lookAt(this.model.position)
+        // if (this.model) {
+        //     const {
+        //         x,
+        //         y,
+        //         z
+        //     } = this.model.position
+        //     camera.position.set(x, y - 80, z + 80)
+        //     camera.lookAt(this.model.position)
+        //     temp.set(x, y - 70, z + 50)
+        //     // temp.setFromMatrixPosition(this.model.matrixWorld);
+        //     // camera.position.lerp(temp, 0.2);
+        // }
+        const direction = this.car.power - this.car.reverse > 0 ? 1 : -1
         if (this.accelerate) {
             this.car.power += POWER_FAC;
         } else {
@@ -257,8 +287,8 @@ export default class WorldUtil {
         }
 
         if (this.car.isTurning) {
-            this.car.power = Math.min(this.car.power, 0.6 * MAX_POWER);
-            this.car.reverse = Math.min(this.car.reverse, 0.6 * MAX_REVERSE);
+            this.car.power = Math.min(this.car.power, 0.8 * MAX_POWER);
+            this.car.reverse = Math.min(this.car.reverse, 0.8 * MAX_REVERSE);
         }
         Body.applyForce(
             this.car, {
@@ -295,6 +325,9 @@ export default class WorldUtil {
                 break;
             case "W":
                 this.accelerate = isDown;
+                break;
+            case " ":
+                this.deaccelerate = isDown;
                 break;
             case "s":
                 this.deaccelerate = isDown;

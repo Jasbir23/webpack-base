@@ -65,7 +65,7 @@ function addRect(engine, x, y, width, height, scene, angle = 0) {
   });
   World.add(engine.world, body);
 
-  let geometry = new THREE.BoxGeometry(width, height, 1);
+  let geometry = new THREE.BoxGeometry(width, height, 10);
   let material = new THREE.MeshBasicMaterial({
     color: 0xD2691E
   })
@@ -270,16 +270,16 @@ function createTrack(engine, scene) {
   addRect(engine, w / 3, h / 3.2, w / 4.2, 2 * thickness, scene, Math.PI / 7.4);
 }
 
-function addWalls(engine) {
+function addWalls(engine, scene) {
   const wallThickness = 5
   //bottom
-  addRect(engine, 0 + w / 2, h - wallThickness / 2, h / 1.1 + w, wallThickness);
+  addRect(engine, 0 + w / 2, h - wallThickness / 2, w, wallThickness, scene);
   //top
-  addRect(engine, 0 + w / 2, wallThickness / 2, w, wallThickness);
+  addRect(engine, 0 + w / 2, wallThickness / 2, w, wallThickness, scene);
   //left
-  addRect(engine, 0 + wallThickness / 2, h / 2, wallThickness, h);
+  addRect(engine, 0 + wallThickness / 2, h / 2, wallThickness, h, scene);
   //right
-  addRect(engine, w - wallThickness / 2, h / 2, wallThickness, h);
+  addRect(engine, w - wallThickness / 2, h / 2, wallThickness, h, scene);
 }
 
 function addGround(scene) {
