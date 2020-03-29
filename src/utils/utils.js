@@ -79,20 +79,13 @@ function addRect(engine, x, y, width, height, scene, angle = 0) {
 function createTrack(engine, scene) {
   const thickness = 4;
   // top left part
-  addRect(engine, w / 20, 3 * thickness / 2, w / 10, thickness, scene);
-  addRect(engine, w / 24, 5 * thickness / 2, w / 12, thickness, scene);
-  addRect(engine, w / 28, 7 * thickness / 2, w / 14, thickness, scene);
-  addRect(engine, w / 32, 9 * thickness / 2, w / 16, thickness, scene);
-  addRect(engine, w / 36, 11 * thickness / 2, w / 18, thickness, scene);
-  addRect(engine, w / 40, 13 * thickness / 2, w / 20, thickness, scene);
-  addRect(engine, w / 44, 15 * thickness / 2, w / 22, thickness, scene);
-  addRect(engine, w / 48, 17 * thickness / 2, w / 24, thickness, scene);
-  addRect(engine, w / 52, 19 * thickness / 2, w / 26, thickness, scene);
-  addRect(engine, w / 56, 21 * thickness / 2, w / 28, thickness, scene);
-  addRect(engine, w / 60, 23 * thickness / 2, w / 30, thickness, scene);
-  addRect(engine, w / 64, 25 * thickness / 2, w / 32, thickness, scene);
-  addRect(engine, w / 68, 27 * thickness / 2, w / 34, thickness, scene);
-  addRect(engine, w / 72, 29 * thickness / 2, w / 36, thickness, scene);
+  let i = 10,
+    k = 3
+  while (i <= 36) {
+    addRect(engine, w / (i * 2), k * thickness / 2, w / i, thickness, scene);
+    i += 2;
+    k += 2
+  }
 
   addRect(engine, w / 72, 36 * thickness / 2, w / 36, 10 * thickness, scene);
 
@@ -100,35 +93,21 @@ function createTrack(engine, scene) {
   addRect(engine, w / 16, 79 * thickness / 2, w / 8, thickness, scene);
 
   addRect(engine, w / 12, 77 * thickness / 2, w / 6, thickness, scene);
-  addRect(engine, w / 12, 75 * thickness / 2, w / 6, thickness, scene);
-  addRect(engine, w / 16, 73 * thickness / 2, w / 8, thickness, scene);
-  addRect(engine, w / 20, 71 * thickness / 2, w / 10, thickness, scene);
-  addRect(engine, w / 24, 69 * thickness / 2, w / 12, thickness, scene);
-  addRect(engine, w / 28, 67 * thickness / 2, w / 14, thickness, scene);
-  addRect(engine, w / 32, 65 * thickness / 2, w / 16, thickness, scene);
-  addRect(engine, w / 36, 63 * thickness / 2, w / 18, thickness, scene);
-  addRect(engine, w / 40, 61 * thickness / 2, w / 20, thickness, scene);
-  addRect(engine, w / 44, 59 * thickness / 2, w / 22, thickness, scene);
-  addRect(engine, w / 48, 57 * thickness / 2, w / 24, thickness, scene);
-  addRect(engine, w / 52, 55 * thickness / 2, w / 26, thickness, scene);
-  addRect(engine, w / 56, 53 * thickness / 2, w / 28, thickness, scene);
-  addRect(engine, w / 60, 51 * thickness / 2, w / 30, thickness, scene);
-  addRect(engine, w / 64, 49 * thickness / 2, w / 32, thickness, scene);
-  addRect(engine, w / 68, 47 * thickness / 2, w / 34, thickness, scene);
-  addRect(engine, w / 72, 45 * thickness / 2, w / 36, thickness, scene);
 
-  addRect(engine, w / 24, 79 * thickness / 2, w / 12, thickness, scene);
-  addRect(engine, w / 28, 81 * thickness / 2, w / 14, thickness, scene);
-  addRect(engine, w / 32, 83 * thickness / 2, w / 16, thickness, scene);
-  addRect(engine, w / 36, 85 * thickness / 2, w / 18, thickness, scene);
-  addRect(engine, w / 40, 87 * thickness / 2, w / 20, thickness, scene);
-  addRect(engine, w / 44, 89 * thickness / 2, w / 22, thickness, scene);
-  addRect(engine, w / 48, 91 * thickness / 2, w / 24, thickness, scene);
-  addRect(engine, w / 52, 93 * thickness / 2, w / 26, thickness, scene);
-  addRect(engine, w / 56, 95 * thickness / 2, w / 28, thickness, scene);
-  addRect(engine, w / 60, 97 * thickness / 2, w / 30, thickness, scene);
-  addRect(engine, w / 64, 99 * thickness / 2, w / 32, thickness, scene);
-  addRect(engine, w / 68, 101 * thickness / 2, w / 34, thickness, scene);
+  i = 6;
+  k = 75
+  while (i <= 36) {
+    addRect(engine, w / (i * 2), k * thickness / 2, w / i, thickness, scene);
+    i += 2;
+    k -= 2;
+  }
+
+  i = 12, k = 79;
+  while (i <= 34) {
+    addRect(engine, w / (i * 2), k * thickness / 2, w / i, thickness, scene);
+    i += 2;
+    k += 2;
+  }
 
   addRect(engine, w / 72, 119 * thickness / 2, w / 36, 20 * thickness, scene);
 

@@ -43,7 +43,6 @@ import {
 } from "three/examples/jsm/helpers/LightProbeHelper"
 
 import carModel from "../assets/car/SportsCar.gltf";
-import islandModel from "../assets/island/1220 Island.gltf";
 
 const raceContainer = document.querySelector(".raceContainer");
 
@@ -74,6 +73,14 @@ var temp = new THREE.Vector3;
 var geometry, material, mesh;
 export default class WorldUtil {
     constructor(props) {
+
+        this.initMatterWorld()
+        this.initCar()
+        this.addControls();
+        this.initThreeJsWorld();
+    }
+
+    initMatterWorld() {
         this.engine = Engine.create();
         this.engine.world.gravity = {
             x: 0,
@@ -88,17 +95,12 @@ export default class WorldUtil {
                 wireframes: false
             }
         });
+        Events.on(this.engine, "collisionActive", this.collisionActive);
+        Events.on(this.engine, "collisionEnd", this.collisionEnd);
+        Render.run(render);
+    }
 
-        this.carView = document.querySelector(".car");
-        this.carView.style.height = CAR_HEIGHT;
-        this.carView.style.width = CAR_WIDTH;
-
-        this.left = false;
-        this.right = false;
-        this.accelerate = false;
-        this.deaccelerate = false;
-        this.addControls();
-
+    initCar() {
         this.car = addCar({
                 x: 0.14 * w,
                 y: 0.86 * h
@@ -108,15 +110,17 @@ export default class WorldUtil {
         this.car.power = 0;
         this.car.reverse = 0;
         this.car.isTurning = false;
-        Events.on(this.engine, "collisionActive", this.collisionActive);
-        Events.on(this.engine, "collisionEnd", this.collisionEnd);
-        Render.run(render);
+        this.carView = document.querySelector(".car");
+        this.carView.style.height = CAR_HEIGHT;
+        this.carView.style.width = CAR_WIDTH;
 
-        this.carMeshes = [];
-        this.init();
+        this.left = false;
+        this.right = false;
+        this.accelerate = false;
+        this.deaccelerate = false;
     }
 
-    init() {
+    initThreeJsWorld() {
         //creating scene
         scene = new Scene();
         scene.background = new THREE.Color(0xfffff0);
@@ -131,12 +135,6 @@ export default class WorldUtil {
 
         //camera
         camera = new PerspectiveCamera(70, w / h, 0.01, 1000);
-        // camera.lookAt({
-        //     x: -230,
-        //     y: -200,
-        //     z: 50
-        // })
-        // scene.add(cubeCamera)
         this.getCarModel(scene);
 
         const light = new AmbientLight(0xffffff, 1);
@@ -179,36 +177,13 @@ export default class WorldUtil {
         window.requestAnimationFrame(this.gameLoop);
     };
 
-    // getIslandModel(scene, x, y) {
-    //     loader.load(
-    //         islandModel,
-    //         gltf => {
-    //             // called when the resource is loaded
-    //             this.model2 = gltf.scene;
-    //             this.model2.position.x = x;
-    //             this.model2.position.y = y;
-    //             this.model2.position.z = 0;
-    //             this.model2.rotation.x = Math.PI / 2;
-    //             scene.add(gltf.scene);
-    //         },
-    //         xhr => {
-    //             // called while loading is progressing
-    //             console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
-    //         },
-    //         error => {
-    //             // called when loading has errors
-    //             console.error("An error happened", error);
-    //         }
-    //     );
-    // }
     getCarModel(scene) {
         loader.load(
             carModel,
             gltf => {
                 // called when the resource is loaded
-                // gltf.cameras.push(cubeCamera);
 
-                camera.position.set(-50, -20, 150);
+                camera.position.set(-20, 0, 250);
                 this.model = gltf.scene;
                 this.model.scale.x = 0.1;
                 this.model.scale.y = 0.1;
@@ -218,8 +193,8 @@ export default class WorldUtil {
                 this.model.position.z = 0;
                 this.model.rotation.z = -this.car.angle + Math.PI / 2;
                 const carMesh = new THREE.Mesh();
-                carMesh.add(camera);
-                carMesh.add(gltf.scene);
+                carMesh.add(this.model);
+                carMesh.add(camera)
                 scene.add(carMesh);
             },
             xhr => {
@@ -235,29 +210,7 @@ export default class WorldUtil {
 
     updateCar() {
         this.car.isTurning = this.left || this.right;
-        // this.angleBtwFNV = getAngleBtwVectores({
-        //         x: this.car.power * Math.sin(this.car.angle),
-        //         y: -this.car.power * Math.cos(this.car.angle)
-        //     },
-        //     this.car.velocity
-        // );
 
-        // let direction =
-        //     this.accelerate || this.deaccelerate ? (this.accelerate ? 1 : -1) : 0;
-        // direction = this.angleBtwFNV ? this.angleBtwFNV * direction : direction;
-        // this.model && camera.lookAt(this.model.position)
-        // if (this.model) {
-        //     const {
-        //         x,
-        //         y,
-        //         z
-        //     } = this.model.position
-        //     camera.position.set(x, y - 80, z + 80)
-        //     camera.lookAt(this.model.position)
-        //     temp.set(x, y - 70, z + 50)
-        //     // temp.setFromMatrixPosition(this.model.matrixWorld);
-        //     // camera.position.lerp(temp, 0.2);
-        // }
         const direction = this.car.power - this.car.reverse > 0 ? 1 : -1
         if (this.accelerate) {
             this.car.power += POWER_FAC;
