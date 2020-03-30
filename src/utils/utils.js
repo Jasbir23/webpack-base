@@ -37,7 +37,7 @@ function addCar(pos, engine) {
     density: 0.1,
     label: 'car',
     friction: 0.02,
-    frictionAir: 0.03,
+    frictionAir: 0.06,
     frictionStatic: 0,
     collisionFilter: {
       mask: defaultCategory

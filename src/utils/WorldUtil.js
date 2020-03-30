@@ -168,7 +168,7 @@ export default class WorldUtil {
         }
 
         renderer.render(scene, camera);
-
+        // this.model && camera.lookAt(this.model.position)
         this.updateCar();
         // camera.updateProjectionMatrix();
         Engine.update(this.engine);
@@ -183,6 +183,7 @@ export default class WorldUtil {
             gltf => {
                 // called when the resource is loaded
 
+                // camera.position.set(-225, -180, 40);
                 camera.position.set(-20, 0, 250);
                 this.model = gltf.scene;
                 this.model.scale.x = 0.1;
@@ -211,7 +212,7 @@ export default class WorldUtil {
     updateCar() {
         this.car.isTurning = this.left || this.right;
 
-        const direction = this.car.power - this.car.reverse > 0 ? 1 : -1
+        const direction = this.car.power - this.car.reverse >= 0 ? 1 : -1
         if (this.accelerate) {
             this.car.power += POWER_FAC;
         } else {
@@ -224,8 +225,7 @@ export default class WorldUtil {
 
         this.car.power = Math.max(0, Math.min(MAX_POWER, this.car.power));
         this.car.reverse = Math.max(0, Math.min(MAX_REVERSE, this.car.reverse));
-        this.shouldRotate =
-            this.car.power > 0.00006 || this.car.reverse > 0.00004 ? true : false;
+        this.shouldRotate = Math.abs(this.car.power - this.car.reverse) > 0.001 ? true : false
         if (this.left && this.shouldRotate) {
             this.car.angle -= direction * ANGLE_FACTOR;
             Body.set(this.car, {
@@ -305,7 +305,7 @@ export default class WorldUtil {
     };
     collisionEnd = e => {
         Body.set(this.car, {
-            frictionAir: 0.03
+            frictionAir: 0.06
         });
     };
 }
