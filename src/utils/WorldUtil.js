@@ -1,15 +1,10 @@
 import Matter from "matter-js";
 
 import {
-    MAX_POWER,
     CAR_WIDTH,
     CAR_HEIGHT,
-    REVERSE_FAC,
-    POWER_FAC,
-    BRAKE_CONST,
-    MAX_REVERSE,
-    HEART_VEC,
-    ANGLE_FACTOR,
+    FORCE_CONSTANT,
+    TORQUE,
     THREE_D_X_SHIFT,
     THREE_D_Y_SHIFT
 } from "./constants";
@@ -75,7 +70,10 @@ export default class WorldUtil {
     constructor(props) {
 
         this.initMatterWorld()
-        this.initCar()
+        const RPM = 9000,
+            HP = 570,
+            gearRatio = 15;
+        this.initCar(RPM, HP, gearRatio)
         this.addControls();
         this.initThreeJsWorld();
     }
@@ -100,15 +98,19 @@ export default class WorldUtil {
         Render.run(render);
     }
 
-    initCar() {
+    initCar(RPM, HP, gearRatio) {
         this.car = addCar({
                 x: 0.14 * w,
                 y: 0.86 * h
             },
             this.engine
         );
+        const forceVal = (HP * gearRatio * 5252 * FORCE_CONSTANT) / RPM;
         this.car.power = 0;
         this.car.reverse = 0;
+        this.car.thrust = forceVal;
+        this.car.reverse = forceVal;
+        this.car.torqueVal = forceVal / 1.2;
         this.car.isTurning = false;
         this.carView = document.querySelector(".car");
         this.carView.style.height = CAR_HEIGHT;
@@ -213,35 +215,29 @@ export default class WorldUtil {
         this.car.isTurning = this.left || this.right;
 
         const direction = this.car.power - this.car.reverse >= 0 ? 1 : -1
-        if (this.accelerate) {
-            this.car.power += POWER_FAC;
-        } else {
-            this.car.power -= POWER_FAC;
-        }
 
-        if (this.deaccelerate) {
-            this.car.reverse += REVERSE_FAC;
-        } else this.car.reverse -= REVERSE_FAC;
+        this.car.power = this.accelerate ? this.car.thrust : 0
+        this.car.reverse = this.deaccelerate ? this.car.thrust : 0
 
-        this.car.power = Math.max(0, Math.min(MAX_POWER, this.car.power));
-        this.car.reverse = Math.max(0, Math.min(MAX_REVERSE, this.car.reverse));
-        this.shouldRotate = Math.abs(this.car.power - this.car.reverse) > 0.001 ? true : false
+        this.shouldRotate = this.car.power !== this.car.reverse ? true : false
+
         if (this.left && this.shouldRotate) {
-            this.car.angle -= direction * ANGLE_FACTOR;
             Body.set(this.car, {
-                angle: this.car.angle
-            });
+                torque: -direction * this.car.torqueVal
+            })
         }
         if (this.right && this.shouldRotate) {
-            this.car.angle += direction * ANGLE_FACTOR;
             Body.set(this.car, {
-                angle: this.car.angle
-            });
+                torque: direction * this.car.torqueVal
+            })
         }
+        // if (!this.left && !this.right) Body.set(this.car, {
+        //     torque: 0
+        // })
 
         if (this.car.isTurning) {
-            this.car.power = Math.min(this.car.power, 0.8 * MAX_POWER);
-            this.car.reverse = Math.min(this.car.reverse, 0.8 * MAX_REVERSE);
+            this.car.power = Math.min(this.car.power, 0.9 * this.car.thrust);
+            this.car.reverse = Math.min(this.car.reverse, 0.9 * this.car.thrust);
         }
         Body.applyForce(
             this.car, {

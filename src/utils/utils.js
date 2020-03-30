@@ -38,7 +38,7 @@ function addCar(pos, engine) {
     label: 'car',
     friction: 0.02,
     frictionAir: 0.06,
-    frictionStatic: 0,
+    frictionStatic: 0.01,
     collisionFilter: {
       mask: defaultCategory
     },
