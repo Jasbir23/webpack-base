@@ -2,7 +2,10 @@ import "./index.css";
 import Matter from "matter-js";
 import lottie from "lottie-web";
 const Blowfish = require("egoroof-blowfish");
-const { innerHeight: h, innerWidth: w } = window;
+const {
+  innerHeight: h,
+  innerWidth: w
+} = window;
 import {
   GRAVITY,
   getUserURL,
@@ -19,7 +22,10 @@ import {
   BOARD_HEIGHT,
   SPEED_Y_FACTOR
 } from "./constants";
-import { random, getParameterByName } from "./utils";
+import {
+  random,
+  getParameterByName
+} from "./utils";
 
 var Engine = Matter.Engine,
   Body = Matter.Body,
@@ -53,6 +59,7 @@ var removeCount = 0;
 var dragTime = null;
 var battleId = null;
 var playerId = null;
+var isVisibilityChanged = false
 var scaleThreshold = 0.015;
 const loadingArr = [
   [0, 35],
@@ -84,6 +91,7 @@ if (typeof document.hidden !== "undefined") {
 
 function handleVisibilityChange() {
   if (document[hidden]) {
+    isVisibilityChanged = true;
     stopGame();
   }
 }
@@ -94,7 +102,13 @@ function handleVisibilityChange() {
 // getParameterByName(getUserURL, battleId, playerId);
 
 function stopGame() {
-  ballCont && ballCont.remove();
+  // ballCont && ballCont.remove();
+  let i = 0
+  while (i < ballCont.childElementCount)
+    removeBall(i)
+
+  // ballArray.forEach((ball, index) => removeBall(index))
+  ballArray = [];
   fireLottie.goToAndStop(30, true);
   slideLottie.stop();
   gameOver.style.display = "initial";
@@ -181,8 +195,7 @@ var left_point = Bodies.circle(RIM_LEFT, RIM_TOP, INFINITE_MASS_RADIUS, {
 var right_point = Bodies.circle(
   RIM_LEFT + RIM_WIDTH - 2 * INFINITE_MASS_RADIUS,
   RIM_TOP,
-  INFINITE_MASS_RADIUS,
-  {
+  INFINITE_MASS_RADIUS, {
     isStatic: true,
     collisionFilter: {
       mask: defaultCategory
@@ -223,7 +236,10 @@ function setFinalValue(event) {
   )
     return;
   var mousePosition = event.mouse.position;
-  const { x, y } = ballArray[ballArray.length - 1].position;
+  const {
+    x,
+    y
+  } = ballArray[ballArray.length - 1].position;
   let swipeLength = startY - mousePosition.y;
   swipeLength = swipeLength >= 250 ? 2.4 : (swipeLength * 2.4) / 250;
 
@@ -246,12 +262,13 @@ function setFinalValue(event) {
   ballArray[ballArray.length - 1].isMoving = true;
   ballArray[ballArray.length - 1].slow =
     initialVy === -SLOW_VEL_FAC * h ? true : false;
-  setTimeout(function() {
-    createBall();
+  setTimeout(function () {
+    if (!timeStopped)
+      createBall();
   }, 600);
 }
 
-Events.on(mouseConstraint, "mousedown", function(event) {
+Events.on(mouseConstraint, "mousedown", function (event) {
   if (!gameStarted && timeStopped) return;
   var mousePosition = event.mouse.position;
   startY = mousePosition.y;
@@ -260,21 +277,21 @@ Events.on(mouseConstraint, "mousedown", function(event) {
   endTime = null;
 });
 
-Events.on(mouseConstraint, "mousemove", function(event) {
+Events.on(mouseConstraint, "mousemove", function (event) {
   if (!gameStarted && timeStopped) return;
   dragTime = new Date().getTime();
   slideLottie.stop();
   if (!endTime && dragTime - startTime > 400) setFinalValue(event);
 });
 
-Events.on(mouseConstraint, "mouseup", function(event) {
+Events.on(mouseConstraint, "mouseup", function (event) {
   if (!gameStarted && timeStopped) return;
 
   endTime = new Date().getTime();
   setFinalValue(event);
 });
 
-Events.on(engine, "collisionStart", function(event) {
+Events.on(engine, "collisionStart", function (event) {
   ballArray.map((ball, index) => {
     if (
       ball.isMoving &&
@@ -344,7 +361,7 @@ loadingLottie.playSegments(loadingArr[0], true);
 loadingLottie.playSegments(loadingArr[1], false);
 loadingLottie.playSegments(loadingArr[2], false);
 loadingLottie.loop = true;
-loadingLottie.addEventListener("loopComplete", function() {
+loadingLottie.addEventListener("loopComplete", function () {
   startGame();
 });
 var interval = null;
@@ -352,8 +369,38 @@ var interval = null;
 const slide = document.querySelector(".slide");
 var slideLottie = null;
 
-document.getElementById("restartButton").onclick = function restartGame() {
-  console.log("implement restart here");
+document.getElementById("restartButton").onclick = function restartGame(e) {
+  e.preventDefault();
+  isLoading = false;
+  gameStarted = false;
+  resultSend = false;
+  timeStopped = true;
+  mainTimer = 60;
+  initialVx = 0;
+  initialVy = 0;
+  score = 0;
+  ballRadius = w / 12;
+  startX = 0;
+  startY = 0;
+  startTime = null;
+  endTime = null;
+  rimOnFire = false;
+  basketCount = 0;
+  removeCount = 0;
+  dragTime = null;
+  battleId = null;
+  playerId = null;
+  scaleThreshold = 0.015;
+  gameOver.style.display = "none";
+  gameEndContainer.style.opacity = 0;
+  gameEndContainer.style.display = "none";
+  name.style.display = "none";
+  finalScore.style.display = "none";
+  gameEndLottie.stop();
+  let i = 0
+  while (i < ballCont.childElementCount)
+    removeBall(i)
+  startGame();
 };
 
 function startGame() {
@@ -377,10 +424,14 @@ function startGame() {
   isLoading = false;
   gameStarted = true;
   timeStopped = false;
-  timerInterval = setInterval(function() {
+  timerInterval = setInterval(function () {
     mainTimer--;
   }, 1000);
-  animationFrame = window.requestAnimationFrame(run);
+  console.log('here: isVisibilityChanged', isVisibilityChanged)
+  if (!isVisibilityChanged) {
+    animationFrame = window.requestAnimationFrame(run);
+  }
+  isVisibilityChanged = false;
   slideLottie.setSpeed(0.2);
   slideLottie.playSegments([0, 10], true);
 }
@@ -485,7 +536,7 @@ rightPoint.style.top = right_point.position.y - INFINITE_MASS_RADIUS;
 function showPoints(text) {
   plusTwo.textContent = text;
   plusTwo.style.display = "initial";
-  setTimeout(function() {
+  setTimeout(function () {
     plusTwo.style.display = "none";
   }, 1000);
 }
@@ -497,7 +548,7 @@ function runOnBasketSuccess(ball) {
     ball.position.x > left_point.position.x + INFINITE_MASS_RADIUS &&
     ball.position.x < right_point.position.x - INFINITE_MASS_RADIUS &&
     ball.position.y - ball.circleRadius >
-      left_point.position.y + INFINITE_MASS_RADIUS
+    left_point.position.y + INFINITE_MASS_RADIUS
   ) {
     ball.ballAboveBasket = false;
     rimLottie.setSpeed(3);
@@ -560,7 +611,7 @@ function run() {
       ball &&
       ball.isMoving &&
       ball.position.y + ball.circleRadius <
-        left_point.position.y - INFINITE_MASS_RADIUS &&
+      left_point.position.y - INFINITE_MASS_RADIUS &&
       ball.velocity.y >= 0
     ) {
       ball.collisionFilter.mask = defaultCategory;
@@ -578,7 +629,7 @@ function run() {
       ball.isMoving &&
       ball.velocity.y >= 0 &&
       ball.position.y - ballRadius >
-        left_point.position.y + INFINITE_MASS_RADIUS + RIM_HEIGHT
+      left_point.position.y + INFINITE_MASS_RADIUS + RIM_HEIGHT
     ) {
       ballView.style.zIndex = -2;
     }
