@@ -10,4 +10,4 @@ export const defaultCategory = 0x0001,
     CAR_WIDTH = 6,
     CAR_HEIGHT = 8,
     TORQUE = 0.0016,
-    FORCE_CONSTANT = 0.00000036,
+    FORCE_CONSTANT = 0.00000036;
