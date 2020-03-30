@@ -2,10 +2,7 @@ import "./index.css";
 import Matter from "matter-js";
 import lottie from "lottie-web";
 const Blowfish = require("egoroof-blowfish");
-const {
-  innerHeight: h,
-  innerWidth: w
-} = window;
+const { innerHeight: h, innerWidth: w } = window;
 import {
   GRAVITY,
   getUserURL,
@@ -22,10 +19,7 @@ import {
   BOARD_HEIGHT,
   SPEED_Y_FACTOR
 } from "./constants";
-import {
-  random,
-  getParameterByName,
-} from "./utils";
+import { random, getParameterByName } from "./utils";
 
 var Engine = Matter.Engine,
   Body = Matter.Body,
@@ -35,6 +29,8 @@ var Engine = Matter.Engine,
   Mouse = Matter.Mouse,
   Events = Matter.Events,
   MouseConstraint = Matter.MouseConstraint;
+
+var gameEndContainer = document.querySelector(".gameEndContainer");
 
 var isLoading = false;
 var timerInterval;
@@ -71,10 +67,11 @@ var engine = Engine.create();
 const ballCont = document.getElementById("ball");
 engine.world.gravity.y = GRAVITY;
 
-const bf = new Blowfish("gamePind@12", Blowfish.MODE.ECB); // only key isn't optional
+// const bf = new Blowfish("gamePind@12", Blowfish.MODE.ECB); // only key isn't optional
 
 var hidden, visibilityChange;
-if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+if (typeof document.hidden !== "undefined") {
+  // Opera 12.10 and Firefox 18 and later support
   hidden = "hidden";
   visibilityChange = "visibilitychange";
 } else if (typeof document.msHidden !== "undefined") {
@@ -87,22 +84,20 @@ if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and 
 
 function handleVisibilityChange() {
   if (document[hidden]) {
-    stopGame()
+    stopGame();
   }
 }
 
-let params = new URL(document.location).searchParams;
-battleId = params.get("battleId");
-playerId = params.get("playerId");
-getParameterByName(getUserURL, battleId, playerId);
+// let params = new URL(document.location).searchParams;
+// battleId = params.get("battleId");
+// playerId = params.get("playerId");
+// getParameterByName(getUserURL, battleId, playerId);
 
 function stopGame() {
-  ballCont &&
-    ballCont.remove();
-  fireLottie.goToAndStop(30, true)
+  ballCont && ballCont.remove();
+  fireLottie.goToAndStop(30, true);
   slideLottie.stop();
   gameOver.style.display = "initial";
-  var gameEndContainer = document.querySelector(".gameEndContainer");
   gameEndContainer.style.opacity = 0.6;
   gameEndContainer.style.display = "initial";
   name.style.display = "initial";
@@ -116,24 +111,25 @@ function stopGame() {
     }
   };
   gameEndLottie.play();
-  clearInterval(timerInterval)
+  clearInterval(timerInterval);
   window.cancelAnimationFrame(animationFrame);
-  !resultSend && playerId && battleId && sendResult(res, postResURL, bf);
+  //   !resultSend && playerId && battleId && sendResult(res, postResURL, bf);
 }
 
-
-function sendResult(obj, postResURL, bf) {
-  const encoded = bf.encode(JSON.stringify(obj));
-  resultSend = true;
-  fetch(postResURL, {
-    method: "post",
-    body: encoded.toString()
-  });
-}
+// function sendResult(obj, postResURL, bf) {
+//   const encoded = bf.encode(JSON.stringify(obj));
+//   resultSend = true;
+//   fetch(postResURL, {
+//     method: "post",
+//     body: encoded.toString()
+//   });
+// }
 if (typeof document.addEventListener === "undefined" || hidden === undefined) {
-  console.log("This demo requires a browser, such as Google Chrome or Firefox, that supports the Page Visibility API.");
+  console.log(
+    "This demo requires a browser, such as Google Chrome or Firefox, that supports the Page Visibility API."
+  );
 } else {
-  // Handle page visibility change   
+  // Handle page visibility change
   document.addEventListener(visibilityChange, handleVisibilityChange, false);
 }
 
@@ -146,7 +142,7 @@ Matter.Bounds.create({
     x: Infinity,
     y: Infinity
   }
-})
+});
 var render = Render.create({
   element: document.body,
   engine: engine,
@@ -185,7 +181,8 @@ var left_point = Bodies.circle(RIM_LEFT, RIM_TOP, INFINITE_MASS_RADIUS, {
 var right_point = Bodies.circle(
   RIM_LEFT + RIM_WIDTH - 2 * INFINITE_MASS_RADIUS,
   RIM_TOP,
-  INFINITE_MASS_RADIUS, {
+  INFINITE_MASS_RADIUS,
+  {
     isStatic: true,
     collisionFilter: {
       mask: defaultCategory
@@ -206,7 +203,7 @@ var ground = Bodies.rectangle(w / 2, 0.75 * h, 3 * w, 0.06 * h, {
   }
 });
 // add all of the bodies to the world
-World.add(engine.world, [ground, left_point, right_point, ]);
+World.add(engine.world, [ground, left_point, right_point]);
 
 var mouse = Mouse.create(render.canvas),
   mouseConstraint = MouseConstraint.create(engine, {
@@ -220,12 +217,13 @@ var mouse = Mouse.create(render.canvas),
   });
 
 function setFinalValue(event) {
-  if (!ballArray[ballArray.length - 1] || ballArray[ballArray.length - 1].isMoving) return;
+  if (
+    !ballArray[ballArray.length - 1] ||
+    ballArray[ballArray.length - 1].isMoving
+  )
+    return;
   var mousePosition = event.mouse.position;
-  const {
-    x,
-    y
-  } = ballArray[ballArray.length - 1].position;
+  const { x, y } = ballArray[ballArray.length - 1].position;
   let swipeLength = startY - mousePosition.y;
   swipeLength = swipeLength >= 250 ? 2.4 : (swipeLength * 2.4) / 250;
 
@@ -246,13 +244,14 @@ function setFinalValue(event) {
   });
   ballArray[ballArray.length - 1].rotation = initialVx * ROTATION_FAC;
   ballArray[ballArray.length - 1].isMoving = true;
-  ballArray[ballArray.length - 1].slow = initialVy === -SLOW_VEL_FAC * h ? true : false
-  setTimeout(function () {
-    createBall()
+  ballArray[ballArray.length - 1].slow =
+    initialVy === -SLOW_VEL_FAC * h ? true : false;
+  setTimeout(function() {
+    createBall();
   }, 600);
 }
 
-Events.on(mouseConstraint, "mousedown", function (event) {
+Events.on(mouseConstraint, "mousedown", function(event) {
   if (!gameStarted && timeStopped) return;
   var mousePosition = event.mouse.position;
   startY = mousePosition.y;
@@ -261,22 +260,21 @@ Events.on(mouseConstraint, "mousedown", function (event) {
   endTime = null;
 });
 
-Events.on(mouseConstraint, "mousemove", function (event) {
+Events.on(mouseConstraint, "mousemove", function(event) {
   if (!gameStarted && timeStopped) return;
   dragTime = new Date().getTime();
   slideLottie.stop();
   if (!endTime && dragTime - startTime > 400) setFinalValue(event);
 });
 
-Events.on(mouseConstraint, "mouseup", function (event) {
+Events.on(mouseConstraint, "mouseup", function(event) {
   if (!gameStarted && timeStopped) return;
 
   endTime = new Date().getTime();
   setFinalValue(event);
-
 });
 
-Events.on(engine, "collisionStart", function (event) {
+Events.on(engine, "collisionStart", function(event) {
   ballArray.map((ball, index) => {
     if (
       ball.isMoving &&
@@ -285,7 +283,9 @@ Events.on(engine, "collisionStart", function (event) {
     ) {
       fireLottie.goToAndStop(30, true);
       rimLottie.setSpeed(1.5);
-      window.navigator && window.navigator.vibrate && window.navigator.vibrate(50)
+      window.navigator &&
+        window.navigator.vibrate &&
+        window.navigator.vibrate(50);
       rimLottie.playSegments([30, 45], true);
       ball.isCollided = true;
     } else if (ball.velocity.y > 0 && ball.position.y + ballRadius >= 0.6 * h) {
@@ -344,13 +344,17 @@ loadingLottie.playSegments(loadingArr[0], true);
 loadingLottie.playSegments(loadingArr[1], false);
 loadingLottie.playSegments(loadingArr[2], false);
 loadingLottie.loop = true;
-loadingLottie.addEventListener("loopComplete", function () {
+loadingLottie.addEventListener("loopComplete", function() {
   startGame();
 });
 var interval = null;
 
 const slide = document.querySelector(".slide");
 var slideLottie = null;
+
+document.getElementById("restartButton").onclick = function restartGame() {
+  console.log("implement restart here");
+};
 
 function startGame() {
   loadingLottie.playSegments(loadingArr[3], false);
@@ -373,9 +377,9 @@ function startGame() {
   isLoading = false;
   gameStarted = true;
   timeStopped = false;
-  timerInterval = setInterval(function () {
-    mainTimer--
-  }, 1000)
+  timerInterval = setInterval(function() {
+    mainTimer--;
+  }, 1000);
   animationFrame = window.requestAnimationFrame(run);
   slideLottie.setSpeed(0.2);
   slideLottie.playSegments([0, 10], true);
@@ -389,8 +393,8 @@ var fireLottie = lottie.loadAnimation({
   loop: true,
   animationData: require("./assets/firebasket.json")
 });
-fireLottie.goToAndStop(30, true)
-fireLottie.setSpeed(0.4)
+fireLottie.goToAndStop(30, true);
+fireLottie.setSpeed(0.4);
 fire.style.width = RIM_WIDTH;
 fire.style.height = 52;
 fire.style.opacity = 0.9;
@@ -436,11 +440,11 @@ function createBall() {
   ballChild.style.width = 2 * ballArray[ballArray.length - 1].circleRadius;
   ballChild.style.borderRadius = `${
     ballArray[ballArray.length - 1].circleRadius
-    }px`;
+  }px`;
   ballChild.style.opacity = 1;
   ballChild.style.transform = `rotate(${
     ballArray[ballArray.length - 1].rotation
-    }deg) scale(${ballArray[ballArray.length - 1].scale})`;
+  }deg) scale(${ballArray[ballArray.length - 1].scale})`;
   ballChild.style.left =
     ballArray[ballArray.length - 1].position.x -
     ballArray[ballArray.length - 1].circleRadius;
@@ -454,21 +458,15 @@ function removeBall(index) {
   removeCount++;
   if (removeCount !== basketCount) {
     rimOnFire = false;
-    fireLottie.goToAndStop(30, true)
+    fireLottie.goToAndStop(30, true);
     removeCount = 0;
     basketCount = 0;
   }
   World.remove(engine.world, ballArray[index]);
   ballArray.splice(index, 1);
-  if (
-    ballCont &&
-    ballCont.childNodes[index]
-  )
-    ballCont
-    .removeChild(ballCont.childNodes[index]);
-
+  if (ballCont && ballCont.childNodes[index])
+    ballCont.removeChild(ballCont.childNodes[index]);
 }
-
 
 const leftPoint = document.querySelector(".leftPoint");
 leftPoint.style.height = 2 * INFINITE_MASS_RADIUS;
@@ -485,9 +483,9 @@ rightPoint.style.left = right_point.position.x - INFINITE_MASS_RADIUS;
 rightPoint.style.top = right_point.position.y - INFINITE_MASS_RADIUS;
 
 function showPoints(text) {
-  plusTwo.textContent = text
+  plusTwo.textContent = text;
   plusTwo.style.display = "initial";
-  setTimeout(function () {
+  setTimeout(function() {
     plusTwo.style.display = "none";
   }, 1000);
 }
@@ -499,31 +497,31 @@ function runOnBasketSuccess(ball) {
     ball.position.x > left_point.position.x + INFINITE_MASS_RADIUS &&
     ball.position.x < right_point.position.x - INFINITE_MASS_RADIUS &&
     ball.position.y - ball.circleRadius >
-    left_point.position.y + INFINITE_MASS_RADIUS
+      left_point.position.y + INFINITE_MASS_RADIUS
   ) {
     ball.ballAboveBasket = false;
     rimLottie.setSpeed(3);
     rimLottie.playSegments([0, 30], true);
     basketCount++;
     if (rimOnFire && !ball.isCollided) {
-      score += 5
-      showPoints("+5")
+      score += 5;
+      showPoints("+5");
       perfectShot.play();
     } else if (rimOnFire && ball.isCollided) {
-      score += 3
-      showPoints("+3")
-      rimOnFire = false
-      fireLottie.goToAndStop(30, true)
+      score += 3;
+      showPoints("+3");
+      rimOnFire = false;
+      fireLottie.goToAndStop(30, true);
     } else if (!rimOnFire && !ball.isCollided) {
-      score += 2
-      rimOnFire = true
-      fireLottie.playSegments([0, 29])
-      showPoints("+2")
+      score += 2;
+      rimOnFire = true;
+      fireLottie.playSegments([0, 29]);
+      showPoints("+2");
       perfectShot.play();
     } else {
-      score += 1
-      fireLottie.goToAndStop(30, true)
-      showPoints("+1")
+      score += 1;
+      fireLottie.goToAndStop(30, true);
+      showPoints("+1");
     }
   }
 }
@@ -536,13 +534,11 @@ function run() {
   }
   timerView.textContent = `TIME: ${mainTimer <= 0 ? 0 : mainTimer}`;
   if (gameStarted && timeStopped) {
-    stopGame()
+    stopGame();
     return;
   }
   ballArray.map((ball, index) => {
-    var ballView =
-      ballCont &&
-      ballCont.childNodes[index];
+    var ballView = ballCont && ballCont.childNodes[index];
     if (!ballView) return;
     Body.set(ball, {
       circleRadius: ballRadius * ball.scale
@@ -552,14 +548,19 @@ function run() {
     ballView.style.left = ball.position.x - ball.circleRadius;
     ballView.style.top = ball.position.y - ball.circleRadius;
 
-    if ((ball.ballOnPlatform) || ball.position.x < ballRadius || ball.position.x > w) {
+    if (
+      ball.ballOnPlatform ||
+      ball.position.x < ballRadius ||
+      ball.position.x > w
+    ) {
       removeBall(index);
     }
 
-    if (ball &&
+    if (
+      ball &&
       ball.isMoving &&
       ball.position.y + ball.circleRadius <
-      left_point.position.y - INFINITE_MASS_RADIUS &&
+        left_point.position.y - INFINITE_MASS_RADIUS &&
       ball.velocity.y >= 0
     ) {
       ball.collisionFilter.mask = defaultCategory;
@@ -577,7 +578,7 @@ function run() {
       ball.isMoving &&
       ball.velocity.y >= 0 &&
       ball.position.y - ballRadius >
-      left_point.position.y + INFINITE_MASS_RADIUS + RIM_HEIGHT
+        left_point.position.y + INFINITE_MASS_RADIUS + RIM_HEIGHT
     ) {
       ballView.style.zIndex = -2;
     }
@@ -611,6 +612,5 @@ function run() {
   window.requestAnimationFrame(run);
 }
 // Matter.Runner.run(engine)
-render.mouse = mouse;
 
 // Render.run(render);

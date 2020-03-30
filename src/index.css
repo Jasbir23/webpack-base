@@ -1,6 +1,7 @@
 @font-face {
-  font-family: 'digital-clock-font';
-  src: url('https://res.cloudinary.com/princeofpersia/raw/upload/v1579287016/digital.ttf') format('truetype');
+  font-family: "digital-clock-font";
+  src: url("https://res.cloudinary.com/princeofpersia/raw/upload/v1579287016/digital.ttf")
+    format("truetype");
 }
 
 body {
@@ -22,7 +23,7 @@ body {
   height: 100%;
   width: 100%;
   background-position: center;
-  background-image: url('./assets/loaderBackground.png');
+  background-image: url("./assets/loaderBackground.png");
   background-size: cover;
   background-repeat: no-repeat;
 }
@@ -120,15 +121,22 @@ body {
 }
 
 .finalScore {
-  position: absolute;
   top: 71vh;
+}
+
+.restartButton {
+  top: 55vh;
+}
+
+.actionButton {
+  position: absolute;
   left: 25vw;
   width: 50vw;
   text-align: center;
   line-height: 8vh;
   height: 8vh;
   border: #fff 1px solid;
-  font-family: 'digital-clock-font';
+  font-family: "digital-clock-font";
   border-radius: 4px;
   background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079521/yellowBack.png");
   background-size: cover;
@@ -159,10 +167,10 @@ body {
 .gameOver {
   position: absolute;
   bottom: 0;
+  display: none;
   height: 70%;
   width: 100%;
 }
-
 
 .timer {
   display: none;
@@ -184,7 +192,7 @@ body {
   height: 28px;
   line-height: 27px;
   width: 100px;
-  font-family: 'digital-clock-font';
+  font-family: "digital-clock-font";
   border: #fff 1px solid;
   border-radius: 4px;
   background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079521/yellowBack.png");
@@ -204,7 +212,7 @@ body {
   line-height: 27px;
   width: 130px;
   border: #fff 1px solid;
-  font-family: 'digital-clock-font';
+  font-family: "digital-clock-font";
   border-radius: 4px;
   background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079521/yellowBack.png");
   background-size: cover;
@@ -214,8 +222,7 @@ body {
   font-size: 24px;
 }
 
-
-#ball>span {
+#ball > span {
   position: absolute;
   z-index: -1;
   /* box-shadow: 0px 15px 10px -10px #111; */
