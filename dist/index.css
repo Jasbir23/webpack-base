@@ -1,6 +1,7 @@
 @font-face {
-  font-family: 'digital-clock-font';
-  src: url('https://res.cloudinary.com/princeofpersia/raw/upload/v1579287016/digital.ttf') format('truetype');
+  font-family: "digital-clock-font";
+  src: url("https://res.cloudinary.com/princeofpersia/raw/upload/v1579287016/digital.ttf")
+    format("truetype");
 }
 
 body {
@@ -9,6 +10,7 @@ body {
   overflow: hidden;
   height: 100%;
   width: 100%;
+  user-select: none;
   background: white;
 }
 
@@ -21,7 +23,7 @@ body {
   height: 100%;
   width: 100%;
   background-position: center;
-  background-image: url(assets/449169960203278a0ce45072a4f8ab22.png);
+  background-image: url(assets/95ec7a1aaf99cbb80ec476923fe07daf.png);
   background-size: cover;
   background-repeat: no-repeat;
 }
@@ -55,7 +57,7 @@ body {
   right: 0;
   bottom: 0;
   background-position: center;
-  background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079523/background.png");
+  background-image: url(assets/6c631a2528e8227b2cb122d6f218670f.png);
   background-size: cover;
   background-repeat: no-repeat;
   z-index: -4;
@@ -70,6 +72,11 @@ body {
 }
 
 .rim {
+  position: absolute;
+  z-index: -2;
+  overflow: hidden;
+}
+.fire {
   position: absolute;
   z-index: -2;
   overflow: hidden;
@@ -100,6 +107,8 @@ body {
 
 .board {
   position: absolute;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
   z-index: -3;
 }
 
@@ -114,15 +123,22 @@ body {
 }
 
 .finalScore {
-  position: absolute;
   top: 71vh;
+}
+
+.restartButton {
+  top: 55vh;
+}
+
+.actionButton {
+  position: absolute;
   left: 25vw;
   width: 50vw;
   text-align: center;
   line-height: 8vh;
   height: 8vh;
   border: #fff 1px solid;
-  font-family: 'digital-clock-font';
+  font-family: "digital-clock-font";
   border-radius: 4px;
   background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079521/yellowBack.png");
   background-size: cover;
@@ -153,10 +169,10 @@ body {
 .gameOver {
   position: absolute;
   bottom: 0;
+  display: none;
   height: 70%;
   width: 100%;
 }
-
 
 .timer {
   display: none;
@@ -178,7 +194,7 @@ body {
   height: 28px;
   line-height: 27px;
   width: 100px;
-  font-family: 'digital-clock-font';
+  font-family: "digital-clock-font";
   border: #fff 1px solid;
   border-radius: 4px;
   background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079521/yellowBack.png");
@@ -198,7 +214,7 @@ body {
   line-height: 27px;
   width: 130px;
   border: #fff 1px solid;
-  font-family: 'digital-clock-font';
+  font-family: "digital-clock-font";
   border-radius: 4px;
   background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079521/yellowBack.png");
   background-size: cover;
@@ -208,11 +224,10 @@ body {
   font-size: 24px;
 }
 
-
-#ball>span {
+#ball > span {
   position: absolute;
   z-index: -1;
-  box-shadow: 0px 15px 10px -10px #111;
-  background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1579079522/basketball.png");
+  /* box-shadow: 0px 15px 10px -10px #111; */
+  background-image: url("https://res.cloudinary.com/princeofpersia/image/upload/v1581699170/basketball2.jpg");
   background-size: cover;
 }
