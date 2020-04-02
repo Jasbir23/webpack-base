@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "NODE_ENV=production webpack",
-    "dev": "NODE_ENV=development webpack-dev-server --content-base dist --hot --host 0.0.0.0"
+    "dev": "NODE_ENV=development webpack-dev-server --content-base dist --hot --host"
   },
   "author": "Jasbir",
   "license": "ISC",
@@ -26,7 +26,8 @@
     "webpack-dev-server": "^3.10.1"
   },
   "dependencies": {
-    "matter-js": "^0.14.2",
-    "socket.io": "^2.3.0"
+    "cannon": "github:schteppe/cannon.js",
+    "socket.io": "^2.3.0",
+    "three": "^0.113.2"
   }
 }

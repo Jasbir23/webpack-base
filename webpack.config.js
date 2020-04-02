@@ -27,8 +27,7 @@ module.exports = {
     extractCss
   ],
   module: {
-    rules: [
-      {
+    rules: [{
         test: /\.js$/,
         exclude: /node_modules/,
         use: "babel-loader"
@@ -37,42 +36,38 @@ module.exports = {
         test: /\.css$/,
         exclude: /node_modules/,
         use: extractCss.extract({
-          use: [{ loader: "css-loader" }],
+          use: [{
+            loader: "css-loader"
+          }],
           fallback: "style-loader"
         })
       },
       {
         // Now we apply rule for images
         test: /\.(png|jpe?g|gif|svg)$/,
-        use: [
-          {
-            // Using file-loader for these files
-            loader: "file-loader",
+        use: [{
+          // Using file-loader for these files
+          loader: "file-loader",
 
-            // In options we can set different things like format
-            // and directory to save
-            options: {
-              outputPath: "assets"
-            }
+          // In options we can set different things like format
+          // and directory to save
+          options: {
+            outputPath: "assets"
           }
-        ]
+        }]
       },
       {
         test: /\.(gltf)$/,
-        use: [
-          {
-            loader: "gltf-webpack-loader"
-          }
-        ]
+        use: [{
+          loader: "gltf-webpack-loader"
+        }]
       },
       {
         test: /\.(bin)$/,
-        use: [
-          {
-            loader: "file-loader",
-            options: {}
-          }
-        ]
+        use: [{
+          loader: "file-loader",
+          options: {}
+        }]
       }
     ]
   }
