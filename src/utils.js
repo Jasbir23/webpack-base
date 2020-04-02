@@ -5,11 +5,11 @@ function random(min, max) {
 function getParameterByName(getUserURL, playerId) {
   var getUrl = `${getUserURL}/user/:${playerId}`;
   fetch(getUrl, {
-      method: "get",
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
+    method: "get",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
     .then(res => {
       return res.json();
     })
@@ -18,8 +18,19 @@ function getParameterByName(getUserURL, playerId) {
     });
 }
 
-
-export {
-  random,
-  getParameterByName
+function extractTouchPoint(e) {
+  const targetValue = e && e.changedTouches && e.changedTouches[0];
+  if (targetValue) {
+    return {
+      x: targetValue.clientX,
+      y: targetValue.clientY
+    };
+  } else {
+    return {
+      x: 0,
+      y: 0
+    };
+  }
 }
+
+export { random, getParameterByName, extractTouchPoint };
