@@ -96,7 +96,7 @@
         },
         {
             "mesh" : 0,
-            "name" : "Cube.025",
+            "name" : "Cube025",
             "rotation" : [
                 0,
                 -0.10799934715032578,
@@ -116,7 +116,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "Cube.024",
+            "name" : "Cube024",
             "rotation" : [
                 0,
                 -0.1010562926530838,
@@ -136,7 +136,7 @@
         },
         {
             "mesh" : 2,
-            "name" : "Cube.002",
+            "name" : "Cube002",
             "scale" : [
                 18.98000144958496,
                 1.8199999332427979,
@@ -150,7 +150,7 @@
         },
         {
             "mesh" : 3,
-            "name" : "Cube.003",
+            "name" : "Cube003",
             "scale" : [
                 28.160001754760742,
                 1.8199999332427979,
@@ -164,7 +164,7 @@
         },
         {
             "mesh" : 4,
-            "name" : "Cube.004",
+            "name" : "Cube004",
             "scale" : [
                 16.420001983642578,
                 1.8199999332427979,
@@ -178,7 +178,7 @@
         },
         {
             "mesh" : 5,
-            "name" : "Cube.005",
+            "name" : "Cube005",
             "scale" : [
                 6.64000129699707,
                 1.8199999332427979,
@@ -192,7 +192,7 @@
         },
         {
             "mesh" : 6,
-            "name" : "Cube.007",
+            "name" : "Cube007",
             "rotation" : [
                 0,
                 -0.32556813955307007,
@@ -212,7 +212,7 @@
         },
         {
             "mesh" : 7,
-            "name" : "Cube.008",
+            "name" : "Cube008",
             "rotation" : [
                 0,
                 0.8415107131004333,
@@ -232,7 +232,7 @@
         },
         {
             "mesh" : 8,
-            "name" : "Cube.009",
+            "name" : "Cube009",
             "rotation" : [
                 0,
                 0.6613118052482605,
@@ -252,7 +252,7 @@
         },
         {
             "mesh" : 9,
-            "name" : "Cube.010",
+            "name" : "Cube010",
             "rotation" : [
                 0,
                 0.7396310567855835,
@@ -272,7 +272,7 @@
         },
         {
             "mesh" : 10,
-            "name" : "Cube.011",
+            "name" : "Cube011",
             "rotation" : [
                 0,
                 0.7760463953018188,
@@ -292,7 +292,7 @@
         },
         {
             "mesh" : 11,
-            "name" : "Cube.012",
+            "name" : "Cube012",
             "rotation" : [
                 0,
                 0.770513117313385,
@@ -312,7 +312,7 @@
         },
         {
             "mesh" : 12,
-            "name" : "Cube.013",
+            "name" : "Cube013",
             "rotation" : [
                 0,
                 0.5635260343551636,
@@ -332,7 +332,7 @@
         },
         {
             "mesh" : 13,
-            "name" : "Cube.014",
+            "name" : "Cube014",
             "rotation" : [
                 0,
                 0.22495104372501373,
@@ -352,7 +352,7 @@
         },
         {
             "mesh" : 14,
-            "name" : "Cube.015",
+            "name" : "Cube015",
             "rotation" : [
                 0,
                 0.40833044052124023,
@@ -372,7 +372,7 @@
         },
         {
             "mesh" : 15,
-            "name" : "Cube.016",
+            "name" : "Cube016",
             "rotation" : [
                 0,
                 0.7313536405563354,
@@ -392,7 +392,7 @@
         },
         {
             "mesh" : 16,
-            "name" : "Cube.017",
+            "name" : "Cube017",
             "rotation" : [
                 0,
                 0.7738401889801025,
@@ -412,7 +412,7 @@
         },
         {
             "mesh" : 17,
-            "name" : "Cube.018",
+            "name" : "Cube018",
             "rotation" : [
                 0,
                 0.8941541910171509,
@@ -432,7 +432,7 @@
         },
         {
             "mesh" : 18,
-            "name" : "Cube.019",
+            "name" : "Cube019",
             "rotation" : [
                 0,
                 0.9348256587982178,
@@ -452,7 +452,7 @@
         },
         {
             "mesh" : 19,
-            "name" : "Cube.020",
+            "name" : "Cube020",
             "rotation" : [
                 0,
                 0.03141074255108833,
@@ -472,7 +472,7 @@
         },
         {
             "mesh" : 20,
-            "name" : "Cube.021",
+            "name" : "Cube021",
             "rotation" : [
                 0,
                 0.23514209687709808,
@@ -492,7 +492,7 @@
         },
         {
             "mesh" : 21,
-            "name" : "Cube.022",
+            "name" : "Cube022",
             "rotation" : [
                 0,
                 0.5313985347747803,
@@ -512,7 +512,7 @@
         },
         {
             "mesh" : 22,
-            "name" : "Cube.023",
+            "name" : "Cube023",
             "rotation" : [
                 0,
                 0.4663865864276886,
@@ -532,7 +532,7 @@
         },
         {
             "mesh" : 23,
-            "name" : "Cube.049",
+            "name" : "Cube049",
             "rotation" : [
                 0,
                 0.3436596691608429,
@@ -552,7 +552,7 @@
         },
         {
             "mesh" : 24,
-            "name" : "Cube.048",
+            "name" : "Cube048",
             "rotation" : [
                 0,
                 0.6156614422798157,
@@ -572,7 +572,7 @@
         },
         {
             "mesh" : 25,
-            "name" : "Cube.047",
+            "name" : "Cube047",
             "rotation" : [
                 0,
                 0.9205048084259033,
@@ -592,7 +592,7 @@
         },
         {
             "mesh" : 26,
-            "name" : "Cube.027",
+            "name" : "Cube027",
             "rotation" : [
                 0,
                 0.7901549339294434,
@@ -612,7 +612,7 @@
         },
         {
             "mesh" : 27,
-            "name" : "Cube.028",
+            "name" : "Cube029",
             "rotation" : [
                 0,
                 0.8598521947860718,
@@ -632,7 +632,7 @@
         },
         {
             "mesh" : 28,
-            "name" : "Cube.029",
+            "name" : "Cube028",
             "rotation" : [
                 0,
                 0.7253742814064026,
@@ -652,7 +652,7 @@
         },
         {
             "mesh" : 29,
-            "name" : "Cube.035",
+            "name" : "Cube035",
             "rotation" : [
                 0,
                 0.23344534635543823,
@@ -672,7 +672,7 @@
         },
         {
             "mesh" : 30,
-            "name" : "Cube.034",
+            "name" : "cube008",
             "rotation" : [
                 0,
                 0.40833044052124023,
@@ -692,7 +692,7 @@
         },
         {
             "mesh" : 31,
-            "name" : "Cube.033",
+            "name" : "Cube033",
             "rotation" : [
                 0,
                 0.6613118052482605,
@@ -712,7 +712,7 @@
         },
         {
             "mesh" : 32,
-            "name" : "Cube.032",
+            "name" : "Cube032",
             "rotation" : [
                 0,
                 0.7396310567855835,
@@ -732,7 +732,7 @@
         },
         {
             "mesh" : 33,
-            "name" : "Cube.031",
+            "name" : "Cube031",
             "rotation" : [
                 0,
                 0.8754644989967346,
@@ -752,7 +752,7 @@
         },
         {
             "mesh" : 34,
-            "name" : "Cube.030",
+            "name" : "Cube030",
             "rotation" : [
                 0,
                 0.9816271662712097,
@@ -772,7 +772,7 @@
         },
         {
             "mesh" : 35,
-            "name" : "track.001",
+            "name" : "track",
             "scale" : [
                 100,
                 1,
@@ -781,7 +781,7 @@
         },
         {
             "mesh" : 36,
-            "name" : "Cube.036",
+            "name" : "Cube036",
             "rotation" : [
                 0,
                 0.9568135142326355,
@@ -801,7 +801,7 @@
         },
         {
             "mesh" : 37,
-            "name" : "Cube.037",
+            "name" : "Cube037",
             "rotation" : [
                 0,
                 0.43208566308021545,
@@ -821,7 +821,7 @@
         },
         {
             "mesh" : 38,
-            "name" : "Cube.038",
+            "name" : "Cube038",
             "rotation" : [
                 0,
                 0.43208566308021545,
@@ -841,7 +841,7 @@
         },
         {
             "mesh" : 39,
-            "name" : "Cube.006",
+            "name" : "Cube006",
             "rotation" : [
                 0,
                 0.26050442457199097,
@@ -861,7 +861,7 @@
         },
         {
             "mesh" : 40,
-            "name" : "Cube.001",
+            "name" : "Cube001",
             "rotation" : [
                 0,
                 -0.36162450909614563,
@@ -881,7 +881,7 @@
         },
         {
             "mesh" : 41,
-            "name" : "Cube.026",
+            "name" : "Cube026",
             "rotation" : [
                 0,
                 0.9755346179008484,
@@ -901,7 +901,7 @@
         },
         {
             "mesh" : 42,
-            "name" : "Cube.040",
+            "name" : "Cube040",
             "rotation" : [
                 0,
                 0.43208566308021545,
@@ -921,7 +921,7 @@
         },
         {
             "mesh" : 43,
-            "name" : "Cube.041",
+            "name" : "Cube041",
             "scale" : [
                 12.440001487731934,
                 1.8199999332427979,
@@ -935,7 +935,7 @@
         },
         {
             "mesh" : 44,
-            "name" : "Cube.042",
+            "name" : "Cube042",
             "rotation" : [
                 0,
                 0.9668233394622803,
@@ -955,7 +955,7 @@
         },
         {
             "mesh" : 45,
-            "name" : "Cube.043",
+            "name" : "Cube043",
             "rotation" : [
                 0,
                 0.9957247376441956,
@@ -975,7 +975,7 @@
         },
         {
             "mesh" : 46,
-            "name" : "Cube.044",
+            "name" : "Cube044",
             "rotation" : [
                 0,
                 0.5417083501815796,
@@ -995,7 +995,7 @@
         },
         {
             "mesh" : 47,
-            "name" : "Cube.045",
+            "name" : "Cube045",
             "rotation" : [
                 0,
                 0.887815535068512,
@@ -1015,7 +1015,7 @@
         },
         {
             "mesh" : 48,
-            "name" : "Cube.046",
+            "name" : "Cube046",
             "rotation" : [
                 0,
                 0.7289687991142273,
@@ -1055,7 +1055,7 @@
         },
         {
             "mesh" : 50,
-            "name" : "Cube.039",
+            "name" : "Cube039",
             "rotation" : [
                 0,
                 -0.22835080325603485,
@@ -1075,7 +1075,7 @@
         },
         {
             "mesh" : 51,
-            "name" : "Cube.050",
+            "name" : "Cube050",
             "scale" : [
                 67.22000122070312,
                 1,
@@ -1097,7 +1097,7 @@
                 0,
                 0
             ],
-            "name" : "track.001",
+            "name" : "track",
             "pbrMetallicRoughness" : {
                 "baseColorTexture" : {
                     "index" : 0,
@@ -1110,7 +1110,7 @@
     ],
     "meshes" : [
         {
-            "name" : "Cube.001",
+            "name" : "Cube001.001",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1123,7 +1123,7 @@
             ]
         },
         {
-            "name" : "Cube.002",
+            "name" : "Cube002",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1136,7 +1136,7 @@
             ]
         },
         {
-            "name" : "Cube.003",
+            "name" : "Cube003",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1149,7 +1149,7 @@
             ]
         },
         {
-            "name" : "Cube.004",
+            "name" : "Cube004",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1162,7 +1162,7 @@
             ]
         },
         {
-            "name" : "Cube.005",
+            "name" : "Cube005",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1175,7 +1175,7 @@
             ]
         },
         {
-            "name" : "Cube.006",
+            "name" : "Cube006",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1188,7 +1188,7 @@
             ]
         },
         {
-            "name" : "Cube.008",
+            "name" : "Cube008",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1201,7 +1201,7 @@
             ]
         },
         {
-            "name" : "Cube.009",
+            "name" : "Cube009",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1214,7 +1214,7 @@
             ]
         },
         {
-            "name" : "Cube.010",
+            "name" : "Cube010",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1227,7 +1227,7 @@
             ]
         },
         {
-            "name" : "Cube.011",
+            "name" : "Cube011",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1240,7 +1240,7 @@
             ]
         },
         {
-            "name" : "Cube.012",
+            "name" : "Cube012",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1253,7 +1253,7 @@
             ]
         },
         {
-            "name" : "Cube.013",
+            "name" : "Cube013",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1266,7 +1266,7 @@
             ]
         },
         {
-            "name" : "Cube.014",
+            "name" : "Cube014",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1279,7 +1279,7 @@
             ]
         },
         {
-            "name" : "Cube.015",
+            "name" : "Cube015",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1292,7 +1292,7 @@
             ]
         },
         {
-            "name" : "Cube.016",
+            "name" : "Cube016",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1305,7 +1305,7 @@
             ]
         },
         {
-            "name" : "Cube.017",
+            "name" : "Cube017",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1318,7 +1318,7 @@
             ]
         },
         {
-            "name" : "Cube.018",
+            "name" : "Cube018",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1331,7 +1331,7 @@
             ]
         },
         {
-            "name" : "Cube.019",
+            "name" : "Cube019",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1344,7 +1344,7 @@
             ]
         },
         {
-            "name" : "Cube.020",
+            "name" : "Cube020",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1357,7 +1357,7 @@
             ]
         },
         {
-            "name" : "Cube.021",
+            "name" : "Cube021",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1370,7 +1370,7 @@
             ]
         },
         {
-            "name" : "Cube.022",
+            "name" : "Cube022",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1383,7 +1383,7 @@
             ]
         },
         {
-            "name" : "Cube.023",
+            "name" : "Cube023",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1396,7 +1396,7 @@
             ]
         },
         {
-            "name" : "Cube.024",
+            "name" : "Cube024",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1409,7 +1409,7 @@
             ]
         },
         {
-            "name" : "Cube.025",
+            "name" : "Cube025",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1422,7 +1422,7 @@
             ]
         },
         {
-            "name" : "Cube.026",
+            "name" : "Cube026",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1435,7 +1435,7 @@
             ]
         },
         {
-            "name" : "Cube.027",
+            "name" : "Cube027",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1448,7 +1448,7 @@
             ]
         },
         {
-            "name" : "Cube.028",
+            "name" : "Cube028",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1461,7 +1461,7 @@
             ]
         },
         {
-            "name" : "Cube.029",
+            "name" : "Cube029",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1474,7 +1474,7 @@
             ]
         },
         {
-            "name" : "Cube.030",
+            "name" : "Cube030",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1487,7 +1487,7 @@
             ]
         },
         {
-            "name" : "Cube.036",
+            "name" : "Cube036",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1500,7 +1500,7 @@
             ]
         },
         {
-            "name" : "Cube.035",
+            "name" : "Cube035",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1513,7 +1513,7 @@
             ]
         },
         {
-            "name" : "Cube.034",
+            "name" : "Cube034",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1526,7 +1526,7 @@
             ]
         },
         {
-            "name" : "Cube.033",
+            "name" : "Cube033",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1539,7 +1539,7 @@
             ]
         },
         {
-            "name" : "Cube.032",
+            "name" : "Cube032",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1552,7 +1552,7 @@
             ]
         },
         {
-            "name" : "Cube.031",
+            "name" : "Cube031",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1565,7 +1565,7 @@
             ]
         },
         {
-            "name" : "track.001",
+            "name" : "track",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1579,7 +1579,7 @@
             ]
         },
         {
-            "name" : "Cube.037",
+            "name" : "Cube037",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1592,7 +1592,7 @@
             ]
         },
         {
-            "name" : "Cube.038",
+            "name" : "Cube038",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1605,7 +1605,7 @@
             ]
         },
         {
-            "name" : "Cube.039",
+            "name" : "Cube039",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1618,7 +1618,7 @@
             ]
         },
         {
-            "name" : "Cube.040",
+            "name" : "Cube040",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1631,7 +1631,7 @@
             ]
         },
         {
-            "name" : "Cube.041",
+            "name" : "Cube001",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1644,7 +1644,7 @@
             ]
         },
         {
-            "name" : "Cube.042",
+            "name" : "Cube042",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1657,7 +1657,7 @@
             ]
         },
         {
-            "name" : "Cube.043",
+            "name" : "Cube043",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1670,7 +1670,7 @@
             ]
         },
         {
-            "name" : "Cube.044",
+            "name" : "Cube044",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1683,7 +1683,7 @@
             ]
         },
         {
-            "name" : "Cube.045",
+            "name" : "Cube045",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1696,7 +1696,7 @@
             ]
         },
         {
-            "name" : "Cube.046",
+            "name" : "Cube046",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1709,7 +1709,7 @@
             ]
         },
         {
-            "name" : "Cube.047",
+            "name" : "Cube047",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1722,7 +1722,7 @@
             ]
         },
         {
-            "name" : "Cube.048",
+            "name" : "Cube048",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1735,7 +1735,7 @@
             ]
         },
         {
-            "name" : "Cube.049",
+            "name" : "Cube049",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1748,7 +1748,7 @@
             ]
         },
         {
-            "name" : "Cube.050",
+            "name" : "Cube050",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1761,7 +1761,7 @@
             ]
         },
         {
-            "name" : "Cube.051",
+            "name" : "Cube051",
             "primitives" : [
                 {
                     "attributes" : {
@@ -1774,7 +1774,7 @@
             ]
         },
         {
-            "name" : "Cube.052",
+            "name" : "Cube052",
             "primitives" : [
                 {
                     "attributes" : {

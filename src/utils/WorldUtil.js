@@ -23,6 +23,10 @@ const {
 } = window;
 
 const loader = new GLTFLoader();
+// var audioLoader = new THREE.AudioLoader();
+// var listener = new THREE.AudioListener();
+// var sound = new THREE.Audio(listener);
+// var engineVolume = 0;
 export default class WorldUtil {
     constructor(props) {
         this.fixedTimeStep = 1.0 / 60.0;
@@ -38,24 +42,29 @@ export default class WorldUtil {
     }
     getTrack(scene) {
         loader.load(track,
-            gltf =>{
+            gltf => {
                 this.model = gltf.scene;
                 this.model.scale.x = 1
                 this.model.scale.y = 1
                 this.model.scale.z = 1
                 scene.add(this.model)
-                gltf.scene.children.forEach(child=>
-                    {
-                        if(child.name.includes('Cube')) {
-                            const halfExtents = new CANNON.Vec3(child.scale.x, child.scale.y, child.scale.z);
-                            const box = new CANNON.Box(halfExtents);
-                            const body = new CANNON.Body({mass:0});
-                            body.addShape(box);
-                            body.position.copy({x: child.position.x+this.model.position.x, y:  child.position.y+this.model.position.y +0.1, z: child.position.z+this.model.position.z});
-                            body.quaternion.copy(child.quaternion);
-                            this.world.add(body);
-                        }
-                    })
+                gltf.scene.children.forEach(child => {
+                    if (child.name.includes('Cube')) {
+                        const halfExtents = new CANNON.Vec3(child.scale.x, child.scale.y, child.scale.z);
+                        const box = new CANNON.Box(halfExtents);
+                        const body = new CANNON.Body({
+                            mass: 0
+                        });
+                        body.addShape(box);
+                        body.position.copy({
+                            x: child.position.x + this.model.position.x,
+                            y: child.position.y + this.model.position.y + 0.1,
+                            z: child.position.z + this.model.position.z
+                        });
+                        body.quaternion.copy(child.quaternion);
+                        this.world.add(body);
+                    }
+                })
             },
             xhr => {
                 // called while loading is progressing
@@ -105,8 +114,8 @@ export default class WorldUtil {
                 wheel.position.x = 0;
                 wheel.position.y = 1;
                 wheel.position.z = 0;
-                let t=4;
-                while(t--) {
+                let t = 4;
+                while (t--) {
                     wheelArray.push(wheel);
                     this.scene.add(new THREE.Mesh().add(wheel))
                 }
@@ -150,7 +159,15 @@ export default class WorldUtil {
             game && game.onWindowResize();
         }, false);
 
-
+        // this.camera.add(listener);
+        // this.startSoundStopped = false;
+        // create a global audio source
+        // audioLoader.load('https://res.cloudinary.com/princeofpersia/video/upload/v1586107257/Sports-Car-Driving-Loud-_AudioTrimmer.com_thvtqg.ogg', function (buffer) {
+        //     sound.setBuffer(buffer);
+        //     sound.setLoop(true);
+        //     sound.setVolume(0);
+        //     sound.play();
+        // });
         this.joystick = new JoyStick({
             game: this,
             onMove: this.joystickCallback
@@ -270,19 +287,33 @@ export default class WorldUtil {
     }
 
     updateDrive(forward = this.js.forward, turn = this.js.turn) {
-
+        // engineVolume -= 0.01;
+        // sound.setVolume(engineVolume);
         const maxSteerVal = 0.34;
         const maxForce = 700;
         const brakeForce = 10;
 
         const force = maxForce * forward;
         const steer = maxSteerVal * turn;
-
         if (forward != 0) {
+            // engineVolume += forward * 0.005;
+            // if (engineVolume > 0.1) engineVolume = 0.1
+            // sound.setVolume(engineVolume);
             this.vehicle.setBrake(0, 0);
             this.vehicle.setBrake(0, 1);
             this.vehicle.setBrake(0, 2);
             this.vehicle.setBrake(0, 3);
+            // if (!this.startSoundStopped) {
+            //     sound.stop();
+            //     this.startSoundStopped = true;
+            //     audioLoader.load('https://res.cloudinary.com/princeofpersia/video/upload/v1586104391/moving-_AudioTrimmer.com_yehuyl.ogg', function (buffer) {
+            //         sound.setBuffer(buffer);
+            //         sound.setLoop(true);
+            //         if (engineVolume > 0.2) engineVolume = 0.2
+            //         sound.setVolume(engineVolume);
+            //         sound.play();
+            //     });
+            // };
 
             this.vehicle.applyEngineForce(force, 0);
             this.vehicle.applyEngineForce(force, 3);
@@ -329,7 +360,7 @@ export default class WorldUtil {
             this.world.step(this.fixedTimeStep, dt);
             this.updateDrive();
             this.updateCamera();
-            this.world.bodies.forEach( function(body){
+            this.world.bodies.forEach(function (body) {
                 if (body.threemesh) {
                     body.threemesh.position.x = body.position.x
                     body.threemesh.position.y = body.position.y - 0.4
