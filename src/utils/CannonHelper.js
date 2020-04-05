@@ -11,16 +11,16 @@ export default class CannonHelper {
         renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
         // LIGHTS
-        const ambient = new THREE.AmbientLight(0x888888);
+        const ambient = new THREE.AmbientLight(0xffffff, 2);
         this.scene.add(ambient);
 
-        const light = new THREE.DirectionalLight(0xdddddd);
+        const light = new THREE.DirectionalLight(0xffffff, 2);
         light.position.set(3, 10, 4);
         light.target.position.set(0, 0, 0);
 
         light.castShadow = true;
 
-        const lightSize = 10;
+        const lightSize = 100;
         light.shadow.camera.near = 1;
         light.shadow.camera.far = 50;
         light.shadow.camera.left = light.shadow.camera.bottom = -lightSize;
@@ -70,7 +70,7 @@ export default class CannonHelper {
     addVisual(body, name, castShadow = true, receiveShadow = true) {
         body.name = name;
         if (this.currentMaterial === undefined) this.currentMaterial = new THREE.MeshLambertMaterial({
-            color: 0x888888
+            color: 0x000000
         });
         if (this.settings === undefined) {
             this.settings = {
@@ -100,28 +100,27 @@ export default class CannonHelper {
             }
             this.particleGeo = new THREE.SphereGeometry(1, 16, 8);
             this.particleMaterial = new THREE.MeshLambertMaterial({
-                color: 0xff0000
+                color: 0xA9A9A9
             });
         }
         // What geometry should be used?
         let mesh;
-        if (body instanceof CANNON.Body) mesh = this.shape2Mesh(body, castShadow, receiveShadow);
+        if (body instanceof CANNON.Body) mesh = this.shape2Mesh(body, name,castShadow, receiveShadow);
 
         if (mesh) {
             // Add body
             body.threemesh = mesh;
             mesh.castShadow = castShadow;
             mesh.receiveShadow = receiveShadow;
-            this.scene.add(mesh);
+            (name !== "car" ) && this.scene.add(mesh);
         }
     }
 
-    shape2Mesh(body, castShadow, receiveShadow) {
+    shape2Mesh(body, name, castShadow, receiveShadow) {
         const obj = new THREE.Object3D();
         const material = this.currentMaterial;
         const game = this;
         let index = 0;
-
         body.shapes.forEach(function (shape) {
             let mesh;
             let geometry;
