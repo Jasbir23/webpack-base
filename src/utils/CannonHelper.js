@@ -100,19 +100,19 @@ export default class CannonHelper {
             }
             this.particleGeo = new THREE.SphereGeometry(1, 16, 8);
             this.particleMaterial = new THREE.MeshLambertMaterial({
-                color: 0xA9A9A9
+                color: 0x000000
             });
         }
         // What geometry should be used?
         let mesh;
-        if (body instanceof CANNON.Body) mesh = this.shape2Mesh(body, name,castShadow, receiveShadow);
+        if (body instanceof CANNON.Body) mesh = this.shape2Mesh(body, name, castShadow, receiveShadow);
 
         if (mesh) {
             // Add body
             body.threemesh = mesh;
             mesh.castShadow = castShadow;
             mesh.receiveShadow = receiveShadow;
-            (name !== "car" ) && this.scene.add(mesh);
+            (name !== "car") && this.scene.add(mesh);
         }
     }
 

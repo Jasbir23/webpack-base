@@ -43,10 +43,10 @@ export default class WorldUtil {
         loader.load(track,
             gltf => {
                 this.model = gltf.scene;
-                this.model.scale.x = 1
-                this.model.scale.y = 1
-                this.model.scale.z = 1
-                scene.add(this.model)
+                this.model.scale.x = 1;
+                this.model.scale.y = 1;
+                this.model.scale.z = 1;
+                scene.add(this.model);
                 gltf.scene.children.forEach(child => {
                     if (child.name.includes('Cube')) {
                         const halfExtents = new CANNON.Vec3(child.scale.x, child.scale.y, child.scale.z);
@@ -106,7 +106,7 @@ export default class WorldUtil {
     initThreeJS() {
         const game = this;
         this.camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 1000);
-        this.camera.position.set(30, 15, 0);
+        this.camera.position.set(38, 20, 0);
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0xa0a0a0);
 
@@ -162,7 +162,7 @@ export default class WorldUtil {
         });
         chassisBody.addShape(chassisShape);
         chassisBody.position.x = car.position.x;
-        chassisBody.position.y = car.position.y + 0.6;
+        chassisBody.position.y = car.position.y + 0.4;
         chassisBody.position.z = car.position.z;
         chassisBody.sleepSpeedLimit = 0.5;
         chassisBody.name = "car"
@@ -184,11 +184,11 @@ export default class WorldUtil {
             frictionSlip: 5,
             dampingRelaxation: 10,
             dampingCompression: 4.4,
-            maxSuspensionForce: 10000000,
+            maxSuspensionForce: 1000000,
             rollInfluence: 0.01,
             axleLocal: new CANNON.Vec3(0, 0, -1),
             chassisConnectionPointLocal: new CANNON.Vec3(0, 1, 1),
-            maxSuspensionTravel: 0.08,
+            maxSuspensionTravel: 0.2,
             customSlidingRotationalSpeed: -30,
             useCustomSlidingRotationalSpeed: true
         };
@@ -219,7 +219,7 @@ export default class WorldUtil {
         vehicle.wheelInfos.forEach(function (wheelChild, index) {
             const cylinderShape = new CANNON.Cylinder(wheelChild.radius, wheelChild.radius, wheelChild.radius / 2, 20);
             const wheelBody = new CANNON.Body({
-                mass: 50,
+                mass: 100,
                 material: wheelMaterial,
             });
             wheelBody.sleepSpeedLimit = 1;
@@ -244,8 +244,8 @@ export default class WorldUtil {
     }
 
     updateDrive(forward = this.js.forward, turn = this.js.turn) {
-        const maxSteerVal = 0.3;
-        const maxForce = 460;
+        const maxSteerVal = 0.36;
+        const maxForce = 480;
         const brakeForce = 10;
 
         const force = maxForce * forward;
