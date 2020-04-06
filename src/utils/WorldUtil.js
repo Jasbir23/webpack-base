@@ -7,9 +7,11 @@ import {
 import {
     OrbitControls
 } from "three/examples/jsm/controls/OrbitControls";
+import {
+    Sky
+} from "three/examples/jsm/objects/Sky"
 import track from '../assets/track/track.gltf';
 import ferrari from '../assets/ferrari/scene.gltf';
-import wheelModel from '../assets/morello_cerchi_-_rims_-_murgese_iii 2/scene.gltf';
 const raceContainer = document.querySelector(".raceContainer");
 
 import CannonHelper from './CannonHelper'
@@ -23,10 +25,6 @@ const {
 } = window;
 
 const loader = new GLTFLoader();
-// var audioLoader = new THREE.AudioLoader();
-// var listener = new THREE.AudioListener();
-// var sound = new THREE.Audio(listener);
-// var engineVolume = 0;
 export default class WorldUtil {
     constructor(props) {
         this.fixedTimeStep = 1.0 / 60.0;
@@ -34,8 +32,6 @@ export default class WorldUtil {
             forward: 0,
             turn: 0
         };
-        this.clock = new THREE.Clock();
-        this.useVisuals = true;
         this.initThreeJS();
         this.getCar(this.scene);
     }
@@ -46,7 +42,9 @@ export default class WorldUtil {
                 this.model.scale.x = 1;
                 this.model.scale.y = 1;
                 this.model.scale.z = 1;
-                scene.add(this.model);
+                const mesh = new THREE.Mesh()
+                mesh.add(this.model);
+                scene.add(mesh);
                 gltf.scene.children.forEach(child => {
                     if (child.name.includes('Cube')) {
                         const halfExtents = new CANNON.Vec3(child.scale.x, child.scale.y, child.scale.z);
@@ -57,12 +55,13 @@ export default class WorldUtil {
                         body.addShape(box);
                         body.position.copy({
                             x: child.position.x + this.model.position.x,
-                            y: child.position.y + this.model.position.y + 0.1,
+                            y: child.position.y + this.model.position.y,
                             z: child.position.z + this.model.position.z
                         });
+                        body.allowSleep = true;
                         body.sleepSpeedLimit = 1;
                         body.quaternion.copy(child.quaternion);
-                        this.world.add(body);
+                        this.world.addBody(body);
                     }
                 })
             },
@@ -89,7 +88,7 @@ export default class WorldUtil {
                 car.position.z = 0;
                 const mesh = new THREE.Mesh()
                 mesh.add(car);
-                this.scene.add(mesh)
+                this.scene.add(mesh);
                 this.initPhysics();
                 this.getTrack(scene);
             },
@@ -105,15 +104,19 @@ export default class WorldUtil {
     }
     initThreeJS() {
         const game = this;
-        this.camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 1000);
-        this.camera.position.set(38, 20, 0);
-        this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0xa0a0a0);
+        this.camera = new THREE.PerspectiveCamera(45, w / h, 1, 1000);
+        this.camera.position.set(20, 20, 0);
 
-        this.renderer = new THREE.WebGLRenderer({});
-        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.scene = new THREE.Scene();
+        const loader = new THREE.TextureLoader();
+        const bgTexture = loader.load('https://threejsfundamentals.org/threejs/resources/images/daikanyama.jpg');
+        this.scene.background = bgTexture;
+
+        this.renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true,
+        });
         this.renderer.setSize(w, h);
-        this.renderer.shadowMap.enabled = true;
         raceContainer.appendChild(this.renderer.domElement);
 
         this.helper = new CannonHelper(this.scene);
@@ -157,18 +160,18 @@ export default class WorldUtil {
 
         const chassisShape = new CANNON.Box(new CANNON.Vec3(1.24, 0.232, 0.5));
         const chassisBody = new CANNON.Body({
-            mass: 250,
+            mass: 220,
             material: groundMaterial
         });
         chassisBody.addShape(chassisShape);
         chassisBody.position.x = car.position.x;
-        chassisBody.position.y = car.position.y + 0.4;
+        chassisBody.position.y = car.position.y;
         chassisBody.position.z = car.position.z;
-        chassisBody.sleepSpeedLimit = 0.5;
+        chassisBody.sleepSpeedLimit = 1;
         chassisBody.name = "car"
         chassisBody.threemesh = car;
-        world.add(chassisBody);
-        // this.helper.addVisual(chassisBody, "car")
+        world.addBody(chassisBody);
+        // this.helper.addVisual(chassisBody)
 
         this.followCam = new THREE.Object3D();
         this.followCam.position.copy(this.camera.position);
@@ -201,16 +204,16 @@ export default class WorldUtil {
             indeForwardAxis: 0
         });
 
-        options.chassisConnectionPointLocal.set(-0.74, 0.21, 0.51);
+        options.chassisConnectionPointLocal.set(-0.74, 0.21, 0.54);
         vehicle.addWheel(options);
 
-        options.chassisConnectionPointLocal.set(-0.74, 0.21, -0.51);
+        options.chassisConnectionPointLocal.set(-0.74, 0.21, -0.54);
         vehicle.addWheel(options);
 
-        options.chassisConnectionPointLocal.set(0.74, 0.22, 0.51);
+        options.chassisConnectionPointLocal.set(0.74, 0.22, 0.54);
         vehicle.addWheel(options);
 
-        options.chassisConnectionPointLocal.set(0.74, 0.22, -0.51);
+        options.chassisConnectionPointLocal.set(0.74, 0.22, -0.54);
         vehicle.addWheel(options);
 
         vehicle.addToWorld(world);
@@ -221,8 +224,8 @@ export default class WorldUtil {
             const wheelBody = new CANNON.Body({
                 mass: 100,
                 material: wheelMaterial,
+                sleepSpeedLimit: 1,
             });
-            wheelBody.sleepSpeedLimit = 1;
             wheelBody.addShape(cylinderShape);
             wheelBodies.push(wheelBody);
             game.helper.addVisual(wheelBody, 'wheel');
@@ -231,7 +234,11 @@ export default class WorldUtil {
         // Update wheels
         world.addEventListener('postStep', function () {
             let index = 0;
-            game.vehicle.wheelInfos.forEach(function (wheel) {
+            chassisBody.threemesh.position.x = chassisBody.position.x
+            chassisBody.threemesh.position.z = chassisBody.position.z
+            chassisBody.threemesh.position.y = chassisBody.position.y - 0.4
+            chassisBody.threemesh.quaternion.copy(chassisBody.quaternion);
+            vehicle.wheelInfos.forEach(function (wheel) {
                 game.vehicle.updateWheelTransform(index);
                 const t = wheel.worldTransform;
                 wheelBodies[index].threemesh.position.copy(t.position);
@@ -245,7 +252,7 @@ export default class WorldUtil {
 
     updateDrive(forward = this.js.forward, turn = this.js.turn) {
         const maxSteerVal = 0.36;
-        const maxForce = 480;
+        const maxForce = 500;
         const brakeForce = 10;
 
         const force = maxForce * forward;
@@ -270,7 +277,7 @@ export default class WorldUtil {
     }
 
     startGame() {
-        this.animationFrame = window.requestAnimationFrame(this.gameLoop);
+        this.renderer.setAnimationLoop(this.gameLoop)
     }
 
     onWindowResize() {
@@ -281,7 +288,7 @@ export default class WorldUtil {
 
     }
     updateCamera() {
-        this.camera.position.lerp(this.followCam.getWorldPosition(new THREE.Vector3()), 0.05);
+        this.camera.position.lerp(this.followCam.getWorldPosition(new THREE.Vector3()), 0.054);
         this.camera.lookAt(this.vehicle.chassisBody.threemesh.position);
         if (this.dirLight != undefined) {
             this.dirLight.position.copy(this.camera.position);
@@ -290,26 +297,11 @@ export default class WorldUtil {
     }
     gameLoop = () => {
         this.renderer.render(this.scene, this.camera);
-        this.orbitalControls.update();
-        const now = Date.now();
-        if (this.lastTime === undefined) this.lastTime = now;
-        const dt = (Date.now() - this.lastTime) / 1000.0;
-        this.FPSFactor = dt;
-        this.lastTime = now;
 
         if (this.world) {
-            this.world.step(this.fixedTimeStep, dt);
+            this.updateCamera();
+            this.world.step(this.fixedTimeStep, 0.018);
             this.updateDrive();
-            // this.updateCamera();
-            this.world.bodies.forEach(function (body) {
-                if (body.threemesh) {
-                    body.threemesh.position.x = body.position.x
-                    body.threemesh.position.y = body.position.y - 0.4
-                    body.threemesh.position.z = body.position.z
-                    body.threemesh.quaternion.copy(body.quaternion);
-                }
-            });
         }
-        window.requestAnimationFrame(this.gameLoop);
     };
 }

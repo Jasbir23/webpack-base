@@ -11,10 +11,10 @@ export default class CannonHelper {
         renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
         // LIGHTS
-        const ambient = new THREE.AmbientLight(0xffffff, 2);
+        const ambient = new THREE.AmbientLight(0xffffff, 4);
         this.scene.add(ambient);
 
-        const light = new THREE.DirectionalLight(0xffffff, 2);
+        const light = new THREE.DirectionalLight(0xffffff, 5);
         light.position.set(3, 10, 4);
         light.target.position.set(0, 0, 0);
 
