@@ -7,9 +7,6 @@ import {
 import {
     OrbitControls
 } from "three/examples/jsm/controls/OrbitControls";
-import {
-    Sky
-} from "three/examples/jsm/objects/Sky"
 import track from '../assets/track/track.gltf';
 import ferrari from '../assets/ferrari/scene.gltf';
 const raceContainer = document.querySelector(".raceContainer");
@@ -104,8 +101,8 @@ export default class WorldUtil {
     }
     initThreeJS() {
         const game = this;
-        this.camera = new THREE.PerspectiveCamera(45, w / h, 1, 1000);
-        this.camera.position.set(20, 20, 0);
+        this.camera = new THREE.PerspectiveCamera(35, w / h, 1, 1000);
+        this.camera.position.set(20, 15, 0);
 
         this.scene = new THREE.Scene();
         const loader = new THREE.TextureLoader();
@@ -121,7 +118,7 @@ export default class WorldUtil {
 
         this.helper = new CannonHelper(this.scene);
         this.helper.addLights(this.renderer);
-        this.orbitalControls = new OrbitControls(this.camera, raceContainer);
+        // this.orbitalControls = new OrbitControls(this.camera, raceContainer);
         window.addEventListener('resize', function () {
             game && game.onWindowResize();
         }, false);
@@ -251,8 +248,8 @@ export default class WorldUtil {
     }
 
     updateDrive(forward = this.js.forward, turn = this.js.turn) {
-        const maxSteerVal = 0.36;
-        const maxForce = 500;
+        const maxSteerVal = 0.28;
+        const maxForce = 440;
         const brakeForce = 10;
 
         const force = maxForce * forward;
@@ -288,7 +285,7 @@ export default class WorldUtil {
 
     }
     updateCamera() {
-        this.camera.position.lerp(this.followCam.getWorldPosition(new THREE.Vector3()), 0.054);
+        this.camera.position.lerp(this.followCam.getWorldPosition(new THREE.Vector3()), 0.05);
         this.camera.lookAt(this.vehicle.chassisBody.threemesh.position);
         if (this.dirLight != undefined) {
             this.dirLight.position.copy(this.camera.position);
@@ -297,10 +294,9 @@ export default class WorldUtil {
     }
     gameLoop = () => {
         this.renderer.render(this.scene, this.camera);
-
         if (this.world) {
             this.updateCamera();
-            this.world.step(this.fixedTimeStep, 0.018);
+            this.world.step(this.fixedTimeStep);
             this.updateDrive();
         }
     };
