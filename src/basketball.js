@@ -1,7 +1,7 @@
 import "./index.css";
 import { Engine, Render, World, Bodies, Body, Events } from "matter-js";
 import lottie from "lottie-web";
-
+import {getConstants} from './constants'
 import { random, extractTouchPoint } from "./utils";
 
 let engine = null;
@@ -26,13 +26,76 @@ let gameEndContainer = null;
 let restartButton = null;
 let gameEndLottie = null;
 let perfectShotDiv = null;
+let backMusicDiv1 = document.querySelector(".music1");
+let backMusicDiv2 = document.querySelector(".music2");
+let shadowDiv = document.querySelector(".shadow");
+const loading = document.querySelector(".loading");
 let plusTwo = null;
 let gameOver = false;
 let currentScore = 0;
 // render.options.background = "transparent";
 
+function adjustAssetdimensions() {
+  const spacingLeft = (innerWidth > 500) ? innerWidth/2 - 250: innerWidth/2 - loading.clientWidth/2;
+  const spacingTop = (innerHeight > 888) ? innerHeight/2 - 444: (innerHeight - loading.clientHeight)/2;
+  loading.style.left = spacingLeft;
+  loading.style.top = spacingTop;
+
+  const gameEndContainer = document.querySelector(".gameEndContainer");
+  gameEndContainer.style.left = spacingLeft;
+  gameEndContainer.style.top = spacingTop;
+
+
+  const container = document.querySelector(".container");
+  container.style.left = spacingLeft;
+  container.style.top = spacingTop;
+
+
+  const actionButton = document.querySelector(".actionButton");
+  actionButton.style.width = 0.5 * loading.clientWidth;
+  actionButton.style.height = 0.08 * loading.clientHeight;
+  actionButton.style.lineHeight = (actionButton.style.height).toString();
+  actionButton.style.left = 0.25* loading.clientWidth;
+
+
+  const instruction = document.querySelector(".instructions");
+  instruction.style.width = 0.8*loading.clientWidth;
+  instruction.style.top = 0.4*loading.clientHeight;
+  instruction.style.letterSpacing = (0.005 * loading.clientWidth).toString() +'px';
+  instruction.style.fontSize = (0.07* loading.clientWidth).toString() + 'px';
+  instruction.style.lineHeight = (0.07*loading.clientHeight).toString() + 'px';
+
+  startBut.style.top = 0.7*loading.clientHeight;
+
+  const restartButton = document.querySelector(".restartButton");
+  restartButton.style.top = 0.55*loading.clientHeight;
+  restartButton.style.left = 0.25* loading.clientWidth;
+  restartButton.style.width = 0.5 * loading.clientWidth;
+  restartButton.style.height = 0.08 * loading.clientHeight;
+  restartButton.style.lineHeight = (restartButton.style.height).toString();
+
+
+  const finalScore = document.querySelector(".finalScore");
+  finalScore.style.left = 0.25* loading.clientWidth;
+  finalScore.style.top = 0.71*loading.clientHeight;
+  finalScore.style.width = 0.5 * loading.clientWidth;
+  finalScore.style.height = 0.08 * loading.clientHeight;
+  finalScore.style.lineHeight = (finalScore.style.height).toString();
+
+
+  plusTwo = document.querySelector(".plusTwo");
+  plusTwo.style.left = 0.64* loading.clientWidth;
+  plusTwo.style.top = 0.34* loading.clientHeight;
+
+}
+
 function commence() {
-  const { innerHeight: h, innerWidth: w } = window;
+  let { innerHeight: h, innerWidth: w } = window;
+  const container = document.querySelector(".container")
+  const containerWidth = container.clientWidth;
+  const containerHeight = container.clientHeight;
+  w = containerWidth;
+  h = containerHeight;
   const {
     GRAVITY,
     getUserURL,
@@ -60,20 +123,20 @@ function commence() {
     DELTA,
     largeYForce,
     lessYForce
-  } = require("./constants");
+  } = getConstants(containerHeight, containerWidth);
   let ballState = STILL_BALL_STATE;
   const ballRadius = BALL_RADIUS_FACTOR;
   function initializeWorldElements() {
     engine = Engine.create();
-    //   render = Render.create({
-    //     element: document.body,
-    //     engine: engine,
-    //     options: {
-    //       width: w,
-    //       height: h,
-    //       wireframes: true
-    //     }
-    //   });
+    // render = Render.create({
+    //   element: document.body,
+    //   engine: engine,
+    //   options: {
+    //     width: containerWidth,
+    //     height: containerHeight,
+    //     wireframes: false
+    //   }
+    // });
     left_point = Bodies.circle(RIM_LEFT, RIM_TOP, INFINITE_MASS_RADIUS, {
       isStatic: true,
       collisionFilter: { group: NO_COLLISION_CATEGORY }
@@ -151,6 +214,8 @@ function commence() {
     board.style.top = RIM_TOP + 4 * INFINITE_MASS_RADIUS - BOARD_HEIGHT;
     timerDiv.innerHTML = `TIME ${GAME_INTERVAL - timerValue}`;
     scoreDiv.innerHTML = `SCORE: ${currentScore}`;
+    shadowDiv.style.height = 4 * ballRadius;
+    shadowDiv.style.width = 4* ballRadius;
     updateBall(ball);
 
     gameOverDiv = document.querySelector(".gameOver");
@@ -174,6 +239,7 @@ function commence() {
 
   function resetBall() {
     ballState = STILL_BALL_STATE;
+    ball.velSet = false;
     left_point.collisionFilter.group = NO_COLLISION_CATEGORY;
     right_point.collisionFilter.group = NO_COLLISION_CATEGORY;
     Body.setPosition(ball, {
@@ -201,6 +267,12 @@ function commence() {
     } else if (ballState === COLLIDING_BALL_STATE) {
       scale = 1;
     }
+    if(!ballState) shadowDiv.style.opacity = 1;
+    shadowDiv.style.left = ball.position.x -2* ballRadius + parseInt(loading.style.left);
+    shadowDiv.style.top = ball.position.y + 0.75* ballRadius + parseInt(loading.style.top);
+
+    Body.set(ball,{angle: ball.angle + ball.velocity.x *0.014})
+
     ballDiv.style.left = ball.position.x - ballRadius;
     ballDiv.style.top = ball.position.y - ballRadius;
     ballDiv.style.transform = `rotate(${ball.angle}rad) scale(${scale})`;
@@ -217,6 +289,8 @@ function commence() {
       timerDiv.innerHTML = `TIME: ${GAME_INTERVAL - timerValue}`;
     }
     if (ballState === MOVING_BALL_STATE) {
+
+      shadowDiv.style.opacity = 0.25;
       updateBall(ball, ballState);
       if (ball.velocity.y > 0) {
         setBallColliding();
@@ -239,7 +313,6 @@ function commence() {
         if (perfectShot) {
           perfectShotDiv.play();
           showPoints("+2");
-
           currentScore += 2;
         } else {
           showPoints("+1");
@@ -249,6 +322,19 @@ function commence() {
         rimLottie.setSpeed(3);
         rimLottie.playSegments([0, 30], true);
         basketDetected = true;
+      }else  if (
+        ball.position.y > RIM_TOP &&
+        ball.velocity.y > 0 &&
+        ball.position.x > RIM_LEFT &&
+        ball.position.x < RIM_LEFT + RIM_WIDTH &&
+        !ball.velSet &&
+        !ball.slow
+      ) {
+        Body.setVelocity(ball, {
+          x: 0,
+          y: ball.velocity.y
+        });
+        ball.velSet = true;
       }
     }
     Engine.update(engine);
@@ -256,7 +342,7 @@ function commence() {
 
   function showPoints(text) {
     plusTwo.textContent = text;
-    plusTwo.style.display = "initial";
+    plusTwo.style.display = "initial"
     setTimeout(function() {
       plusTwo.style.display = "none";
     }, 1000);
@@ -271,13 +357,13 @@ function commence() {
     if (touchStart && ballState === STILL_BALL_STATE && !gameOver) {
       const deltaX = touchEnd.x - touchStart.x;
       const deltaY = touchEnd.y - touchStart.y;
-      // const targetAngle = Math.atan(deltaY / deltaX);
       performBallShoot(deltaX, deltaY);
     }
   });
 
   function handleGameOver() {
     gameOver = true;
+    shadowDiv.style.display = "none";
     gameOverDiv.style.display = "initial";
     gameEndContainer.style.display = "initial";
     gameEndLottie.play();
@@ -288,6 +374,9 @@ function commence() {
   }
 
   function handleRestart(e) {
+    if(!backMusicDiv1.paused || !backMusicDiv2.paused) { backMusicDiv1.pause(); backMusicDiv2.pause(); }
+    backMusicDiv1.play();
+    shadowDiv.style.display = "initial";
     gameOverDiv.style.display = "none";
     gameEndContainer.style.display = "none";
     ballDiv.style.display = "initial";
@@ -332,16 +421,32 @@ function commence() {
     }
   });
 }
+function handleVisibilityChange() {
+      if (!document.hidden) {
+          if(backMusicDiv1.paused)
+          backMusicDiv1.play();
+          else if(backMusicDiv2.paused)
+          backMusicDiv2.play();
+      } else {
+        if(!backMusicDiv1.paused)
+          backMusicDiv1.pause();
+          else if(!backMusicDiv2.paused)
+          backMusicDiv2.pause();
+      }
+}
 
 window.addEventListener("DOMContentLoaded", () => {
-  const loading = document.querySelector(".loading");
+  window.addEventListener("resize", ()=> adjustAssetdimensions());
+  adjustAssetdimensions();
   startBut.onclick = function() {
     loading.style.display = "none";
-    commence();
-  };
-  // loadingLottie.addEventListener("complete", function() {
-  //   loading.style.display = "none";
-  //   loadingBall.style.display = "none";
-  //   commence();
-  // });
+    backMusicDiv1.volume = 0.3;
+    backMusicDiv1.play();
+    backMusicDiv1.addEventListener("ended", ()=> {
+        backMusicDiv2.volume = 0.3;
+        backMusicDiv2.play();
+      })
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+  commence();
+};
 });

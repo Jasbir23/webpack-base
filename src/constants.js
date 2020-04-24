@@ -1,5 +1,10 @@
-const { innerHeight, innerWidth } = window;
-export const GRAVITY = innerHeight / 70,
+let { innerHeight, innerWidth } = window;
+
+export function getConstants(height= innerHeight, width= innerWidth) {
+  console.log('here: ', height, width)
+  innerHeight = height;
+  innerWidth = width;
+  const GRAVITY = innerHeight / 70,
   SLOW_VEL_FAC = 0.04,
   getUserURL = "https://api.ewar.in/api/gamePind",
   postResURL = "https://api.ewar.in/api/gamePind/result",
@@ -13,7 +18,7 @@ export const GRAVITY = innerHeight / 70,
   RIM_TOP = 0.32 * innerHeight,
   BOARD_WIDTH = innerWidth * 0.5,
   SPEED_Y_FACTOR = -13,
-  GAME_INTERVAL = 60,
+  GAME_INTERVAL = 45,
   BOARD_HEIGHT = innerHeight * 0.2,
   WALL_WIDTH_FACTOR = 0.06,
   BALL_RADIUS_FACTOR = innerWidth / 12,
@@ -27,3 +32,34 @@ export const GRAVITY = innerHeight / 70,
   scaleFactor = 0.01,
   largeYForce = -0.08 * innerHeight,
   lessYForce = largeYForce / 2;
+  return {
+    GRAVITY,
+    SLOW_VEL_FAC,
+    getUserURL,
+    postResURL,
+    INFINITE_MASS_RADIUS,
+    BALL_POSITION_CHECK_THRES,
+    ROTATION_FAC,
+    RIM_HEIGHT,
+    RANDOM_VX_FAC,
+    RIM_WIDTH,
+    RIM_LEFT,
+    RIM_TOP,
+    BOARD_WIDTH,
+    SPEED_Y_FACTOR,
+    GAME_INTERVAL,
+    BOARD_HEIGHT,
+    WALL_WIDTH_FACTOR,
+    BALL_RADIUS_FACTOR,
+    forceFactor,
+    BALL_COLLISION_CATEGORY,
+    NO_COLLISION_CATEGORY,
+    STILL_BALL_STATE,
+    MOVING_BALL_STATE,
+    COLLIDING_BALL_STATE,
+    DELTA,
+    scaleFactor,
+    largeYForce,
+    lessYForce
+  }
+}
