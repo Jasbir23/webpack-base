@@ -73,6 +73,7 @@ body {
   overflow: hidden;
   z-index: 3;
 }
+
 .fire {
   position: absolute;
   overflow: hidden;
@@ -252,6 +253,7 @@ body {
     opacity: 1;
     transform: scale(1) rotate(0deg);
   }
+
   100% {
     opacity: 0;
     transform: scale(0) rotate(180deg);
