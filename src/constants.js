@@ -20,7 +20,7 @@ export function getConstants(height = innerHeight, width = innerWidth) {
     GAME_INTERVAL = 60,
     BOARD_HEIGHT = innerHeight * 0.2,
     WALL_WIDTH_FACTOR = 0.06,
-    BALL_RADIUS_FACTOR = innerWidth / 12,
+    BALL_RADIUS_FACTOR = innerWidth / 13,
     forceFactor = 0.1,
     BALL_COLLISION_CATEGORY = 1,
     NO_COLLISION_CATEGORY = -1,
@@ -59,6 +59,6 @@ export function getConstants(height = innerHeight, width = innerWidth) {
     DELTA,
     scaleFactor,
     largeYForce,
-    lessYForce,
+    lessYForce
   };
 }

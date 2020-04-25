@@ -35,7 +35,8 @@ body {
   border-radius: 4px;
   z-index: 2;
   opacity: 0.9;
-  background: url("https://res.cloudinary.com/princeofpersia/image/upload/v1587829454/Flame_GIF_mlxnqn.gif") no-repeat;
+  background: url("https://res.cloudinary.com/princeofpersia/image/upload/v1587829454/Flame_GIF_mlxnqn.gif")
+    no-repeat;
   background-size: cover;
 }
 
@@ -238,7 +239,7 @@ body {
 #ball {
   position: absolute;
   z-index: 4;
-  transform: scale(1.3);
+  /* transform: scale(1.3); */
   background-image: url("./assets/ball.png");
   background-size: cover;
 }

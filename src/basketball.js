@@ -170,7 +170,7 @@ function commence() {
     COLLIDING_BALL_STATE,
     DELTA,
     largeYForce,
-    lessYForce,
+    lessYForce
   } = getConstants(containerHeight, containerWidth);
   let ballState = STILL_BALL_STATE;
   const ballRadius = BALL_RADIUS_FACTOR;
@@ -180,8 +180,8 @@ function commence() {
     left_point = Bodies.circle(RIM_LEFT, RIM_TOP, INFINITE_MASS_RADIUS, {
       isStatic: true,
       collisionFilter: {
-        group: NO_COLLISION_CATEGORY,
-      },
+        group: NO_COLLISION_CATEGORY
+      }
     });
     right_point = Bodies.circle(
       RIM_LEFT + RIM_WIDTH - 2 * INFINITE_MASS_RADIUS,
@@ -190,8 +190,8 @@ function commence() {
       {
         isStatic: true,
         collisionFilter: {
-          group: NO_COLLISION_CATEGORY,
-        },
+          group: NO_COLLISION_CATEGORY
+        }
       }
     );
     const ground2 = Bodies.rectangle(
@@ -202,8 +202,8 @@ function commence() {
       {
         isStatic: true,
         collisionFilter: {
-          group: BALL_COLLISION_CATEGORY,
-        },
+          group: BALL_COLLISION_CATEGORY
+        }
       }
     );
 
@@ -218,8 +218,8 @@ function commence() {
         frictionStatic: 0,
         restitution: 0.7,
         collisionFilter: {
-          group: NO_COLLISION_CATEGORY,
-        },
+          group: NO_COLLISION_CATEGORY
+        }
       }
     );
     // add all of the bodies to the world
@@ -244,7 +244,7 @@ function commence() {
       renderer: "svg",
       autoplay: false,
       loop: false,
-      animationData: require("./assets/net.json"),
+      animationData: require("./assets/net.json")
     });
     timerDiv = document.querySelector(".timerVal");
     scoreDiv = document.querySelector(".scoreVal");
@@ -262,14 +262,10 @@ function commence() {
     board.style.top = RIM_TOP + 4 * INFINITE_MASS_RADIUS - BOARD_HEIGHT;
     flameDiv.style.width = 0.26 * containerWidth;
     flameDiv.style.height = 0.14 * containerHeight;
-    flameDiv.style.left = `${
-      parseInt(rim.style.left) - 0.8 * INFINITE_MASS_RADIUS
-    }px`;
-    flameDiv.style.top = `${
-      parseInt(rim.style.top) -
-      parseInt(flameDiv.style.height) +
-      (innerHeight / innerWidth) * 4
-    }px`;
+    flameDiv.style.left = `${parseInt(rim.style.left) -
+      0.8 * INFINITE_MASS_RADIUS}px`;
+    flameDiv.style.top = `${parseInt(rim.style.top) -
+      parseInt(flameDiv.style.height)}px`;
     timerDiv.innerHTML = `TIME ${GAME_INTERVAL - timerValue}`;
     scoreDiv.innerHTML = `SCORE: ${currentScore}`;
     shadowDiv.style.height = 4 * ballRadius;
@@ -284,7 +280,7 @@ function commence() {
       renderer: "svg",
       autoplay: false,
       loop: true,
-      animationData: require("./assets/bouncyBall.json"),
+      animationData: require("./assets/bouncyBall.json")
     });
   }
 
@@ -306,11 +302,11 @@ function commence() {
     right_point.collisionFilter.group = NO_COLLISION_CATEGORY;
     Body.setPosition(ball, {
       x: random(2.5 * ballRadius, w - 2.5 * ballRadius),
-      y: (1 - 2 * WALL_WIDTH_FACTOR) * h,
+      y: (1 - 2 * WALL_WIDTH_FACTOR) * h
     });
     Body.setVelocity(ball, {
       x: 0,
-      y: 0,
+      y: 0
     });
     ballDiv.classList.add("fade-out");
     setTimeout(() => {
@@ -321,11 +317,11 @@ function commence() {
   }
 
   function updateBall(ball, ballState) {
-    let scale = 1.38;
+    let scale = 1.5;
     if (ballState === MOVING_BALL_STATE) {
       const yPos = Math.abs(ball.position.y);
-      const yFactor = yPos / h;
-      scale = 1 + 0.38 * yFactor;
+      const yFactor = yPos / (0.9 * h);
+      scale = 1 + 0.5 * yFactor;
     } else if (ballState === COLLIDING_BALL_STATE) {
       scale = 1;
     }
@@ -336,11 +332,11 @@ function commence() {
       ball.position.y + 0.75 * ballRadius + parseInt(loading.style.top);
 
     Body.set(ball, {
-      angle: ball.angle + ball.velocity.x * 0.014,
+      angle: ball.angle + ball.velocity.x * 0.014
     });
-
     ballDiv.style.left = ball.position.x - ballRadius;
     ballDiv.style.top = ball.position.y - ballRadius;
+    // console.log(scale);
     ballDiv.style.transform = `rotate(${ball.angle}rad) scale(${scale})`;
   }
 
@@ -403,7 +399,7 @@ function commence() {
       ) {
         Body.setVelocity(ball, {
           x: 0,
-          y: ball.velocity.y,
+          y: ball.velocity.y
         });
         ball.velSet = true;
       }
@@ -415,26 +411,26 @@ function commence() {
   function showPoints(text) {
     plusTwo.textContent = text;
     plusTwo.style.display = "initial";
-    setTimeout(function () {
+    setTimeout(function() {
       plusTwo.style.display = "none";
     }, 1000);
   }
 
   if (isMobile) {
-    document.body.addEventListener("touchstart", (e) => {
+    document.body.addEventListener("touchstart", e => {
       touchStart = extractTouchPoint(e);
     });
   } else {
-    document.body.addEventListener("mousedown", (e) => {
+    document.body.addEventListener("mousedown", e => {
       touchStart = {
         x: e.clientX,
-        y: e.clientY,
+        y: e.clientY
       };
     });
   }
 
   if (isMobile) {
-    document.body.addEventListener("touchend", (e) => {
+    document.body.addEventListener("touchend", e => {
       const touchEnd = extractTouchPoint(e);
       if (touchStart && ballState === STILL_BALL_STATE && !gameOver) {
         const deltaX = touchEnd.x - touchStart.x;
@@ -443,10 +439,10 @@ function commence() {
       }
     });
   } else
-    document.body.addEventListener("mouseup", (e) => {
+    document.body.addEventListener("mouseup", e => {
       const touchEnd = {
         x: e.clientX,
-        y: e.clientY,
+        y: e.clientY
       };
       if (touchStart && ballState === STILL_BALL_STATE && !gameOver) {
         const deltaX = touchEnd.x - touchStart.x;
@@ -507,7 +503,7 @@ function commence() {
     else yForce = lessYForce;
     Body.setVelocity(ball, {
       x: deltaX * forceFactor,
-      y: yForce,
+      y: yForce
     });
     ball.velocity.y = 0;
     perfectShot = true;
@@ -519,10 +515,11 @@ function commence() {
   gameInterval = requestAnimationFrame(gameLoop);
   startGameTimer();
 
-  Events.on(engine, "collisionStart", function (event) {
+  Events.on(engine, "collisionStart", function(event) {
     if (ballState === COLLIDING_BALL_STATE) {
       rimLottie.playSegments([30, 45], true);
       rimLottie.setSpeed(1.5);
+      stopFlame();
       window.navigator &&
         window.navigator.vibrate &&
         window.navigator.vibrate(50);
@@ -543,10 +540,10 @@ function handleVisibilityChange() {
 
 window.document.addEventListener(
   "readystatechange",
-  function () {
+  function() {
     if (document.readyState == "complete") {
       adjustAssetdimensions();
-      startBut.onclick = function () {
+      startBut.onclick = function() {
         loading.style.display = "none";
         backMusicDiv1.volume = 0.25;
         backMusicDiv1.play();
