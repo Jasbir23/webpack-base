@@ -317,11 +317,11 @@ function commence() {
   }
 
   function updateBall(ball, ballState) {
-    let scale = 1.5;
+    let scale = 1.3;
     if (ballState === MOVING_BALL_STATE) {
       const yPos = Math.abs(ball.position.y);
       const yFactor = yPos / (0.9 * h);
-      scale = 1 + 0.5 * yFactor;
+      scale = 1 + 0.3 * yFactor;
     } else if (ballState === COLLIDING_BALL_STATE) {
       scale = 1;
     }
@@ -336,7 +336,6 @@ function commence() {
     });
     ballDiv.style.left = ball.position.x - ballRadius;
     ballDiv.style.top = ball.position.y - ballRadius;
-    // console.log(scale);
     ballDiv.style.transform = `rotate(${ball.angle}rad) scale(${scale})`;
   }
 
