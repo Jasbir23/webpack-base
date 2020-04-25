@@ -39,6 +39,7 @@ let gameEndContainer = null;
 let restartButton = null;
 let gameEndLottie = null;
 let perfectShotDiv = null;
+let gameTimer = null;
 let backMusicDiv1 = document.querySelector(".music1");
 let backMusicDiv2 = document.querySelector(".music2");
 let shadowDiv = document.querySelector(".shadow");
@@ -138,27 +139,18 @@ function commence() {
     COLLIDING_BALL_STATE,
     DELTA,
     largeYForce,
-    lessYForce,
+    lessYForce
   } = getConstants(containerHeight, containerWidth);
   let ballState = STILL_BALL_STATE;
   const ballRadius = BALL_RADIUS_FACTOR;
 
   function initializeWorldElements() {
     engine = Engine.create();
-    // render = Render.create({
-    //   element: document.body,
-    //   engine: engine,
-    //   options: {
-    //     width: containerWidth,
-    //     height: containerHeight,
-    //     wireframes: false
-    //   }
-    // });
     left_point = Bodies.circle(RIM_LEFT, RIM_TOP, INFINITE_MASS_RADIUS, {
       isStatic: true,
       collisionFilter: {
-        group: NO_COLLISION_CATEGORY,
-      },
+        group: NO_COLLISION_CATEGORY
+      }
     });
     right_point = Bodies.circle(
       RIM_LEFT + RIM_WIDTH - 2 * INFINITE_MASS_RADIUS,
@@ -167,8 +159,8 @@ function commence() {
       {
         isStatic: true,
         collisionFilter: {
-          group: NO_COLLISION_CATEGORY,
-        },
+          group: NO_COLLISION_CATEGORY
+        }
       }
     );
     const ground2 = Bodies.rectangle(
@@ -179,8 +171,8 @@ function commence() {
       {
         isStatic: true,
         collisionFilter: {
-          group: BALL_COLLISION_CATEGORY,
-        },
+          group: BALL_COLLISION_CATEGORY
+        }
       }
     );
 
@@ -195,8 +187,8 @@ function commence() {
         frictionStatic: 0,
         restitution: 0.7,
         collisionFilter: {
-          group: NO_COLLISION_CATEGORY,
-        },
+          group: NO_COLLISION_CATEGORY
+        }
       }
     );
     // add all of the bodies to the world
@@ -221,7 +213,7 @@ function commence() {
       renderer: "svg",
       autoplay: false,
       loop: false,
-      animationData: require("./assets/net.json"),
+      animationData: require("./assets/net.json")
     });
     timerDiv = document.querySelector(".timerVal");
     scoreDiv = document.querySelector(".scoreVal");
@@ -251,7 +243,7 @@ function commence() {
       renderer: "svg",
       autoplay: false,
       loop: true,
-      animationData: require("./assets/bouncyBall.json"),
+      animationData: require("./assets/bouncyBall.json")
     });
   }
 
@@ -269,11 +261,11 @@ function commence() {
     right_point.collisionFilter.group = NO_COLLISION_CATEGORY;
     Body.setPosition(ball, {
       x: random(2.5 * ballRadius, w - 2.5 * ballRadius),
-      y: (1 - 2 * WALL_WIDTH_FACTOR) * h,
+      y: (1 - 2 * WALL_WIDTH_FACTOR) * h
     });
     Body.setVelocity(ball, {
       x: 0,
-      y: 0,
+      y: 0
     });
     ballDiv.classList.add("fade-out");
     setTimeout(() => {
@@ -299,7 +291,7 @@ function commence() {
       ball.position.y + 0.75 * ballRadius + parseInt(loading.style.top);
 
     Body.set(ball, {
-      angle: ball.angle + ball.velocity.x * 0.014,
+      angle: ball.angle + ball.velocity.x * 0.014
     });
 
     ballDiv.style.left = ball.position.x - ballRadius;
@@ -308,15 +300,6 @@ function commence() {
   }
 
   function gameLoop() {
-    currentTime += 30;
-    if (currentTime > 1000) {
-      timerValue++;
-      if (timerValue === GAME_INTERVAL) {
-        return handleGameOver();
-      }
-      currentTime = 0;
-      timerDiv.innerHTML = `TIME: ${GAME_INTERVAL - timerValue}`;
-    }
     if (ballState === MOVING_BALL_STATE) {
       shadowDiv.style.opacity = 0.25;
       updateBall(ball, ballState);
@@ -360,37 +343,38 @@ function commence() {
       ) {
         Body.setVelocity(ball, {
           x: 0,
-          y: ball.velocity.y,
+          y: ball.velocity.y
         });
         ball.velSet = true;
       }
     }
     Engine.update(engine);
+    !gameOver && setTimeout(() => requestAnimationFrame(gameLoop), 16);
   }
 
   function showPoints(text) {
     plusTwo.textContent = text;
     plusTwo.style.display = "initial";
-    setTimeout(function () {
+    setTimeout(function() {
       plusTwo.style.display = "none";
     }, 1000);
   }
 
   if (isMobile) {
-    document.body.addEventListener("touchstart", (e) => {
+    document.body.addEventListener("touchstart", e => {
       touchStart = extractTouchPoint(e);
     });
   } else {
-    document.body.addEventListener("mousedown", (e) => {
+    document.body.addEventListener("mousedown", e => {
       touchStart = {
         x: e.clientX,
-        y: e.clientY,
+        y: e.clientY
       };
     });
   }
 
   if (isMobile) {
-    document.body.addEventListener("touchend", (e) => {
+    document.body.addEventListener("touchend", e => {
       const touchEnd = extractTouchPoint(e);
       if (touchStart && ballState === STILL_BALL_STATE && !gameOver) {
         const deltaX = touchEnd.x - touchStart.x;
@@ -399,10 +383,10 @@ function commence() {
       }
     });
   } else
-    document.body.addEventListener("mouseup", (e) => {
+    document.body.addEventListener("mouseup", e => {
       const touchEnd = {
         x: e.clientX,
-        y: e.clientY,
+        y: e.clientY
       };
       if (touchStart && ballState === STILL_BALL_STATE && !gameOver) {
         const deltaX = touchEnd.x - touchStart.x;
@@ -420,7 +404,8 @@ function commence() {
     timerDiv.innerHTML = `TIME: 0`;
     ballDiv.style.display = "none";
     finalScoreDiv.innerHTML = `SCORE: ${currentScore}`;
-    clearInterval(gameInterval);
+    cancelAnimationFrame(gameInterval);
+    clearInterval(gameTimer);
   }
 
   function handleRestart(e) {
@@ -439,31 +424,41 @@ function commence() {
     timerValue = 0;
     currentTime = 0;
     timerDiv.innerHTML = `TIME: ${GAME_INTERVAL - timerValue}`;
-    gameInterval = setInterval(gameLoop, 30);
-    resetBall();
     gameOver = false;
+    gameInterval = requestAnimationFrame(gameLoop);
+    resetBall();
+    startGameTimer();
+  }
+
+  function startGameTimer() {
+    gameTimer = setInterval(() => {
+      timerValue++;
+      if (timerValue >= GAME_INTERVAL) {
+        return handleGameOver();
+      }
+      timerDiv.innerHTML = `TIME: ${GAME_INTERVAL - timerValue}`;
+    }, 1000);
   }
 
   function performBallShoot(deltaX, deltaY) {
     let yForce = largeYForce;
     if (Math.abs(deltaY) > 150) yForce = largeYForce;
     else yForce = lessYForce;
-    // Body.applyForce(ball, ball.position, {
-    //   x: deltaX * forceFactor,
-    //   y: yForce
-    // });
     Body.setVelocity(ball, {
       x: deltaX * forceFactor,
-      y: yForce,
+      y: yForce
     });
     ball.velocity.y = 0;
     perfectShot = true;
     basketDetected = false;
     ballState = MOVING_BALL_STATE;
   }
+
   initializeWorldElements();
-  gameInterval = setInterval(gameLoop, 30);
-  Events.on(engine, "collisionStart", function (event) {
+  gameInterval = requestAnimationFrame(gameLoop);
+  startGameTimer();
+
+  Events.on(engine, "collisionStart", function(event) {
     if (ballState === COLLIDING_BALL_STATE) {
       rimLottie.playSegments([30, 45], true);
       rimLottie.setSpeed(1.5);
@@ -488,7 +483,7 @@ function handleVisibilityChange() {
 window.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("resize", () => adjustAssetdimensions());
   adjustAssetdimensions();
-  startBut.onclick = function () {
+  startBut.onclick = function() {
     loading.style.display = "none";
     backMusicDiv1.volume = 0.3;
     backMusicDiv1.play();
