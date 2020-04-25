@@ -10,19 +10,17 @@ body {
   height: 100%;
   width: 100%;
   user-select: none;
-  background: white;
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .loading {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  max-height: 888;
+  max-width: 500;
   height: 100%;
   width: 100%;
   background-position: center;
-  background-image: url(assets/95ec7a1aaf99cbb80ec476923fe07daf.png);
+  background-image: url(assets/b674c464d8919a010a91380c9653bce1.jpg);
   background-size: cover;
   background-repeat: no-repeat;
   z-index: 5;
@@ -41,28 +39,25 @@ body {
 .gameEndContainer {
   position: absolute;
   display: none;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  max-height: 888;
+  max-width: 500;
   height: 100%;
   width: 100%;
   z-index: 5;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .container {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
   height: 100%;
   width: 100%;
+  max-height: 888;
+  max-width: 500;
   background-position: center;
-  background-image: url(assets/6c631a2528e8227b2cb122d6f218670f.png);
+  background-image: url(assets/56b861192667f48ce024ca2a121099f6.png);
   background-size: cover;
   background-repeat: no-repeat;
+  overflow: hidden;
 }
 
 .leftPoint {
@@ -78,6 +73,7 @@ body {
   overflow: hidden;
   z-index: 3;
 }
+
 .fire {
   position: absolute;
   overflow: hidden;
@@ -88,22 +84,7 @@ body {
   font-size: 40px;
   font-style: italic;
   font-weight: 600;
-  left: 64vw;
-  top: 34vh;
   color: rgb(250, 173, 6);
-  animation: start 1s forwards;
-}
-
-@keyframes start {
-  from {
-    opacity: 0;
-    top: 37vh;
-  }
-
-  to {
-    opacity: 1;
-    top: 34vh;
-  }
 }
 
 .board {
@@ -133,7 +114,6 @@ body {
 }
 
 .start-but {
-  top: 70vh;
   background: yellow;
 }
 
@@ -147,18 +127,14 @@ body {
   line-height: 7vw;
   letter-spacing: 0.5vw;
   font-family: "digital-clock-font";
-  top: 45vh;
   color: white;
   text-align: center;
 }
 
 .actionButton {
   position: absolute;
-  left: 25vw;
-  width: 50vw;
+  justify-content: center;
   text-align: center;
-  line-height: 8vh;
-  height: 8vh;
   border: #fff 1px solid;
   font-family: "digital-clock-font";
   border-radius: 4px;
@@ -251,9 +227,16 @@ body {
   position: absolute;
   z-index: 4;
   transform: scale(1.3);
-  /* box-shadow: 0px 15px 10px -10px #111; */
-  background-image: url(assets/d87999a3a30d8fc1365350f08a1bce2e.png);
+  background-image: url(assets/e06c92794d16555b77655f7b5f3ba3cd.png);
   background-size: cover;
+}
+
+.shadow {
+  position: absolute;
+  z-index: 4;
+  background-image: url(assets/e5d569cd6eb9aa68ffb411115883c4f1.png);
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
 .in-between {
@@ -270,6 +253,7 @@ body {
     opacity: 1;
     transform: scale(1) rotate(0deg);
   }
+
   100% {
     opacity: 0;
     transform: scale(0) rotate(180deg);

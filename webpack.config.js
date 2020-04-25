@@ -11,18 +11,19 @@ const isProd = env === "production";
 
 const extractCss = new ExtractTextPlugin({
   filename: "index.css",
-  disable: isDev
+  disable: isDev,
 });
 
 module.exports = {
-  mode: "production",
+  mode: env,
   entry: {
-    bundle: "./src/index.js"
+    bundle: "./src/index.js",
   },
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "bundle.js"
+    filename: "bundle.js",
   },
+  devtool: "source-map",
   optimization: {
     minimizer: [
       new UglifyJSPlugin({
@@ -32,30 +33,30 @@ module.exports = {
           warnings: false,
           compress: {
             drop_console: false,
-            reduce_vars: false
-          }
-        }
-      })
+            reduce_vars: false,
+          },
+        },
+      }),
     ],
     splitChunks: {
       cacheGroups: {
         commons: {
           test: /[\\/]node_modules[\\/]/,
           name: "vendors",
-          chunks: "all"
-        }
-      }
-    }
+          chunks: "all",
+        },
+      },
+    },
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: __dirname + "/index.html",
-      inject: "body"
+      inject: "body",
     }),
     new webpack.DefinePlugin({
       "process.env": {
-        NODE_ENV: JSON.stringify("production")
-      }
+        NODE_ENV: JSON.stringify("production"),
+      },
     }),
     new CompressionPlugin({
       filename: "[path].gz[query]",
@@ -63,24 +64,28 @@ module.exports = {
       test: /\.js$|\.css$|\.html$/,
       threshold: 10240,
       minRatio: 0.7,
-      cache: true
+      cache: true,
     }),
-    extractCss
+    extractCss,
   ],
   module: {
     rules: [
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        use: "babel-loader"
+        use: "babel-loader",
       },
       {
         test: /\.css$/,
         exclude: /node_modules/,
         use: extractCss.extract({
-          use: [{ loader: "css-loader" }],
-          fallback: "style-loader"
-        })
+          use: [
+            {
+              loader: "css-loader",
+            },
+          ],
+          fallback: "style-loader",
+        }),
       },
       {
         // Now we apply rule for images
@@ -93,28 +98,28 @@ module.exports = {
             // In options we can set different things like format
             // and directory to save
             options: {
-              outputPath: "assets"
-            }
-          }
-        ]
+              outputPath: "assets",
+            },
+          },
+        ],
       },
       {
         test: /\.(gltf)$/,
         use: [
           {
-            loader: "gltf-webpack-loader"
-          }
-        ]
+            loader: "gltf-webpack-loader",
+          },
+        ],
       },
       {
         test: /\.(bin)$/,
         use: [
           {
             loader: "file-loader",
-            options: {}
-          }
-        ]
-      }
-    ]
-  }
+            options: {},
+          },
+        ],
+      },
+    ],
+  },
 };
