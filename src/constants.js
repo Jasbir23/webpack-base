@@ -6,21 +6,21 @@ let {
 export function getConstants(height = innerHeight, width = innerWidth) {
   innerHeight = height;
   innerWidth = width;
-  const GRAVITY = innerHeight / 70,
+  const GRAVITY = innerHeight / 110,
     SLOW_VEL_FAC = 0.04,
     getUserURL = "https://api.ewar.in/api/gamePind",
     postResURL = "https://api.ewar.in/api/gamePind/result",
     INFINITE_MASS_RADIUS = innerWidth / 84,
     BALL_POSITION_CHECK_THRES = 80,
     ROTATION_FAC = 4,
-    RIM_HEIGHT = 0.14 * innerHeight,
+    RIM_HEIGHT = 0.14 * innerHeight - (innerHeight / innerWidth) * 10,
     RANDOM_VX_FAC = 0,
     RIM_WIDTH = 0.22 * innerWidth + 2 * INFINITE_MASS_RADIUS,
     RIM_LEFT = 0.4 * innerWidth,
     RIM_TOP = 0.32 * innerHeight,
     BOARD_WIDTH = innerWidth * 0.5,
     SPEED_Y_FACTOR = -13,
-    GAME_INTERVAL = 45,
+    GAME_INTERVAL = 60,
     BOARD_HEIGHT = innerHeight * 0.2,
     WALL_WIDTH_FACTOR = 0.06,
     BALL_RADIUS_FACTOR = innerWidth / 12,
@@ -32,7 +32,7 @@ export function getConstants(height = innerHeight, width = innerWidth) {
     COLLIDING_BALL_STATE = "COLLIDING_BALL_STATE",
     DELTA = 20,
     scaleFactor = 0.01,
-    largeYForce = -0.08 * innerHeight,
+    largeYForce = -0.065 * innerHeight,
     lessYForce = largeYForce / 2;
   return {
     GRAVITY,

@@ -1,8 +1,20 @@
 import "./index.css";
-import { Engine, Render, World, Bodies, Body, Events } from "matter-js";
+import {
+  Engine,
+  Render,
+  World,
+  Bodies,
+  Body,
+  Events
+} from "matter-js";
 import lottie from "lottie-web";
-import { getConstants } from "./constants";
-import { random, extractTouchPoint } from "./utils";
+import {
+  getConstants
+} from "./constants";
+import {
+  random,
+  extractTouchPoint
+} from "./utils";
 
 var isMobile = false; //initiate as false
 // device detection
@@ -44,21 +56,37 @@ let backMusicDiv1 = document.querySelector(".music1");
 let backMusicDiv2 = document.querySelector(".music2");
 let shadowDiv = document.querySelector(".shadow");
 const loading = document.querySelector(".loading");
+const timerVal = document.querySelector(".timerVal")
+const scoreVal = document.querySelector(".scoreVal")
+const flameDiv = document.querySelector(".flameDiv")
+var tID = null;
+var rimOnFire = false;
+let spacingLeft, spacingTop;
 
 let plusTwo = null;
 let gameOver = false;
 let currentScore = 0;
 // render.options.background = "transparent";
 
+function animateFlame() {
+  flameDiv.style.display = "initial";
+  rimOnFire = true;
+}
+
+function stopFlame() {
+  rimOnFire = false
+  flameDiv.style.display = "none";
+}
+
 function adjustAssetdimensions() {
-  const spacingLeft =
-    innerWidth > 500
-      ? innerWidth / 2 - 250
-      : innerWidth / 2 - loading.clientWidth / 2;
-  const spacingTop =
-    innerHeight > 888
-      ? innerHeight / 2 - 444
-      : (innerHeight - loading.clientHeight) / 2;
+  spacingLeft =
+    innerWidth > 500 ?
+    innerWidth / 2 - 250 :
+    innerWidth / 2 - loading.clientWidth / 2;
+  spacingTop =
+    innerHeight > 888 ?
+    innerHeight / 2 - 444 :
+    (innerHeight - loading.clientHeight) / 2;
   loading.style.left = spacingLeft;
   loading.style.top = spacingTop;
 
@@ -71,12 +99,14 @@ function adjustAssetdimensions() {
   container.style.top = spacingTop;
 
   const actionButton = document.querySelector(".actionButton");
+  actionButton.style.display = "initial";
   actionButton.style.width = 0.5 * loading.clientWidth;
   actionButton.style.height = 0.08 * loading.clientHeight;
   actionButton.style.lineHeight = actionButton.style.height.toString();
   actionButton.style.left = 0.25 * loading.clientWidth;
 
   const instruction = document.querySelector(".instructions");
+  instruction.innerHTML = "Swipe the ball" + "<br>" + "Into the basket." + "<br>" + "You have 60 seconds";
   instruction.style.width = 0.8 * loading.clientWidth;
   instruction.style.top = 0.4 * loading.clientHeight;
   instruction.style.letterSpacing =
@@ -85,9 +115,12 @@ function adjustAssetdimensions() {
   instruction.style.lineHeight =
     (0.07 * loading.clientHeight).toString() + "px";
 
+
+  startBut.textContent = "START";
   startBut.style.top = 0.7 * loading.clientHeight;
 
   const restartButton = document.querySelector(".restartButton");
+  restartButton.textContent = "RESTART";
   restartButton.style.top = 0.55 * loading.clientHeight;
   restartButton.style.left = 0.25 * loading.clientWidth;
   restartButton.style.width = 0.5 * loading.clientWidth;
@@ -104,10 +137,16 @@ function adjustAssetdimensions() {
   plusTwo = document.querySelector(".plusTwo");
   plusTwo.style.left = 0.64 * loading.clientWidth;
   plusTwo.style.top = 0.34 * loading.clientHeight;
+  timerVal.style.display = "initial";
+  scoreVal.style.display = "initial";
 }
 
 function commence() {
-  let { innerHeight: h, innerWidth: w } = window;
+  // animateFlame()
+  let {
+    innerHeight: h,
+    innerWidth: w
+  } = window;
   const container = document.querySelector(".container");
   const containerWidth = container.clientWidth;
   const containerHeight = container.clientHeight;
@@ -139,7 +178,7 @@ function commence() {
     COLLIDING_BALL_STATE,
     DELTA,
     largeYForce,
-    lessYForce
+    lessYForce,
   } = getConstants(containerHeight, containerWidth);
   let ballState = STILL_BALL_STATE;
   const ballRadius = BALL_RADIUS_FACTOR;
@@ -149,46 +188,43 @@ function commence() {
     left_point = Bodies.circle(RIM_LEFT, RIM_TOP, INFINITE_MASS_RADIUS, {
       isStatic: true,
       collisionFilter: {
-        group: NO_COLLISION_CATEGORY
-      }
+        group: NO_COLLISION_CATEGORY,
+      },
     });
     right_point = Bodies.circle(
       RIM_LEFT + RIM_WIDTH - 2 * INFINITE_MASS_RADIUS,
       RIM_TOP,
-      INFINITE_MASS_RADIUS,
-      {
+      INFINITE_MASS_RADIUS, {
         isStatic: true,
         collisionFilter: {
-          group: NO_COLLISION_CATEGORY
-        }
+          group: NO_COLLISION_CATEGORY,
+        },
       }
     );
     const ground2 = Bodies.rectangle(
       w / 2,
       h,
       3 * w,
-      2 * WALL_WIDTH_FACTOR * h,
-      {
+      2 * WALL_WIDTH_FACTOR * h, {
         isStatic: true,
         collisionFilter: {
-          group: BALL_COLLISION_CATEGORY
-        }
+          group: BALL_COLLISION_CATEGORY,
+        },
       }
     );
 
     ball = Bodies.circle(
       random(2.5 * ballRadius, w - 2.5 * ballRadius),
       (1 - WALL_WIDTH_FACTOR) * h - ballRadius,
-      ballRadius,
-      {
+      ballRadius, {
         isStatic: false,
         friction: 0.05,
         frictionAir: 0.006,
         frictionStatic: 0,
         restitution: 0.7,
         collisionFilter: {
-          group: NO_COLLISION_CATEGORY
-        }
+          group: NO_COLLISION_CATEGORY,
+        },
       }
     );
     // add all of the bodies to the world
@@ -213,7 +249,7 @@ function commence() {
       renderer: "svg",
       autoplay: false,
       loop: false,
-      animationData: require("./assets/net.json")
+      animationData: require("./assets/net.json"),
     });
     timerDiv = document.querySelector(".timerVal");
     scoreDiv = document.querySelector(".scoreVal");
@@ -229,6 +265,10 @@ function commence() {
     board.style.left =
       RIM_LEFT - INFINITE_MASS_RADIUS - (BOARD_WIDTH - RIM_WIDTH) / 2;
     board.style.top = RIM_TOP + 4 * INFINITE_MASS_RADIUS - BOARD_HEIGHT;
+    flameDiv.style.width = 0.26 * containerWidth
+    flameDiv.style.height = 0.14 * containerHeight
+    flameDiv.style.left = `${parseInt(rim.style.left) -0.8*INFINITE_MASS_RADIUS}px`;
+    flameDiv.style.top = `${parseInt(rim.style.top) - parseInt(flameDiv.style.height )  +(innerHeight/innerWidth)*4 }px`;
     timerDiv.innerHTML = `TIME ${GAME_INTERVAL - timerValue}`;
     scoreDiv.innerHTML = `SCORE: ${currentScore}`;
     shadowDiv.style.height = 4 * ballRadius;
@@ -243,7 +283,7 @@ function commence() {
       renderer: "svg",
       autoplay: false,
       loop: true,
-      animationData: require("./assets/bouncyBall.json")
+      animationData: require("./assets/bouncyBall.json"),
     });
   }
 
@@ -261,11 +301,11 @@ function commence() {
     right_point.collisionFilter.group = NO_COLLISION_CATEGORY;
     Body.setPosition(ball, {
       x: random(2.5 * ballRadius, w - 2.5 * ballRadius),
-      y: (1 - 2 * WALL_WIDTH_FACTOR) * h
+      y: (1 - 2 * WALL_WIDTH_FACTOR) * h,
     });
     Body.setVelocity(ball, {
       x: 0,
-      y: 0
+      y: 0,
     });
     ballDiv.classList.add("fade-out");
     setTimeout(() => {
@@ -291,7 +331,7 @@ function commence() {
       ball.position.y + 0.75 * ballRadius + parseInt(loading.style.top);
 
     Body.set(ball, {
-      angle: ball.angle + ball.velocity.x * 0.014
+      angle: ball.angle + ball.velocity.x * 0.014,
     });
 
     ballDiv.style.left = ball.position.x - ballRadius;
@@ -313,6 +353,7 @@ function commence() {
         ball.position.x > w + ballRadius ||
         ball.position.y > 0.75 * h
       ) {
+
         resetBall();
       } else if (
         ball.position.x > RIM_LEFT &&
@@ -322,12 +363,26 @@ function commence() {
         !basketDetected
       ) {
         if (perfectShot) {
-          perfectShotDiv.play();
-          showPoints("+2");
-          currentScore += 2;
+          if (rimOnFire) {
+            perfectShotDiv.play();
+            showPoints("+5");
+            currentScore += 5;
+          } else {
+            animateFlame();
+            perfectShotDiv.play();
+            showPoints("+2");
+            currentScore += 2;
+          }
+
         } else {
-          showPoints("+1");
-          currentScore += 1;
+          if (rimOnFire) {
+            stopFlame();
+            showPoints("+3");
+            currentScore += 3;
+          } else {
+            showPoints("+1");
+            currentScore += 1;
+          }
         }
         scoreDiv.innerHTML = `SCORE: ${currentScore}`;
         rimLottie.setSpeed(3);
@@ -343,38 +398,38 @@ function commence() {
       ) {
         Body.setVelocity(ball, {
           x: 0,
-          y: ball.velocity.y
+          y: ball.velocity.y,
         });
         ball.velSet = true;
       }
     }
     Engine.update(engine);
-    !gameOver && setTimeout(() => requestAnimationFrame(gameLoop), 16);
+    !gameOver && requestAnimationFrame(gameLoop);
   }
 
   function showPoints(text) {
     plusTwo.textContent = text;
     plusTwo.style.display = "initial";
-    setTimeout(function() {
+    setTimeout(function () {
       plusTwo.style.display = "none";
     }, 1000);
   }
 
   if (isMobile) {
-    document.body.addEventListener("touchstart", e => {
+    document.body.addEventListener("touchstart", (e) => {
       touchStart = extractTouchPoint(e);
     });
   } else {
-    document.body.addEventListener("mousedown", e => {
+    document.body.addEventListener("mousedown", (e) => {
       touchStart = {
         x: e.clientX,
-        y: e.clientY
+        y: e.clientY,
       };
     });
   }
 
   if (isMobile) {
-    document.body.addEventListener("touchend", e => {
+    document.body.addEventListener("touchend", (e) => {
       const touchEnd = extractTouchPoint(e);
       if (touchStart && ballState === STILL_BALL_STATE && !gameOver) {
         const deltaX = touchEnd.x - touchStart.x;
@@ -383,10 +438,10 @@ function commence() {
       }
     });
   } else
-    document.body.addEventListener("mouseup", e => {
+    document.body.addEventListener("mouseup", (e) => {
       const touchEnd = {
         x: e.clientX,
-        y: e.clientY
+        y: e.clientY,
       };
       if (touchStart && ballState === STILL_BALL_STATE && !gameOver) {
         const deltaX = touchEnd.x - touchStart.x;
@@ -397,6 +452,7 @@ function commence() {
 
   function handleGameOver() {
     gameOver = true;
+    stopFlame();
     shadowDiv.style.display = "none";
     gameOverDiv.style.display = "initial";
     gameEndContainer.style.display = "initial";
@@ -446,7 +502,7 @@ function commence() {
     else yForce = lessYForce;
     Body.setVelocity(ball, {
       x: deltaX * forceFactor,
-      y: yForce
+      y: yForce,
     });
     ball.velocity.y = 0;
     perfectShot = true;
@@ -458,7 +514,7 @@ function commence() {
   gameInterval = requestAnimationFrame(gameLoop);
   startGameTimer();
 
-  Events.on(engine, "collisionStart", function(event) {
+  Events.on(engine, "collisionStart", function (event) {
     if (ballState === COLLIDING_BALL_STATE) {
       rimLottie.playSegments([30, 45], true);
       rimLottie.setSpeed(1.5);
@@ -480,18 +536,19 @@ function handleVisibilityChange() {
   }
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-  window.addEventListener("resize", () => adjustAssetdimensions());
-  adjustAssetdimensions();
-  startBut.onclick = function() {
-    loading.style.display = "none";
-    backMusicDiv1.volume = 0.3;
-    backMusicDiv1.play();
-    backMusicDiv1.addEventListener("ended", () => {
-      backMusicDiv2.volume = 0.3;
-      backMusicDiv2.play();
-    });
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    commence();
-  };
-});
+window.document.addEventListener("readystatechange", function () {
+  if (document.readyState == "complete") {
+    adjustAssetdimensions();
+    startBut.onclick = function () {
+      loading.style.display = "none";
+      backMusicDiv1.volume = 0;
+      backMusicDiv1.play();
+      backMusicDiv1.addEventListener("ended", () => {
+        backMusicDiv2.volume = 0;
+        backMusicDiv2.play();
+      });
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+      commence();
+    };
+  }
+}, false);
