@@ -1,20 +1,8 @@
 import "./index.css";
-import {
-  Engine,
-  Render,
-  World,
-  Bodies,
-  Body,
-  Events
-} from "matter-js";
+import { Engine, Render, World, Bodies, Body, Events } from "matter-js";
 import lottie from "lottie-web";
-import {
-  getConstants
-} from "./constants";
-import {
-  random,
-  extractTouchPoint
-} from "./utils";
+import { getConstants } from "./constants";
+import { random, extractTouchPoint } from "./utils";
 
 var isMobile = false; //initiate as false
 // device detection
@@ -51,14 +39,16 @@ let gameEndContainer = null;
 let restartButton = null;
 let gameEndLottie = null;
 let perfectShotDiv = null;
+
+let isPerfectShot = false;
 let gameTimer = null;
 let backMusicDiv1 = document.querySelector(".music1");
 let backMusicDiv2 = document.querySelector(".music2");
 let shadowDiv = document.querySelector(".shadow");
 const loading = document.querySelector(".loading");
-const timerVal = document.querySelector(".timerVal")
-const scoreVal = document.querySelector(".scoreVal")
-const flameDiv = document.querySelector(".flameDiv")
+const timerVal = document.querySelector(".timerVal");
+const scoreVal = document.querySelector(".scoreVal");
+const flameDiv = document.querySelector(".flameDiv");
 var tID = null;
 var rimOnFire = false;
 let spacingLeft, spacingTop;
@@ -74,19 +64,19 @@ function animateFlame() {
 }
 
 function stopFlame() {
-  rimOnFire = false
+  rimOnFire = false;
   flameDiv.style.display = "none";
 }
 
 function adjustAssetdimensions() {
   spacingLeft =
-    innerWidth > 500 ?
-    innerWidth / 2 - 250 :
-    innerWidth / 2 - loading.clientWidth / 2;
+    innerWidth > 500
+      ? innerWidth / 2 - 250
+      : innerWidth / 2 - loading.clientWidth / 2;
   spacingTop =
-    innerHeight > 888 ?
-    innerHeight / 2 - 444 :
-    (innerHeight - loading.clientHeight) / 2;
+    innerHeight > 888
+      ? innerHeight / 2 - 444
+      : (innerHeight - loading.clientHeight) / 2;
   loading.style.left = spacingLeft;
   loading.style.top = spacingTop;
 
@@ -106,7 +96,12 @@ function adjustAssetdimensions() {
   actionButton.style.left = 0.25 * loading.clientWidth;
 
   const instruction = document.querySelector(".instructions");
-  instruction.innerHTML = "Swipe the ball" + "<br>" + "Into the basket." + "<br>" + "You have 60 seconds";
+  instruction.innerHTML =
+    "Swipe the ball" +
+    "<br>" +
+    "Into the basket." +
+    "<br>" +
+    "You have 60 seconds";
   instruction.style.width = 0.8 * loading.clientWidth;
   instruction.style.top = 0.4 * loading.clientHeight;
   instruction.style.letterSpacing =
@@ -115,11 +110,11 @@ function adjustAssetdimensions() {
   instruction.style.lineHeight =
     (0.07 * loading.clientHeight).toString() + "px";
 
-
   startBut.textContent = "START";
   startBut.style.top = 0.7 * loading.clientHeight;
 
   const restartButton = document.querySelector(".restartButton");
+  // restartButton.style.display = "initial";
   restartButton.textContent = "RESTART";
   restartButton.style.top = 0.55 * loading.clientHeight;
   restartButton.style.left = 0.25 * loading.clientWidth;
@@ -143,10 +138,7 @@ function adjustAssetdimensions() {
 
 function commence() {
   // animateFlame()
-  let {
-    innerHeight: h,
-    innerWidth: w
-  } = window;
+  let { innerHeight: h, innerWidth: w } = window;
   const container = document.querySelector(".container");
   const containerWidth = container.clientWidth;
   const containerHeight = container.clientHeight;
@@ -194,7 +186,8 @@ function commence() {
     right_point = Bodies.circle(
       RIM_LEFT + RIM_WIDTH - 2 * INFINITE_MASS_RADIUS,
       RIM_TOP,
-      INFINITE_MASS_RADIUS, {
+      INFINITE_MASS_RADIUS,
+      {
         isStatic: true,
         collisionFilter: {
           group: NO_COLLISION_CATEGORY,
@@ -205,7 +198,8 @@ function commence() {
       w / 2,
       h,
       3 * w,
-      2 * WALL_WIDTH_FACTOR * h, {
+      2 * WALL_WIDTH_FACTOR * h,
+      {
         isStatic: true,
         collisionFilter: {
           group: BALL_COLLISION_CATEGORY,
@@ -216,7 +210,8 @@ function commence() {
     ball = Bodies.circle(
       random(2.5 * ballRadius, w - 2.5 * ballRadius),
       (1 - WALL_WIDTH_FACTOR) * h - ballRadius,
-      ballRadius, {
+      ballRadius,
+      {
         isStatic: false,
         friction: 0.05,
         frictionAir: 0.006,
@@ -265,10 +260,16 @@ function commence() {
     board.style.left =
       RIM_LEFT - INFINITE_MASS_RADIUS - (BOARD_WIDTH - RIM_WIDTH) / 2;
     board.style.top = RIM_TOP + 4 * INFINITE_MASS_RADIUS - BOARD_HEIGHT;
-    flameDiv.style.width = 0.26 * containerWidth
-    flameDiv.style.height = 0.14 * containerHeight
-    flameDiv.style.left = `${parseInt(rim.style.left) -0.8*INFINITE_MASS_RADIUS}px`;
-    flameDiv.style.top = `${parseInt(rim.style.top) - parseInt(flameDiv.style.height )  +(innerHeight/innerWidth)*4 }px`;
+    flameDiv.style.width = 0.26 * containerWidth;
+    flameDiv.style.height = 0.14 * containerHeight;
+    flameDiv.style.left = `${
+      parseInt(rim.style.left) - 0.8 * INFINITE_MASS_RADIUS
+    }px`;
+    flameDiv.style.top = `${
+      parseInt(rim.style.top) -
+      parseInt(flameDiv.style.height) +
+      (innerHeight / innerWidth) * 4
+    }px`;
     timerDiv.innerHTML = `TIME ${GAME_INTERVAL - timerValue}`;
     scoreDiv.innerHTML = `SCORE: ${currentScore}`;
     shadowDiv.style.height = 4 * ballRadius;
@@ -295,6 +296,10 @@ function commence() {
   }
 
   function resetBall() {
+    if (rimOnFire && !isPerfectShot) stopFlame();
+    else {
+      isPerfectShot = false;
+    }
     ballState = STILL_BALL_STATE;
     ball.velSet = false;
     left_point.collisionFilter.group = NO_COLLISION_CATEGORY;
@@ -316,11 +321,11 @@ function commence() {
   }
 
   function updateBall(ball, ballState) {
-    let scale = 1.3;
+    let scale = 1.38;
     if (ballState === MOVING_BALL_STATE) {
       const yPos = Math.abs(ball.position.y);
       const yFactor = yPos / h;
-      scale = 1 + 0.3 * yFactor;
+      scale = 1 + 0.38 * yFactor;
     } else if (ballState === COLLIDING_BALL_STATE) {
       scale = 1;
     }
@@ -353,7 +358,6 @@ function commence() {
         ball.position.x > w + ballRadius ||
         ball.position.y > 0.75 * h
       ) {
-
         resetBall();
       } else if (
         ball.position.x > RIM_LEFT &&
@@ -363,6 +367,7 @@ function commence() {
         !basketDetected
       ) {
         if (perfectShot) {
+          isPerfectShot = true;
           if (rimOnFire) {
             perfectShotDiv.play();
             showPoints("+5");
@@ -373,8 +378,8 @@ function commence() {
             showPoints("+2");
             currentScore += 2;
           }
-
         } else {
+          isPerfectShot = false;
           if (rimOnFire) {
             stopFlame();
             showPoints("+3");
@@ -536,19 +541,23 @@ function handleVisibilityChange() {
   }
 }
 
-window.document.addEventListener("readystatechange", function () {
-  if (document.readyState == "complete") {
-    adjustAssetdimensions();
-    startBut.onclick = function () {
-      loading.style.display = "none";
-      backMusicDiv1.volume = 0;
-      backMusicDiv1.play();
-      backMusicDiv1.addEventListener("ended", () => {
-        backMusicDiv2.volume = 0;
-        backMusicDiv2.play();
-      });
-      document.addEventListener("visibilitychange", handleVisibilityChange);
-      commence();
-    };
-  }
-}, false);
+window.document.addEventListener(
+  "readystatechange",
+  function () {
+    if (document.readyState == "complete") {
+      adjustAssetdimensions();
+      startBut.onclick = function () {
+        loading.style.display = "none";
+        backMusicDiv1.volume = 0.25;
+        backMusicDiv1.play();
+        backMusicDiv1.addEventListener("ended", () => {
+          backMusicDiv2.volume = 0.25;
+          backMusicDiv2.play();
+        });
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        commence();
+      };
+    }
+  },
+  false
+);

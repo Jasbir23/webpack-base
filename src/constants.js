@@ -1,7 +1,4 @@
-let {
-  innerHeight,
-  innerWidth
-} = window;
+let { innerHeight, innerWidth } = window;
 
 export function getConstants(height = innerHeight, width = innerWidth) {
   innerHeight = height;
@@ -62,6 +59,6 @@ export function getConstants(height = innerHeight, width = innerWidth) {
     DELTA,
     scaleFactor,
     largeYForce,
-    lessYForce
-  }
+    lessYForce,
+  };
 }

@@ -29,6 +29,16 @@ body {
   align-content: center;
 }
 
+.flameDiv {
+  display: none;
+  position: absolute;
+  border-radius: 4px;
+  z-index: 2;
+  opacity: 0.9;
+  background: url("https://res.cloudinary.com/princeofpersia/image/upload/v1587829454/Flame_GIF_mlxnqn.gif") no-repeat;
+  background-size: cover;
+}
+
 .loadingBall {
   position: absolute;
   top: 30%;
@@ -187,6 +197,7 @@ body {
 }
 
 .timerVal {
+  display: none;
   position: absolute;
   top: 30px;
   left: 10px;
@@ -205,6 +216,7 @@ body {
 }
 
 .scoreVal {
+  display: none;
   position: absolute;
   top: 30px;
   right: 10px;
