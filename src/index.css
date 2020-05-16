@@ -92,6 +92,15 @@ body {
   color: rgb(250, 173, 6);
 }
 
+.timeIncrease {
+  position: absolute;
+  font-size: 28px;
+  font-style: italic;
+  font-weight: 600;
+  color: rgb(18, 169, 214);
+  z-index: 2;
+}
+
 .board {
   position: absolute;
   z-index: 2;
@@ -137,8 +146,9 @@ body {
 }
 
 .clock {
+  display: none;
   position: absolute;
-  background-color: turquoise;
+  background-size: cover;
   z-index: 3;
 }
 
