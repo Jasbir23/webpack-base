@@ -64,11 +64,12 @@ const scoreVal = document.querySelector(".scoreVal");
 const flameDiv = document.querySelector(".flameDiv");
 let tID = null;
 let clockDiv;
+let clockLottie;
 let clock;
 let rimOnFire = false;
 let spacingLeft, spacingTop;
 let gameIntervalupdated;
-let clockArray = [20, 40];
+let clockArray = [2, 40];
 let clockDisappearTime = 0;
 let plusTwo = null;
 let gameOver = false;
@@ -240,10 +241,18 @@ function commence() {
     });
     clockDiv = document.querySelector(".clock");
     clockDiv.style.display = "none";
-    clockDiv.style.width = 0.1 * w;
-    clockDiv.style.height = 0.1 * w;
+    clockDiv.style.width = 0.3 * w;
+    clockDiv.style.height = 0.3 * w;
     clockDiv.style.left = 0.5 * w;
     clockDiv.style.top = 0.2 * h;
+
+    clockLottie = lottie.loadAnimation({
+      container: clockDiv,
+      renderer: "svg",
+      autoplay: true,
+      loop: true,
+      animationData: require("./assets/clock.json"),
+    });
 
     ball = Bodies.circle(
       random(2.5 * ballRadius, w - 2.5 * ballRadius),
@@ -549,6 +558,7 @@ function commence() {
     currentScore = 0;
     timerValue = 0;
     currentTime = 0;
+    gameIntervalupdated = 60;
     timerDiv.innerHTML = `TIME: ${gameIntervalupdated - timerValue}`;
     gameOver = false;
     gameInterval = requestAnimationFrame(gameLoop);
@@ -608,7 +618,8 @@ function commence() {
           ballState === COLLIDING_BALL_STATE
         ) {
           clockDiv.style.display = "none";
-          gameIntervalupdated += 5;
+          showPoints("TIME UP")
+          gameIntervalupdated += 10;
         }
       }
     });
@@ -644,6 +655,9 @@ window.document.addEventListener(
           backMusicDiv2.volume = 0.25;
           backMusicDiv2.play();
         });
+        backMusicDiv2.addEventListener("ended", () => {
+          backMusicDiv1.play();
+        })
         document.addEventListener("visibilitychange", handleVisibilityChange);
         commence();
       };

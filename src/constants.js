@@ -20,7 +20,7 @@ export function getConstants(height = innerHeight, width = innerWidth) {
     RIM_TOP = 0.32 * innerHeight,
     BOARD_WIDTH = innerWidth * 0.5,
     SPEED_Y_FACTOR = -13,
-    GAME_INTERVAL = 600,
+    GAME_INTERVAL = 60,
     BOARD_HEIGHT = innerHeight * 0.2,
     WALL_WIDTH_FACTOR = 0.06,
     BALL_RADIUS_FACTOR = innerWidth / 13,
@@ -34,7 +34,7 @@ export function getConstants(height = innerHeight, width = innerWidth) {
     scaleFactor = 0.01,
     largeYForce = -0.065 * innerHeight,
     CLOCK_SPEED = 0.005 * innerWidth,
-    CLOCK_DELAY = 6,
+    CLOCK_DELAY = 10,
     lessYForce = largeYForce / 2;
   return {
     GRAVITY,
