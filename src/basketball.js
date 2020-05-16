@@ -1,8 +1,21 @@
 import "./index.css";
-import { Engine, Render, World, Bodies, Body, Events } from "matter-js";
+import {
+  Engine,
+  Render,
+  World,
+  Bodies,
+  Body,
+  Events,
+  Vector
+} from "matter-js";
 import lottie from "lottie-web";
-import { getConstants } from "./constants";
-import { random, extractTouchPoint } from "./utils";
+import {
+  getConstants
+} from "./constants";
+import {
+  random,
+  extractTouchPoint
+} from "./utils";
 
 var isMobile = false; //initiate as false
 // device detection
@@ -49,10 +62,14 @@ const loading = document.querySelector(".loading");
 const timerVal = document.querySelector(".timerVal");
 const scoreVal = document.querySelector(".scoreVal");
 const flameDiv = document.querySelector(".flameDiv");
-var tID = null;
-var rimOnFire = false;
+let tID = null;
+let clockDiv;
+let clock;
+let rimOnFire = false;
 let spacingLeft, spacingTop;
-
+let gameIntervalupdated;
+let clockArray = [20, 40];
+let clockDisappearTime = 0;
 let plusTwo = null;
 let gameOver = false;
 let currentScore = 0;
@@ -70,13 +87,13 @@ function stopFlame() {
 
 function adjustAssetdimensions() {
   spacingLeft =
-    innerWidth > 500
-      ? innerWidth / 2 - 250
-      : innerWidth / 2 - loading.clientWidth / 2;
+    innerWidth > 500 ?
+    innerWidth / 2 - 250 :
+    innerWidth / 2 - loading.clientWidth / 2;
   spacingTop =
-    innerHeight > 888
-      ? innerHeight / 2 - 444
-      : (innerHeight - loading.clientHeight) / 2;
+    innerHeight > 888 ?
+    innerHeight / 2 - 444 :
+    (innerHeight - loading.clientHeight) / 2;
   loading.style.left = spacingLeft;
   loading.style.top = spacingTop;
 
@@ -138,7 +155,10 @@ function adjustAssetdimensions() {
 
 function commence() {
   // animateFlame()
-  let { innerHeight: h, innerWidth: w } = window;
+  let {
+    innerHeight: h,
+    innerWidth: w
+  } = window;
   const container = document.querySelector(".container");
   const containerWidth = container.clientWidth;
   const containerHeight = container.clientHeight;
@@ -168,10 +188,13 @@ function commence() {
     STILL_BALL_STATE,
     MOVING_BALL_STATE,
     COLLIDING_BALL_STATE,
+    CLOCK_SPEED,
+    CLOCK_DELAY,
     DELTA,
     largeYForce,
     lessYForce,
   } = getConstants(containerHeight, containerWidth);
+  gameIntervalupdated = GAME_INTERVAL;
   let ballState = STILL_BALL_STATE;
   const ballRadius = BALL_RADIUS_FACTOR;
 
@@ -186,32 +209,46 @@ function commence() {
     right_point = Bodies.circle(
       RIM_LEFT + RIM_WIDTH - 2 * INFINITE_MASS_RADIUS,
       RIM_TOP,
-      INFINITE_MASS_RADIUS,
-      {
+      INFINITE_MASS_RADIUS, {
         isStatic: true,
         collisionFilter: {
           group: NO_COLLISION_CATEGORY,
         },
       }
     );
-    const ground2 = Bodies.rectangle(
+    const ground = Bodies.rectangle(
       w / 2,
       h,
       3 * w,
-      2 * WALL_WIDTH_FACTOR * h,
-      {
+      2 * WALL_WIDTH_FACTOR * h, {
         isStatic: true,
+        label: "ground",
         collisionFilter: {
           group: BALL_COLLISION_CATEGORY,
         },
       }
     );
+    clock = Bodies.rectangle(w / 2, 0.2 * h, 0.1 * w, 0.1 * w, {
+      // mass: 1,
+      isSensor: true,
+      frictionAir: 0,
+      frictionStatic: 0,
+      label: "clock",
+      collisionFilter: {
+        group: BALL_COLLISION_CATEGORY,
+      },
+    });
+    clockDiv = document.querySelector(".clock");
+    clockDiv.style.display = "none";
+    clockDiv.style.width = 0.1 * w;
+    clockDiv.style.height = 0.1 * w;
+    clockDiv.style.left = 0.5 * w;
+    clockDiv.style.top = 0.2 * h;
 
     ball = Bodies.circle(
       random(2.5 * ballRadius, w - 2.5 * ballRadius),
       (1 - WALL_WIDTH_FACTOR) * h - ballRadius,
-      ballRadius,
-      {
+      ballRadius, {
         isStatic: false,
         friction: 0.05,
         frictionAir: 0.006,
@@ -220,11 +257,12 @@ function commence() {
         collisionFilter: {
           group: NO_COLLISION_CATEGORY,
         },
+        label: "ball",
       }
     );
     // add all of the bodies to the world
     engine.world.gravity.y = GRAVITY;
-    World.add(engine.world, [ground2, ball, left_point, right_point]);
+    World.add(engine.world, [ground, ball, left_point, right_point, clock]);
     initializeDomElements();
   }
 
@@ -268,7 +306,7 @@ function commence() {
     flameDiv.style.top = `${
       parseInt(rim.style.top) - parseInt(flameDiv.style.height)
     }px`;
-    timerDiv.innerHTML = `TIME ${GAME_INTERVAL - timerValue}`;
+    timerDiv.innerHTML = `TIME ${gameIntervalupdated - timerValue}`;
     scoreDiv.innerHTML = `SCORE: ${currentScore}`;
     shadowDiv.style.height = 4 * ballRadius;
     shadowDiv.style.width = 4 * ballRadius;
@@ -405,6 +443,35 @@ function commence() {
         ball.velSet = true;
       }
     }
+    Body.setPosition(clock, {
+      x: clock.position.x,
+      y: 0.2 * h,
+    });
+    if (clockDisappearTime === timerValue) {
+      clockDiv.style.display = "none";
+    }
+    if (clockArray.includes(timerValue)) {
+      clockDisappearTime = timerValue + CLOCK_DELAY;
+      Body.setPosition(clock, {
+        x: w / 2,
+        y: 0.2 * h,
+      });
+      Body.setVelocity(clock, {
+        x: CLOCK_SPEED,
+        y: 0,
+      });
+      setTimeout(function () {
+        clockDiv.style.display = "initial";
+      }, 800);
+    }
+    if (clock.position.x > w - 0.1 * w || clock.position.x < 0) {
+      Body.setVelocity(clock, {
+        x: -1 * clock.velocity.x,
+        y: 0,
+      });
+    }
+    clockDiv.style.left = clock.position.x;
+    clockDiv.style.top = clock.position.y;
     Engine.update(engine);
     !gameOver && requestAnimationFrame(gameLoop);
   }
@@ -456,6 +523,7 @@ function commence() {
     gameOver = true;
     stopFlame();
     shadowDiv.style.display = "none";
+    clockDiv.style.display = "none";
     gameOverDiv.style.display = "initial";
     gameEndContainer.style.display = "initial";
     gameEndLottie.play();
@@ -481,7 +549,7 @@ function commence() {
     currentScore = 0;
     timerValue = 0;
     currentTime = 0;
-    timerDiv.innerHTML = `TIME: ${GAME_INTERVAL - timerValue}`;
+    timerDiv.innerHTML = `TIME: ${gameIntervalupdated - timerValue}`;
     gameOver = false;
     gameInterval = requestAnimationFrame(gameLoop);
     resetBall();
@@ -491,10 +559,10 @@ function commence() {
   function startGameTimer() {
     gameTimer = setInterval(() => {
       timerValue++;
-      if (timerValue >= GAME_INTERVAL) {
+      if (timerValue >= gameIntervalupdated) {
         return handleGameOver();
       }
-      timerDiv.innerHTML = `TIME: ${GAME_INTERVAL - timerValue}`;
+      timerDiv.innerHTML = `TIME: ${gameIntervalupdated - timerValue}`;
     }, 1000);
   }
 
@@ -526,6 +594,24 @@ function commence() {
         window.navigator.vibrate(50);
       perfectShot = false;
     }
+    event.pairs.forEach((pair) => {
+      const {
+        bodyA,
+        bodyB
+      } = pair;
+      if (
+        (bodyA.label === "ball" && bodyB.label === "clock") ||
+        (bodyA.label === "clock" && bodyB.label === "ball")
+      ) {
+        if (
+          clockDiv.style.display === "initial" &&
+          ballState === COLLIDING_BALL_STATE
+        ) {
+          clockDiv.style.display = "none";
+          gameIntervalupdated += 5;
+        }
+      }
+    });
   });
 }
 
@@ -549,7 +635,7 @@ window.document.addEventListener(
           hitType: "event",
           eventCategory: "game",
           eventAction: "play",
-          eventLabel: "basketballStartClick",
+          eventLabel: "basketballplay",
         });
         loading.style.display = "none";
         backMusicDiv1.volume = 0.25;

@@ -33,10 +33,9 @@ body {
   display: none;
   position: absolute;
   border-radius: 4px;
-  z-index: 2;
+  z-index: 3;
   opacity: 0.9;
-  background: url("https://res.cloudinary.com/princeofpersia/image/upload/v1587829454/Flame_GIF_mlxnqn.gif")
-    no-repeat;
+  background: url("https://res.cloudinary.com/princeofpersia/image/upload/v1587829454/Flame_GIF_mlxnqn.gif") no-repeat;
   background-size: cover;
 }
 
@@ -83,11 +82,6 @@ body {
   position: absolute;
   overflow: hidden;
   z-index: 3;
-}
-
-.fire {
-  position: absolute;
-  overflow: hidden;
 }
 
 .plusTwo {
@@ -141,6 +135,13 @@ body {
   color: white;
   text-align: center;
 }
+
+.clock {
+  position: absolute;
+  background-color: turquoise;
+  z-index: 3;
+}
+
 
 .actionButton {
   position: absolute;

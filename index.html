@@ -1,7 +1,19 @@
 <html>
 
 <head>
-  <link rel="icon" href="data:;base64,=">
+  <link rel="icon" href="data:;base64,=" />
+  <!-- Global Site Tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-164629883-2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+
+    gtag("config", "UA-164629883-2");
+  </script>
 </head>
 <title>BasketBall</title>
 
@@ -31,10 +43,10 @@
     <span class="restartButton actionButton" id="restartButton"></span>
   </span>
   <div class="container">
+    <div class="clock"></div>
     <span id="ball"></span>
     <div class="board"></div>
     <span class="leftPoint"></span>
-    <span class="fire"></span>
     <span class="rim"></span>
     <span class="rightPoint"></span>
     <span class="score"></span>
@@ -44,8 +56,7 @@
     <span class="slide"></span>
     <span class="name"></span>
     <span class="plusTwo"></span>
-    <div class="flameDiv">
-    </div>
+    <div class="flameDiv"></div>
     <span class="gameOver"></span>
   </div>
 </body>
