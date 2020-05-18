@@ -6,7 +6,7 @@ let {
 export function getConstants(height = innerHeight, width = innerWidth) {
   innerHeight = height;
   innerWidth = width;
-  const GRAVITY = innerHeight / 180,
+  const GRAVITY = innerHeight / 150,
     SLOW_VEL_FAC = 0.04,
     getUserURL = "https://api.ewar.in/api/gamePind",
     postResURL = "https://api.ewar.in/api/gamePind/result",
@@ -32,7 +32,7 @@ export function getConstants(height = innerHeight, width = innerWidth) {
     COLLIDING_BALL_STATE = "COLLIDING_BALL_STATE",
     DELTA = 20,
     scaleFactor = 0.01,
-    largeYForce = -0.052 * innerHeight,
+    largeYForce = -0.054 * innerHeight,
     CLOCK_SPEED = 0.005 * innerWidth,
     CLOCK_DELAY = 10,
     lessYForce = largeYForce / 2;

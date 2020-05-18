@@ -9,6 +9,7 @@ import {
   Vector
 } from "matter-js";
 import lottie from "lottie-web";
+import loader from "./loader/loaderScreen";
 import {
   getConstants
 } from "./constants";
@@ -29,7 +30,7 @@ if (
 ) {
   isMobile = true;
 }
-
+let downloadedImageCount = 0;
 let engine = null;
 let render = null; // TODO, remove this render
 
@@ -97,7 +98,6 @@ function adjustAssetdimensions() {
     (innerHeight - loading.clientHeight) / 2;
   loading.style.left = spacingLeft;
   loading.style.top = spacingTop;
-
   const gameEndContainer = document.querySelector(".gameEndContainer");
   gameEndContainer.style.left = spacingLeft;
   gameEndContainer.style.top = spacingTop;
@@ -157,6 +157,7 @@ function adjustAssetdimensions() {
   timerVal.style.display = "initial";
   scoreVal.style.display = "initial";
 }
+adjustAssetdimensions();
 
 function commence() {
   let {
@@ -632,32 +633,52 @@ function handleVisibilityChange() {
   }
 }
 
-window.document.addEventListener(
-  "readystatechange",
-  function () {
-    if (document.readyState == "complete") {
-      adjustAssetdimensions();
-      startBut.onclick = function () {
-        gtag("send", {
-          hitType: "event",
-          eventCategory: "game",
-          eventAction: "play",
-          eventLabel: "basketballplay",
-        });
-        loading.style.display = "none";
-        backMusicDiv1.volume = 0.25;
-        backMusicDiv1.play();
-        backMusicDiv1.addEventListener("ended", () => {
-          backMusicDiv2.volume = 0.25;
-          backMusicDiv2.play();
-        });
-        backMusicDiv2.addEventListener("ended", () => {
-          backMusicDiv1.play();
-        })
-        document.addEventListener("visibilitychange", handleVisibilityChange);
-        commence();
-      };
-    }
-  },
-  false
-);
+const allData = [
+  'https://res.cloudinary.com/princeofpersia/image/upload/v1589750415/ball_whqsgz.png',
+  'https://res.cloudinary.com/princeofpersia/image/upload/v1589750416/BG_i8nlme.png',
+  'https://res.cloudinary.com/princeofpersia/image/upload/v1589750416/Icon_pquvnu.jpg',
+  'https://res.cloudinary.com/princeofpersia/image/upload/v1589750415/loaderBackground_oj3ttf.jpg',
+  'https://res.cloudinary.com/princeofpersia/image/upload/v1589750414/shadow_iofui4.png',
+  'https://res.cloudinary.com/princeofpersia/image/upload/v1587829454/Flame_GIF_mlxnqn.gif',
+  'https://res.cloudinary.com/princeofpersia/image/upload/v1579348123/board.png',
+  'https://res.cloudinary.com/princeofpersia/image/upload/v1579079521/yellowBack.png',
+  'https://res.cloudinary.com/princeofpersia/video/upload/v1581868331/perfectShotNew_laupxu.wav',
+  'https://res.cloudinary.com/princeofpersia/video/upload/v1587258116/background_music_part1_utnyjk.mp3',
+  'https://res.cloudinary.com/princeofpersia/video/upload/v1587257663/background_music_part2_vb9ffq.mp3',
+]
+
+const loaderScreen = new loader("main-container");
+
+const allPromises = allData.map(src => {
+  return fetch(src).then(res => {
+    downloadedImageCount++;
+    let value = downloadedImageCount / allData.length;
+    loaderScreen.setLoaderProgress(value);
+  });
+});
+
+Promise.all(allPromises).then(res => {
+  loaderScreen.loadingComplete();
+  startBut.onclick = function () {
+    gtag("send", {
+      hitType: "event",
+      eventCategory: "game",
+      eventAction: "play",
+      eventLabel: "basketballplay",
+    });
+    loading.style.display = "none";
+    backMusicDiv1.volume = 0.25;
+    backMusicDiv1.play();
+    backMusicDiv1.addEventListener("ended", () => {
+      backMusicDiv2.volume = 0.25;
+      backMusicDiv2.play();
+    });
+    backMusicDiv2.addEventListener("ended", () => {
+      backMusicDiv1.play();
+    })
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    commence();
+  }
+}).catch(err => {
+  console.log("some error, retry");
+})
