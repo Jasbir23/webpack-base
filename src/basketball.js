@@ -44,7 +44,6 @@ let ballCollided = false;
 let SHOW_CLOCK = false;
 let rimLottie = null;
 let basketDetected = false;
-let currentTime = 0;
 let timerValue = 0;
 let timerDiv = null;
 let scoreDiv = null;
@@ -56,14 +55,16 @@ let gameEndLottie = null;
 let perfectShotDiv = null;
 
 let gameTimer = null;
+let clockSoundStopped = false
 let backMusicDiv1 = document.querySelector(".music1");
 let backMusicDiv2 = document.querySelector(".music2");
+let clockTick = document.querySelector(".clockTick");
 let shadowDiv = document.querySelector(".shadow");
 const loading = document.querySelector(".loading");
 const timerVal = document.querySelector(".timerVal");
 const scoreVal = document.querySelector(".scoreVal");
 const flameDiv = document.querySelector(".flameDiv");
-let tID = null;
+clockTick.loop = true;
 let CLOCK_LEFT, CLOCK_TOP;
 let clockDiv;
 let clockLottie;
@@ -153,7 +154,8 @@ function adjustAssetdimensions() {
 
   timeIncrease = document.querySelector(".timeIncrease");
   timeIncrease.style.display = "none";
-  timeIncrease.style.width = 0.25 * loading.clientWidth;
+  timeIncrease.style.width = 0.4 * loading.clientWidth;
+  timeIncrease.style.left = 0.3 * loading.clientWidth;
   timerVal.style.display = "initial";
   scoreVal.style.display = "initial";
 }
@@ -193,7 +195,6 @@ function commence() {
     STILL_BALL_STATE,
     MOVING_BALL_STATE,
     COLLIDING_BALL_STATE,
-    CLOCK_SPEED,
     CLOCK_DELAY,
     DELTA,
     largeYForce,
@@ -347,10 +348,9 @@ function commence() {
       setTimeout(function () {
         SHOW_CLOCK = false
       }, 1000);
-      timeIncrease.style.left = parseInt(clockDiv.style.left) >= 0.74 * w ? 0.74 * w : clockDiv.style.left;
       timeIncrease.style.top = clockDiv.style.top;
       showTimeIncrease(CLOCK_DELAY);
-      gameIntervalupdated += 10;
+      gameIntervalupdated += CLOCK_DELAY;
     }
     ballCollided = false;
     ballState = STILL_BALL_STATE;
@@ -462,12 +462,18 @@ function commence() {
     if (clockDisappearTime === timerValue) {
       SHOW_CLOCK = false;
       clockDiv.style.display = "none";
+      clockTick && clockTick.pause();
+      clockSoundStopped = true;
     }
     if (clockArray.includes(timerValue) && !SHOW_CLOCK) {
-      console.log('here: ', SHOW_CLOCK)
+      clockSoundStopped = false;
+      clockTick.play();
       clockDiv.style.display = "initial";
-      SHOW_CLOCK = true;
-      console.log('here: ', SHOW_CLOCK)
+      setTimeout(
+        function () {
+          SHOW_CLOCK = true
+        }, 200
+      );
       clockDisappearTime = timerValue + CLOCK_DELAY;
     }
     Engine.update(engine);
@@ -485,6 +491,8 @@ function commence() {
   function showTimeIncrease(delay) {
     timeIncrease.textContent = `+${delay} sec`;
     timeIncrease.style.display = "initial";
+    clockTick.pause();
+    clockSoundStopped = true
     setTimeout(function () {
       timeIncrease.style.display = "none";
     }, 1000);
@@ -530,6 +538,8 @@ function commence() {
     rimOnFire = false;
     stopFlame();
     shadowDiv.style.display = "none";
+    clockTick.pause();
+    clockSoundStopped = true;
     clockDiv.style.display = "none";
     gameOverDiv.style.display = "initial";
     gameEndContainer.style.display = "initial";
@@ -625,9 +635,13 @@ function commence() {
 
 function handleVisibilityChange() {
   if (!document.hidden) {
+    if (clockTick.paused && !clockSoundStopped) clockTick.play();
     if (backMusicDiv1.paused) backMusicDiv1.play();
     else if (backMusicDiv2.paused) backMusicDiv2.play();
   } else {
+    if (!clockSoundStopped) {
+      clockTick.pause();
+    }
     if (!backMusicDiv1.paused) backMusicDiv1.pause();
     else if (!backMusicDiv2.paused) backMusicDiv2.pause();
   }
@@ -645,6 +659,7 @@ const allData = [
   'https://res.cloudinary.com/princeofpersia/video/upload/v1581868331/perfectShotNew_laupxu.wav',
   'https://res.cloudinary.com/princeofpersia/video/upload/v1587258116/background_music_part1_utnyjk.mp3',
   'https://res.cloudinary.com/princeofpersia/video/upload/v1587257663/background_music_part2_vb9ffq.mp3',
+  'https://res.cloudinary.com/princeofpersia/video/upload/v1590102724/clockTick_dsfed8.mp3',
 ]
 
 const loaderScreen = new loader("main-container");

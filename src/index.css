@@ -98,12 +98,25 @@ body {
 }
 
 .timeIncrease {
+  display: none;
   position: absolute;
-  font-size: 28px;
-  font-style: italic;
+  font-size: 32px;
   font-weight: 600;
-  color: rgb(18, 169, 214);
+  text-align: center;
+  color: rgb(214, 133, 27);
   z-index: 2;
+  animation: scaleTimer 0.5s forwards;
+}
+
+@keyframes scaleTimer {
+  from {
+      transform: scale(1);
+      opacity: 1;
+  }
+  to {
+      transform: scale(1.5);
+      opacity: 0;
+  }
 }
 
 .board {

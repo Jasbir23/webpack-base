@@ -16,25 +16,27 @@ const spacingTop =
   innerHeight > 888 ?
   innerHeight / 2 - 444 :
   (innerHeight - loading.clientHeight) / 2;
+
 export default function loader(gameContainerId) {
   let isLottieLoaded = false;
   const gameContainer = document.getElementById(gameContainerId);
 
   const loaderScreen = document.createElement("div");
   loaderScreen.className = "loader-screen";
-  loaderScreen.style.left = spacingLeft;
-  loaderScreen.style.top = spacingTop;
+
   const logo = document.createElement("img");
   logo.className = "logo-image";
   logo.src = logoImage.default;
 
   loaderScreen.appendChild(logo);
 
+  loaderScreen.style.left = spacingLeft;
+  loaderScreen.style.top = spacingTop;
   // fallback loader
-  const spinLoader = document.createElement("div");
-  spinLoader.className = "spin-loader";
+  // const spinLoader = document.createElement("div");
+  // spinLoader.className = "spin-loader";
 
-  loaderScreen.appendChild(spinLoader);
+  // loaderScreen.appendChild(spinLoader);
 
   gameContainer.appendChild(loaderScreen);
   this.loaderScreen = loaderScreen;
@@ -53,7 +55,7 @@ export default function loader(gameContainerId) {
   let currentFrameLimit = 0;
 
   loaderLottie.addEventListener("DOMLoaded", () => {
-    loaderScreen.removeChild(spinLoader);
+    // loaderScreen.removeChild(spinLoader);
     isLottieLoaded = true;
   }); // remove fallback once lottie is loaded
 
