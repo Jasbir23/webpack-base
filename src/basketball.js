@@ -389,7 +389,7 @@ function commence() {
       ball.position.y + 0.75 * ballRadius + parseInt(loading.style.top);
 
     Body.set(ball, {
-      angle: ball.angle + ball.velocity.x * 0.014,
+      angle: ball.angle + ball.velocity.x * 0.028,
     });
     ballDiv.style.left = ball.position.x - ballRadius;
     ballDiv.style.top = ball.position.y - ballRadius;
@@ -515,7 +515,7 @@ function commence() {
     document.body.addEventListener("touchend", (e) => {
       const touchEnd = extractTouchPoint(e);
       if (touchStart && ballState === STILL_BALL_STATE && !gameOver) {
-        const deltaX = touchEnd.x - touchStart.x;
+        const deltaX = (touchEnd.x - touchStart.x) / 1.5;
         const deltaY = touchEnd.y - touchStart.y;
         performBallShoot(deltaX, deltaY);
       }
@@ -565,7 +565,6 @@ function commence() {
     scoreDiv.innerHTML = `SCORE: 0`;
     currentScore = 0;
     timerValue = 0;
-    currentTime = 0;
     gameIntervalupdated = 60;
     SHOW_CLOCK = false;
     ballCollided = false;
